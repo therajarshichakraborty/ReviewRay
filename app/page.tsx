@@ -1,4 +1,3 @@
-// app/page.tsx
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -17,7 +16,7 @@ import {
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-500">
+    <main className="flex min-h-screen flex-col items-center justify-center p-6 ">
       <Card className="w-full max-w-md shadow-lg border border-border">
         <CardHeader>
           <CardTitle className="text-2xl font-bold tracking-tight">
