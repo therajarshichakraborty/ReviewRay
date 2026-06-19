@@ -1,10 +1,10 @@
-"use client";
-import { useRouter } from "next/navigation";
-import { authClient } from "@/lib/auth-client";
-import { cn } from "@/lib/utils";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+'use client';
+import { useRouter } from 'next/navigation';
+import { authClient } from '@/lib/auth-client';
+import { cn } from '@/lib/utils';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,11 +13,11 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { SIGN_IN_PATH } from "../utils";
-import { ChevronUp, LogOut } from "lucide-react";
+} from '@/components/ui/dropdown-menu';
+import { SIGN_IN_PATH } from '../utils';
+import { ChevronUp, LogOut } from 'lucide-react';
 
-const DEFAULT_PLAN = "Free";
+const DEFAULT_PLAN = 'Free';
 
 export type UserMenuUser = {
   name?: string | null;
@@ -25,8 +25,7 @@ export type UserMenuUser = {
   image?: string | null;
 };
 
-
-export type UserMenuTriggerVariant = "compact" | "profile"
+export type UserMenuTriggerVariant = 'compact' | 'profile';
 
 type UserMenuProps = {
   user: UserMenuUser;
@@ -37,11 +36,11 @@ type UserMenuProps = {
 };
 
 export function getDisplayName(user: UserMenuUser) {
-  return user.name?.trim() || user.email?.split("@")[0] || "User";
+  return user.name?.trim() || user.email?.split('@')[0] || 'User';
 }
 
 export function getInitials(user: UserMenuUser) {
-  const source = user.name?.trim() || user.email || "U";
+  const source = user.name?.trim() || user.email || 'U';
   const parts = source.split(/\s+/).filter(Boolean);
 
   if (parts.length >= 2) {
@@ -53,25 +52,22 @@ export function getInitials(user: UserMenuUser) {
 
 function UserAvatar({
   user,
-  size = "default",
+  size = 'default',
 }: {
   user: UserMenuUser;
-  size?: "default" | "sm" | "lg";
+  size?: 'default' | 'sm' | 'lg';
 }) {
   return (
     <Avatar size={size}>
-      {user.image ? (
-        <AvatarImage src={user.image} alt={getDisplayName(user)} />
-      ) : null}
+      {user.image ? <AvatarImage src={user.image} alt={getDisplayName(user)} /> : null}
       <AvatarFallback>{getInitials(user)}</AvatarFallback>
     </Avatar>
   );
 }
 
-
 export function UserMenu({
   user,
-  variant = "profile",
+  variant = 'profile',
   plan = DEFAULT_PLAN,
   className,
 }: UserMenuProps) {
@@ -93,7 +89,7 @@ export function UserMenu({
       <DropdownMenuTrigger
         className={cn(className)}
         render={
-          variant === "compact" ? (
+          variant === 'compact' ? (
             <Button
               variant="ghost"
               size="icon"
@@ -101,20 +97,14 @@ export function UserMenu({
               aria-label="Open account menu"
             />
           ) : (
-            <Button
-              variant="ghost"
-              className="h-9 gap-2 px-2"
-              aria-label="Open account menu"
-            />
+            <Button variant="ghost" className="h-9 gap-2 px-2" aria-label="Open account menu" />
           )
         }
       >
-        <UserAvatar user={user} size={variant === "compact" ? "default" : "sm"} />
-        {variant === "profile" ? (
+        <UserAvatar user={user} size={variant === 'compact' ? 'default' : 'sm'} />
+        {variant === 'profile' ? (
           <>
-            <span className="max-w-32 truncate text-left text-xs font-medium">
-              {displayName}
-            </span>
+            <span className="max-w-32 truncate text-left text-xs font-medium">{displayName}</span>
             <ChevronUp className="size-4 text-muted-foreground" />
           </>
         ) : null}
@@ -127,9 +117,7 @@ export function UserMenu({
               <div className="flex min-w-0 flex-1 flex-col gap-1">
                 <p className="truncate text-xs font-medium">{displayName}</p>
                 {user.email ? (
-                  <p className="truncate text-xs text-muted-foreground">
-                    {user.email}
-                  </p>
+                  <p className="truncate text-xs text-muted-foreground">{user.email}</p>
                 ) : null}
                 <Badge variant="secondary" className="w-fit">
                   {plan} plan
@@ -150,8 +138,7 @@ export function UserMenu({
   );
 }
 
-type UserMenuWithSessionProps = Omit<UserMenuProps, "user">;
-
+type UserMenuWithSessionProps = Omit<UserMenuProps, 'user'>;
 
 export function UserMenuWithSession(props: UserMenuWithSessionProps) {
   const { data: session, isPending } = authClient.useSession();

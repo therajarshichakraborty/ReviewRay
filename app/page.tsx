@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { UserMenu, UserMenuWithSession } from '@/features/auth/components/use-menu';
+import { UserMenu, UserMenuWithSession } from '@/features/auth/components/user-menu';
 
 export default function Home() {
   return (
@@ -50,8 +50,7 @@ export default function Home() {
         </CardFooter>
       </Card>
 
-
-      <UserMenuWithSession variant='compact'/>
+      <UserMenuWithSession variant="compact" />
     </main>
   );
 }
