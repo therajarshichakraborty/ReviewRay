@@ -34,9 +34,10 @@ export function DashboardSidebar({ user, plan = 'Pro' }: DashboardSidebarProps) 
                   <Image
                     src="/logo.svg"
                     alt="Logo"
-                    width={100}
-                    height={100}
-                    className="w-24 h-auto"
+                    width={96}
+                    height={96}
+                    className="w-24"
+                    style={{ height: 'auto' }}
                     loading="eager"
                   />
                 </span>
