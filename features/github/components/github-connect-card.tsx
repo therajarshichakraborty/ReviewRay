@@ -73,14 +73,12 @@ function ConnectedActions() {
 
 function DisconnectedActions({ installUrl }: { installUrl: string }) {
     return (
-        <Button
-            nativeButton={false}
-            render={<a href={installUrl} />}
-            className={statusButtonClass.success}
-        >
-            <GithubLogo />
-            Install GitHub App
-            <ArrowSquareOut className="size-3 opacity-80" />
+        <Button asChild className={statusButtonClass.success}>
+            <a href={installUrl}>
+                <GithubLogo />
+                Install GitHub App
+                <ArrowSquareOut className="size-3 opacity-80" />
+            </a>
         </Button>
     );
 }
