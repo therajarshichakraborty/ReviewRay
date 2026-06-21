@@ -3,20 +3,13 @@
 import { useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
 import { AnimatedThemeToggler } from './animated-theme-toggler';
-import { cn } from '@/lib/utils';
-
-interface ThemeToggleProps {
-  className?: string;
-}
 
 /**
- * Bridges next-themes' `useTheme` into the AnimatedThemeToggler's
- * controlled API so they stay in sync.
- *
- * Renders nothing until after hydration so `resolvedTheme` is defined
- * and there's no server/client mismatch.
+ * A floating theme toggle button fixed to the bottom-right of the viewport.
+ * Bridges next-themes with AnimatedThemeToggler's controlled API.
+ * Renders only after hydration to avoid server/client mismatch.
  */
-export function ThemeToggle({ className }: ThemeToggleProps) {
+export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -24,30 +17,41 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
     setMounted(true);
   }, []);
 
+  // Don't render on server — next-themes resolves theme only on client
   if (!mounted) return null;
+
+  const isDark = resolvedTheme === 'dark';
 
   return (
     <AnimatedThemeToggler
-      theme={resolvedTheme === 'dark' ? 'dark' : 'light'}
+      // Controlled mode: AnimatedThemeToggler reads theme from here
+      // and calls onThemeChange instead of managing localStorage itself
+      theme={isDark ? 'dark' : 'light'}
       onThemeChange={setTheme}
+      // Variant controls the animation shape when toggling
+      variant="circle"
+      aria-label="Toggle theme"
       style={{
         position: 'fixed',
-        bottom: '20px',
-        right: '20px',
+        bottom: '24px',
+        right: '24px',
         zIndex: 9999,
-        width: '42px',
-        height: '42px',
+        width: '44px',
+        height: '44px',
         borderRadius: '50%',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: resolvedTheme === 'dark' ? '#ffffff' : '#18181b',
-        color: resolvedTheme === 'dark' ? '#18181b' : '#ffffff',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-        border: '1px solid rgba(128,128,128,0.3)',
+        // Inverted bg so it always contrasts with the page
+        backgroundColor: isDark ? '#fafafa' : '#09090b',
+        color: isDark ? '#09090b' : '#fafafa',
+        boxShadow: isDark
+          ? '0 4px 16px rgba(255,255,255,0.12), 0 2px 6px rgba(0,0,0,0.2)'
+          : '0 4px 16px rgba(0,0,0,0.25), 0 2px 6px rgba(0,0,0,0.15)',
+        border: `1.5px solid ${isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)'}`,
         cursor: 'pointer',
+        transition: 'background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease',
       }}
-      className={cn(className)}
     />
   );
 }
