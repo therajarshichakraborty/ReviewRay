@@ -17,7 +17,7 @@ import { githubReposInfiniteQuery } from "@/features/github/lib/repo-query"
 import { DashboardRepo } from "../lib/types";
 import { statusBadge } from "../lib/status-style";
 import { LockIcon, LockKeyOpenIcon, StarIcon } from "@phosphor-icons/react";
-//import SyncRepoButton from "@/features/repo-sync/action/repo-sync";
+import SyncRepoButton from "../../repo-sync/components/sync-repo";
 
 type Filter = "all" | "public" | "private";
 
@@ -58,7 +58,7 @@ export function RepoList() {
 
     const visibleRepos = useMemo(() => {
         const query = search.toLowerCase();
-        
+
         return repos.filter((repo) => {
           if (filter !== "all" && repo.visibility !== filter) {
             return false;
@@ -213,11 +213,11 @@ function RepoRow({ repo }: { repo: DashboardRepo }) {
           {formatDistanceToNow(new Date(repo.updatedAt), { addSuffix: true })}
         </TableCell>
         <TableCell className="text-right">
-          {/* <SyncRepoButton
+          <SyncRepoButton
             repoFullName={repo.fullName}
             branch={repo.defaultBranch}
             syncStatus={repo.syncStatus ?? null}
-          /> */}
+          />
         </TableCell>
       </TableRow>
     );

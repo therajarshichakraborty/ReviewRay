@@ -10,7 +10,7 @@ import {
 
 
 export const syncRepoCodebaseFunction = inngest.createFunction({
-    id: "sync-repo-codebas",
+    id: "sync-repo-codebase",
     triggers: { event: "repo/sync.requested" },
     onFailure: async ({ event }) => {
         await prisma.repoSync.update({
