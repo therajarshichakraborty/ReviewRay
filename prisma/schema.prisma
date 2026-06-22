@@ -66,6 +66,23 @@ model PullRequest {
 }
 
 
+model RepoSync {
+  id             String    @id @default(cuid())
+  installationId Int
+  repoFullName   String
+  branch         String
+  status         String    @default("pending") // pending | syncing | synced | failed
+  chunkCount     Int       @default(0)
+  syncedAt       DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@unique([repoFullName])
+  @@map("repo_sync")
+}
+
+
+
 model Session {
   id        String   @id
   expiresAt DateTime
