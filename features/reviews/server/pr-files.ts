@@ -1,5 +1,5 @@
 import { getGithubApp } from "@/features/github/utils/github-app";
-import { PrFile } from "@/features/reviews/types/review";
+import { PrFile } from "../types/review";
 
 const FILES_PER_PAGE = 100;
 

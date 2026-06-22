@@ -46,7 +46,8 @@ export const reviewPullRequest = inngest.createFunction(
             return generateReview({
                 repoFullName: pullRequest.repoFullName,
                 title: pullRequest.title,
-                diff,
+                contextSnippets: [diff],       // the PR diff fetched above
+                repoContextSnippets: [],       // empty until Pinecone is wired up
             });
         });
 
