@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { QueryProvider } from '@/components/providers/query-provider';
+import { Toaster } from '@/components/ui/sonner';
 
 const oxanium = Oxanium({
   subsets: ['latin'],
@@ -63,6 +64,7 @@ export default function RootLayout({
             {children}
           </ThemeProvider>
         </QueryProvider>
+        <Toaster/>
       </body>
     </html>
   );
