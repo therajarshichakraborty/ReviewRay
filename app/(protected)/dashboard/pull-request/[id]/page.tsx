@@ -103,43 +103,43 @@ export default async function PullRequestDetailPage({
         description={pullRequest.repoFullName}
       />
 
-      <div className="flex flex-col gap-4 p-6">
+      <div className="flex flex-col gap-6 p-6 max-w-5xl">
         <div>
-          <Button variant="ghost" size="sm" asChild>
+          <Button variant="ghost" size="sm" asChild className="rounded-lg text-muted-foreground hover:text-foreground">
             <Link href={DASHBOARD_ROUTES.pullRequest}>
-              <ArrowLeftIcon />
+              <ArrowLeftIcon className="mr-1.5 size-4" />
               Back to pull requests
             </Link>
           </Button>
         </div>
 
-        <Card className="rounded-none">
-          <CardHeader>
-            <CardTitle className="flex flex-wrap items-center gap-2 text-sm">
-              <GitPullRequestIcon className="size-4 text-muted-foreground" />
-              {pullRequest.title}
+        <Card className="rounded-xl border border-border/60 bg-card/30 backdrop-blur-sm shadow-sm overflow-hidden">
+          <CardHeader className="border-b border-border/40 bg-muted/20 pb-4">
+            <CardTitle className="flex flex-wrap items-center gap-2 text-sm font-semibold">
+              <GitPullRequestIcon className="size-4 text-muted-foreground/75" />
+              <span className="text-foreground/90">{pullRequest.title}</span>
               <span className="text-xs font-normal text-muted-foreground">
                 #{pullRequest.prNumber}
               </span>
-              <span className={statusBadge(getPrStatusTone(status), 'ml-auto')}>
+              <span className={statusBadge(getPrStatusTone(status), 'ml-auto text-[10px] font-medium')}>
                 {PR_STATUS_LABELS[status]}
               </span>
             </CardTitle>
           </CardHeader>
-          <CardContent className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-            <span className="inline-flex items-center gap-1">
-              <UserIcon className="size-3" />
+          <CardContent className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-muted-foreground py-4">
+            <span className="inline-flex items-center gap-1.5 font-light">
+              <UserIcon className="size-3.5 text-muted-foreground/60" />
               {pullRequest.authorLogin ?? 'unknown'}
             </span>
-            <span className="inline-flex items-center gap-1">
-              <GitBranchIcon className="size-3" />
-              {pullRequest.baseBranch}
+            <span className="inline-flex items-center gap-1.5 font-light">
+              <GitBranchIcon className="size-3.5 text-muted-foreground/60" />
+              <span className="font-mono text-[10px] bg-neutral-100 dark:bg-neutral-800 px-1.5 py-0.5 rounded text-foreground/80">{pullRequest.baseBranch}</span>
             </span>
-            <span>opened {openedAgo}</span>
+            <span className="font-light">opened {openedAgo}</span>
             <Link
               href={prUrl}
               target="_blank"
-              className="ml-auto inline-flex items-center gap-1 hover:text-foreground hover:underline"
+              className="ml-auto inline-flex items-center gap-1 hover:text-foreground hover:underline transition-colors font-medium"
             >
               View on GitHub
               <ExternalLinkIcon className="size-3" />
@@ -147,14 +147,14 @@ export default async function PullRequestDetailPage({
           </CardContent>
         </Card>
 
-        <Card className="rounded-none">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-sm">
-              <BotIcon className="size-4 text-muted-foreground" />
-              AI Review
+        <Card className="rounded-xl border border-border/60 bg-card/30 backdrop-blur-sm shadow-sm overflow-hidden">
+          <CardHeader className="border-b border-border/40 bg-muted/20 pb-4">
+            <CardTitle className="flex items-center gap-2 text-sm font-semibold">
+              <BotIcon className="size-4 text-muted-foreground/75" />
+              <span>AI Review</span>
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             <ReviewBody review={pullRequest.reviewComment} status={status} />
           </CardContent>
         </Card>

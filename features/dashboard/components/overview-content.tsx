@@ -175,15 +175,15 @@ function buildStats(overview: OverviewData): StatCard[] {
  */
 function ConnectGithubBanner() {
   return (
-    <Card className="border-blue-500/25 bg-blue-500/5">
-      <CardHeader className="flex flex-row items-start justify-between gap-4">
-        <div>
-          <CardTitle className="text-sm">Connect GitHub to get started</CardTitle>
-          <CardDescription>
+    <Card className="border-neutral-300 dark:border-neutral-800 bg-neutral-50/40 dark:bg-neutral-900/20 backdrop-blur-sm transition-all duration-300 hover:border-neutral-400 dark:hover:border-neutral-700">
+      <CardHeader className="flex flex-row items-center justify-between gap-4 py-5 px-6">
+        <div className="space-y-1">
+          <CardTitle className="text-sm font-semibold tracking-tight">Connect GitHub to get started</CardTitle>
+          <CardDescription className="text-xs text-muted-foreground font-light">
             Install the GitHub App to list repositories and enable AI reviews on pull requests.
           </CardDescription>
         </div>
-        <Button asChild className="shrink-0">
+        <Button asChild size="sm" className="shrink-0 rounded-lg">
           <Link href={DASHBOARD_ROUTES.github}>Connect GitHub</Link>
         </Button>
       </CardHeader>
@@ -200,33 +200,36 @@ function ConnectGithubBanner() {
 function ActivityList({ items }: { items: OverviewActivityItem[] }) {
   if (items.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground">
-        No reviews yet. Once AI PR reviews are enabled, summaries will appear here.
-      </p>
+      <div className="flex flex-col items-center justify-center py-8 text-center">
+        <p className="text-sm text-muted-foreground font-light">
+          No reviews yet. Once AI PR reviews are enabled, summaries will appear here.
+        </p>
+      </div>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <div className="divide-y divide-border/40">
       {items.map((item) => {
         const config = ACTIVITY_STATUS[item.status];
 
         return (
           <div
             key={item.id}
-            className="flex flex-wrap items-center justify-between gap-2 border-b border-border pb-4 last:border-0 last:pb-0"
+            className="flex flex-wrap items-center justify-between gap-2 py-4 last:pb-0 first:pt-0"
           >
-            <div>
-              <p className="text-xs font-medium">
-                {item.repoFullName} <span className="text-muted-foreground">{item.prNumber}</span>
+            <div className="space-y-1">
+              <p className="text-xs font-semibold tracking-tight text-foreground/90">
+                {item.repoFullName}{" "}
+                <span className="text-muted-foreground font-normal">#{item.prNumber}</span>
               </p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-[10px] text-muted-foreground font-light">
                 {formatDistanceToNow(new Date(item.reviewedAt), {
                   addSuffix: true,
                 })}
               </p>
             </div>
-            <span className={statusBadge(config.tone)}>{config.label}</span>
+            <span className={statusBadge(config.tone, "text-[10px] font-medium")}>{config.label}</span>
           </div>
         );
       })}
@@ -254,35 +257,19 @@ export function OverviewContent({ overview }: OverviewContentProps) {
         {stats.map((stat) => (
           <Card
             key={stat.title}
-            className={cn(
-              stat.accent === 'success' && 'border-green-500/25',
-              stat.accent === 'info' && 'border-blue-500/25',
-            )}
+            className="border-border/60 bg-card/40 backdrop-blur-sm shadow-sm transition-all duration-300 hover:border-neutral-400 dark:hover:border-neutral-700 hover:shadow-md"
           >
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-xs font-medium text-muted-foreground">
+              <CardTitle className="text-xs font-semibold tracking-tight text-muted-foreground uppercase">
                 {stat.title}
               </CardTitle>
-              <stat.icon
-                className={cn(
-                  'size-4',
-                  stat.accent === 'success' && 'text-green-600 dark:text-green-400',
-                  stat.accent === 'info' && 'text-blue-600 dark:text-blue-400',
-                  !stat.accent && 'text-muted-foreground',
-                )}
-              />
+              <stat.icon className="size-4 text-muted-foreground" />
             </CardHeader>
-            <CardContent>
-              <p
-                className={cn(
-                  'text-2xl font-semibold tracking-tight',
-                  stat.accent === 'success' && 'text-green-700 dark:text-green-400',
-                  stat.accent === 'info' && 'text-blue-700 dark:text-blue-400',
-                )}
-              >
+            <CardContent className="space-y-1">
+              <p className="text-2xl font-bold tracking-tight text-foreground">
                 {stat.value}
               </p>
-              <p className="text-xs text-muted-foreground">{stat.description}</p>
+              <p className="text-xs text-muted-foreground font-light">{stat.description}</p>
             </CardContent>
           </Card>
         ))}
@@ -290,10 +277,10 @@ export function OverviewContent({ overview }: OverviewContentProps) {
 
       {showConnectBanner ? <ConnectGithubBanner /> : null}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent activity</CardTitle>
-          <CardDescription>Latest AI review summaries from your repositories.</CardDescription>
+      <Card className="border-border/60 bg-card/40 backdrop-blur-sm shadow-sm">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-sm font-semibold tracking-tight">Recent activity</CardTitle>
+          <CardDescription className="text-xs text-muted-foreground font-light">Latest AI review summaries from your repositories.</CardDescription>
         </CardHeader>
         <CardContent>
           <ActivityList items={overview.recentActivity} />

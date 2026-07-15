@@ -25,29 +25,42 @@ type GithubConnectCardProps = {
 
 function ConnectedDetails({ accountLogin }: { accountLogin: string | null }) {
   return (
-    <p className="text-xs text-muted-foreground">
-      Installed for{' '}
-      <span className="font-medium text-green-700 dark:text-green-400">@{accountLogin}</span>. The
-      app can read repository metadata and post review comments on pull requests.
-    </p>
+    <div className="rounded-lg border border-border/50 bg-neutral-900/5 dark:bg-neutral-950/20 p-4">
+      <p className="text-xs text-muted-foreground leading-relaxed">
+        Currently installed for{' '}
+        <span className="font-semibold text-foreground">@{accountLogin}</span>. ReviewRay has active permissions to read repository metadata and post review comments on pull requests.
+      </p>
+    </div>
   );
 }
 
 function DisconnectedDetails() {
   return (
-    <ul className="list-inside list-disc space-y-1 text-xs text-muted-foreground">
-      <li>Access public and private repositories you select</li>
-      <li>Receive webhooks for pull request events</li>
-      <li>Post AI-generated review comments on PRs</li>
-    </ul>
+    <div className="space-y-3">
+      <p className="text-xs text-muted-foreground font-light">By connecting the GitHub App, ReviewRay will be authorized to:</p>
+      <ul className="space-y-2 text-xs text-muted-foreground font-light">
+        <li className="flex items-center gap-2">
+          <span className="flex size-1.5 rounded-full bg-neutral-400" />
+          Access public and private repositories you explicitly select
+        </li>
+        <li className="flex items-center gap-2">
+          <span className="flex size-1.5 rounded-full bg-neutral-400" />
+          Receive automated webhooks for pull request lifecycle events
+        </li>
+        <li className="flex items-center gap-2">
+          <span className="flex size-1.5 rounded-full bg-neutral-400" />
+          Post AI-generated codebase-aware review comments on PRs
+        </li>
+      </ul>
+    </div>
   );
 }
 
 function ConnectedActions() {
   return (
     <form action={disconnectGithubApp}>
-      <Button type="submit" variant="outline" className={statusButtonClass.danger}>
-        <Plugs />
+      <Button type="submit" variant="outline" size="sm" className="rounded-lg border-border/60 hover:bg-neutral-100 hover:text-red-600 dark:hover:bg-neutral-900 dark:hover:text-red-400">
+        <Plugs className="size-4 mr-1.5" />
         Disconnect GitHub App
       </Button>
     </form>
@@ -56,11 +69,11 @@ function ConnectedActions() {
 
 function DisconnectedActions({ installUrl }: { installUrl: string }) {
   return (
-    <Button asChild className={statusButtonClass.success}>
+    <Button asChild size="sm" className="rounded-lg">
       <a href={installUrl}>
-        <GithubLogo />
+        <GithubLogo className="size-4 mr-1.5" />
         Install GitHub App
-        <ArrowSquareOut className="size-3 opacity-80" />
+        <ArrowSquareOut className="size-3.5 ml-1.5 opacity-80" />
       </a>
     </Button>
   );
@@ -90,51 +103,49 @@ function ConnectionActions({ connected, installUrl }: { connected: boolean; inst
 
 export function GithubConnectCard({ userId, installation }: GithubConnectCardProps) {
   const { connected, accountLogin } = installation;
-  // Install URL encodes userId so the callback can associate the installation
   const installUrl = getGithubInstallUrl(userId);
 
-  // Default to neutral styling; switch to green when connected
-  let cardBorderClass = 'border-border';
-  let iconWrapperClass = 'border-border bg-muted';
+  // Clean, high-end grayscale styling
+  let cardBorderClass = 'border-border/60';
+  let iconWrapperClass = 'border-border/60 bg-neutral-100 dark:bg-neutral-900 text-neutral-800 dark:text-neutral-200';
   let statusTone: 'success' | 'neutral' = 'neutral';
   let statusLabel = 'Not connected';
 
   if (connected) {
-    cardBorderClass = 'border-green-500/30';
-    iconWrapperClass = 'border-green-500/40 bg-green-500/10 text-green-700 dark:text-green-400';
+    cardBorderClass = 'border-neutral-300 dark:border-neutral-800';
+    iconWrapperClass = 'border-neutral-300 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100';
     statusTone = 'success';
     statusLabel = 'Connected';
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-6">
-      <Card className={cn('max-w-2xl transition-colors', cardBorderClass)}>
-        <CardHeader>
+    <div className="flex flex-1 flex-col gap-6 p-6 max-w-3xl">
+      <Card className={cn('transition-colors rounded-xl shadow-sm bg-card/30 backdrop-blur-sm', cardBorderClass)}>
+        <CardHeader className="border-b border-border/40 pb-5">
           <div className="flex items-start justify-between gap-4">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
               <span
                 className={cn(
-                  'flex size-10 items-center justify-center rounded-none border',
+                  'flex size-12 items-center justify-center rounded-xl border',
                   iconWrapperClass,
                 )}
               >
-                <GithubLogo className="size-5" />
+                <GithubLogo className="size-6" />
               </span>
-              <div>
-                <CardTitle>GitHub App</CardTitle>
-                <CardDescription>
-                  Install the Chai reviewer app on your GitHub account or organization to access
-                  public and private repositories.
+              <div className="space-y-1">
+                <CardTitle className="text-base font-semibold tracking-tight">GitHub App Integration</CardTitle>
+                <CardDescription className="text-xs text-muted-foreground font-light max-w-xl">
+                  Install the ReviewRay app on your GitHub user account or organization to enable codebase-aware AI code reviews.
                 </CardDescription>
               </div>
             </div>
-            <span className={statusBadge(statusTone)}>{statusLabel}</span>
+            <span className={statusBadge(statusTone, 'text-[10px] font-medium')}>{statusLabel}</span>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="py-5">
           <ConnectionDetails connected={connected} accountLogin={accountLogin} />
         </CardContent>
-        <CardFooter className="flex flex-wrap gap-2">
+        <CardFooter className="flex flex-wrap gap-2 border-t border-border/40 pt-4 bg-muted/10">
           <ConnectionActions connected={connected} installUrl={installUrl} />
         </CardFooter>
       </Card>

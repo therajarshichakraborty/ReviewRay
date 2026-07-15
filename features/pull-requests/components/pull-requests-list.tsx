@@ -65,14 +65,14 @@ function PullRequestMeta({ pullRequest }: { pullRequest: PullRequestItem }) {
   });
 
   return (
-    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground/80 font-light">
       <span className="inline-flex items-center gap-1">
-        <UserIcon className="size-3" />
+        <UserIcon className="size-3 text-muted-foreground/60" />
         {pullRequest.authorLogin ?? 'unknown'}
       </span>
       <span className="inline-flex items-center gap-1">
-        <GitBranchIcon className="size-3" />
-        {pullRequest.baseBranch}
+        <GitBranchIcon className="size-3 text-muted-foreground/60" />
+        <span className="font-mono text-[10px] bg-neutral-100 dark:bg-neutral-800 px-1.5 py-0.5 rounded text-foreground/80">{pullRequest.baseBranch}</span>
       </span>
       <span>opened {openedAgo}</span>
     </div>
@@ -88,7 +88,7 @@ function PullRequestMeta({ pullRequest }: { pullRequest: PullRequestItem }) {
 function AiReviewAccordion({ pullRequest }: { pullRequest: PullRequestItem }) {
   if (pullRequest.status === 'rate_limited') {
     return (
-      <p className="text-xs text-muted-foreground">
+      <p className="text-[11px] text-muted-foreground font-light italic border border-border/60 bg-muted/20 px-2 py-1 rounded w-fit">
         Monthly review limit reached — upgrade to Pro for unlimited reviews.
       </p>
     );
@@ -96,23 +96,23 @@ function AiReviewAccordion({ pullRequest }: { pullRequest: PullRequestItem }) {
 
   if (!pullRequest.reviewComment) {
     return (
-      <p className="text-xs text-muted-foreground">
+      <p className="text-[11px] text-muted-foreground/80 font-light italic">
         The AI review will appear here once it is ready.
       </p>
     );
   }
 
   return (
-    <Accordion type="single" collapsible>
+    <Accordion type="single" collapsible className="w-full">
       <AccordionItem value="review" className="border-none">
-        <AccordionTrigger className="py-1.5 text-muted-foreground hover:text-foreground">
+        <AccordionTrigger className="py-1.5 text-xs text-muted-foreground hover:text-foreground no-underline hover:no-underline">
           <span className="inline-flex items-center gap-1.5">
             <BotIcon className="size-3.5" />
             View AI review
           </span>
         </AccordionTrigger>
-        <AccordionContent>
-          <div className="rounded-none border border-border bg-muted/40 p-3">
+        <AccordionContent className="pt-2 pb-0">
+          <div className="rounded-lg border border-border/50 bg-neutral-900/5 dark:bg-neutral-950/40 p-4 overflow-x-auto text-xs">
             <AiReviewMarkdown review={pullRequest.reviewComment} />
           </div>
         </AccordionContent>
@@ -138,23 +138,23 @@ function PullRequestRow({
   const tone = getPrStatusTone(pullRequest.status);
 
   return (
-    <div className="flex flex-col gap-2 border-b border-border py-4 last:border-b-0 last:pb-0 first:pt-0">
+    <div className="flex flex-col gap-3 border-b border-border/40 py-4 last:border-b-0 last:pb-0 first:pt-0">
       <div className="flex flex-wrap items-center gap-2">
-        <GitPullRequestIcon className="size-4 shrink-0 text-muted-foreground" />
+        <GitPullRequestIcon className="size-4 shrink-0 text-muted-foreground/60" />
         <Link
           href={`${DASHBOARD_ROUTES.pullRequest}/${pullRequest.id}`}
-          className="font-medium hover:underline"
+          className="font-semibold text-sm hover:underline text-foreground/90"
         >
           {pullRequest.title}
         </Link>
         <Link
           href={buildPrUrl(repoFullName, pullRequest.prNumber)}
           target="_blank"
-          className="text-xs text-muted-foreground hover:underline"
+          className="text-xs text-muted-foreground hover:underline font-light"
         >
           #{pullRequest.prNumber}
         </Link>
-        <span className={statusBadge(tone, 'ml-auto')}>{PR_STATUS_LABELS[pullRequest.status]}</span>
+        <span className={statusBadge(tone, 'ml-auto text-[10px] font-medium')}>{PR_STATUS_LABELS[pullRequest.status]}</span>
       </div>
 
       <PullRequestMeta pullRequest={pullRequest} />
@@ -174,25 +174,25 @@ function RepoCard({ repo }: { repo: RepoPullRequests }) {
   const prLabel = prCount === 1 ? 'pull request' : 'pull requests';
 
   return (
-    <Card className="rounded-none">
-      <CardHeader>
+    <Card className="rounded-xl border border-border/60 bg-card/30 backdrop-blur-sm shadow-sm overflow-hidden">
+      <CardHeader className="border-b border-border/40 bg-muted/30">
         <CardTitle className="flex flex-wrap items-center gap-2 text-sm">
-          <FolderGit2Icon className="size-4 text-muted-foreground" />
-          {repo.repoFullName}
+          <FolderGit2Icon className="size-4 text-muted-foreground/75" />
+          <span className="font-semibold">{repo.repoFullName}</span>
           <span className="font-normal text-xs text-muted-foreground">
             {prCount} {prLabel}
           </span>
           <Link
             href={buildRepoUrl(repo.repoFullName)}
             target="_blank"
-            className="ml-auto inline-flex items-center gap-1 text-xs font-normal text-muted-foreground hover:text-foreground hover:underline"
+            className="ml-auto inline-flex items-center gap-1 text-xs font-normal text-muted-foreground hover:text-foreground hover:underline transition-colors"
           >
             View on GitHub
             <ExternalLinkIcon className="size-3" />
           </Link>
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-4">
         {repo.pullRequests.map((pullRequest) => (
           <PullRequestRow
             key={pullRequest.id}
