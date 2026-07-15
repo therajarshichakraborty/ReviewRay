@@ -1,12 +1,9 @@
-'use client';
+// Server component — no directive needed
 
-import { ArrowSquareOut, GithubLogo, Plugs } from '@phosphor-icons/react';
-
-import type { GithubInstallationStatus } from '@/features/dashboard/lib/types';
-import { statusBadge, statusButtonClass } from '@/features/dashboard/lib/status-style';
+import { disconnectGithubApp } from '@/features/github/actions';
 import { getGithubInstallUrl } from '@/features/github/utils/github-app';
-
-import { cn } from '@/lib/utils';
+import { statusBadge } from '@/features/dashboard/lib/status-styles';
+import { GithubLogo, ArrowSquareOut, Plugs } from '@phosphor-icons/react/dist/ssr';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -16,20 +13,27 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { disconnectGithubApp } from '../actions';
+import { cn } from '@/lib/utils';
 
 type GithubConnectCardProps = {
   userId: string;
-  installation: GithubInstallationStatus;
+  installation: {
+    connected: boolean;
+    accountLogin: string | null;
+  };
 };
 
 function ConnectedDetails({ accountLogin }: { accountLogin: string | null }) {
   return (
-    <div className="rounded-lg border border-border/50 bg-neutral-900/5 dark:bg-neutral-950/20 p-4">
-      <p className="text-xs text-muted-foreground leading-relaxed">
-        Currently installed for{' '}
-        <span className="font-semibold text-foreground">@{accountLogin}</span>. ReviewRay has active permissions to read repository metadata and post review comments on pull requests.
-      </p>
+    <div className="rounded-xl border border-blue-200/50 dark:border-blue-900/40 bg-blue-50/40 dark:bg-blue-950/20 p-4">
+      <div className="flex items-start gap-3">
+        <div className="mt-1.5 size-2 rounded-full bg-emerald-500 shrink-0" />
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          Currently installed for{' '}
+          <span className="font-semibold text-foreground">@{accountLogin}</span>. ReviewRay has
+          active permissions to read repository metadata and post review comments on pull requests.
+        </p>
+      </div>
     </div>
   );
 }
@@ -37,18 +41,20 @@ function ConnectedDetails({ accountLogin }: { accountLogin: string | null }) {
 function DisconnectedDetails() {
   return (
     <div className="space-y-3">
-      <p className="text-xs text-muted-foreground font-light">By connecting the GitHub App, ReviewRay will be authorized to:</p>
-      <ul className="space-y-2 text-xs text-muted-foreground font-light">
-        <li className="flex items-center gap-2">
-          <span className="flex size-1.5 rounded-full bg-neutral-400" />
+      <p className="text-xs text-muted-foreground font-light">
+        By connecting the GitHub App, ReviewRay will be authorized to:
+      </p>
+      <ul className="space-y-2.5 text-xs text-muted-foreground font-light">
+        <li className="flex items-center gap-2.5">
+          <span className="flex size-1.5 rounded-full bg-blue-400" />
           Access public and private repositories you explicitly select
         </li>
-        <li className="flex items-center gap-2">
-          <span className="flex size-1.5 rounded-full bg-neutral-400" />
+        <li className="flex items-center gap-2.5">
+          <span className="flex size-1.5 rounded-full bg-blue-400" />
           Receive automated webhooks for pull request lifecycle events
         </li>
-        <li className="flex items-center gap-2">
-          <span className="flex size-1.5 rounded-full bg-neutral-400" />
+        <li className="flex items-center gap-2.5">
+          <span className="flex size-1.5 rounded-full bg-blue-400" />
           Post AI-generated codebase-aware review comments on PRs
         </li>
       </ul>
@@ -59,7 +65,12 @@ function DisconnectedDetails() {
 function ConnectedActions() {
   return (
     <form action={disconnectGithubApp}>
-      <Button type="submit" variant="outline" size="sm" className="rounded-lg border-border/60 hover:bg-neutral-100 hover:text-red-600 dark:hover:bg-neutral-900 dark:hover:text-red-400">
+      <Button
+        type="submit"
+        variant="outline"
+        size="sm"
+        className="rounded-lg border-border/60 hover:bg-red-50 hover:text-red-600 hover:border-red-200 dark:hover:bg-red-950/20 dark:hover:text-red-400 dark:hover:border-red-900/40 transition-colors"
+      >
         <Plugs className="size-4 mr-1.5" />
         Disconnect GitHub App
       </Button>
@@ -79,48 +90,29 @@ function DisconnectedActions({ installUrl }: { installUrl: string }) {
   );
 }
 
-function ConnectionDetails({
-  connected,
-  accountLogin,
-}: {
-  connected: boolean;
-  accountLogin: string | null;
-}) {
-  if (connected) {
-    return <ConnectedDetails accountLogin={accountLogin} />;
-  }
-
-  return <DisconnectedDetails />;
-}
-
-function ConnectionActions({ connected, installUrl }: { connected: boolean; installUrl: string }) {
-  if (connected) {
-    return <ConnectedActions />;
-  }
-
-  return <DisconnectedActions installUrl={installUrl} />;
-}
-
 export function GithubConnectCard({ userId, installation }: GithubConnectCardProps) {
   const { connected, accountLogin } = installation;
   const installUrl = getGithubInstallUrl(userId);
 
-  // Clean, high-end grayscale styling
-  let cardBorderClass = 'border-border/60';
-  let iconWrapperClass = 'border-border/60 bg-neutral-100 dark:bg-neutral-900 text-neutral-800 dark:text-neutral-200';
-  let statusTone: 'success' | 'neutral' = 'neutral';
-  let statusLabel = 'Not connected';
+  const cardBorderClass = connected
+    ? 'border-blue-300/50 dark:border-blue-800/50'
+    : 'border-border/60';
 
-  if (connected) {
-    cardBorderClass = 'border-neutral-300 dark:border-neutral-800';
-    iconWrapperClass = 'border-neutral-300 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100';
-    statusTone = 'success';
-    statusLabel = 'Connected';
-  }
+  const iconWrapperClass = connected
+    ? 'border-blue-300/60 dark:border-blue-800/60 bg-blue-100/60 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400'
+    : 'border-border/60 bg-muted text-muted-foreground';
+
+  const statusTone = connected ? ('success' as const) : ('neutral' as const);
+  const statusLabel = connected ? 'Connected' : 'Not connected';
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-6 max-w-3xl">
-      <Card className={cn('transition-colors rounded-xl shadow-sm bg-card/30 backdrop-blur-sm', cardBorderClass)}>
+      <Card
+        className={cn(
+          'transition-all duration-200 rounded-xl shadow-sm bg-card/60 backdrop-blur-sm overflow-hidden',
+          cardBorderClass,
+        )}
+      >
         <CardHeader className="border-b border-border/40 pb-5">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-4">
@@ -133,20 +125,35 @@ export function GithubConnectCard({ userId, installation }: GithubConnectCardPro
                 <GithubLogo className="size-6" />
               </span>
               <div className="space-y-1">
-                <CardTitle className="text-base font-semibold tracking-tight">GitHub App Integration</CardTitle>
+                <CardTitle className="text-base font-semibold tracking-tight">
+                  GitHub App Integration
+                </CardTitle>
                 <CardDescription className="text-xs text-muted-foreground font-light max-w-xl">
-                  Install the ReviewRay app on your GitHub user account or organization to enable codebase-aware AI code reviews.
+                  Install the ReviewRay app on your GitHub user account or organization to enable
+                  codebase-aware AI code reviews.
                 </CardDescription>
               </div>
             </div>
-            <span className={statusBadge(statusTone, 'text-[10px] font-medium')}>{statusLabel}</span>
+            <span className={statusBadge(statusTone, 'text-[10px] font-medium shrink-0')}>
+              {statusLabel}
+            </span>
           </div>
         </CardHeader>
+
         <CardContent className="py-5">
-          <ConnectionDetails connected={connected} accountLogin={accountLogin} />
+          {connected ? (
+            <ConnectedDetails accountLogin={accountLogin} />
+          ) : (
+            <DisconnectedDetails />
+          )}
         </CardContent>
-        <CardFooter className="flex flex-wrap gap-2 border-t border-border/40 pt-4 bg-muted/10">
-          <ConnectionActions connected={connected} installUrl={installUrl} />
+
+        <CardFooter className="flex flex-wrap gap-2 border-t border-border/40 pt-4 bg-blue-50/20 dark:bg-blue-950/10">
+          {connected ? (
+            <ConnectedActions />
+          ) : (
+            <DisconnectedActions installUrl={installUrl} />
+          )}
         </CardFooter>
       </Card>
     </div>

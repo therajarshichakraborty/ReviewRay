@@ -105,7 +105,7 @@ export default async function PullRequestDetailPage({
 
       <div className="flex flex-col gap-6 p-6 max-w-5xl">
         <div>
-          <Button variant="ghost" size="sm" asChild className="rounded-lg text-muted-foreground hover:text-foreground">
+          <Button variant="ghost" size="sm" asChild className="rounded-lg text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400">
             <Link href={DASHBOARD_ROUTES.pullRequest}>
               <ArrowLeftIcon className="mr-1.5 size-4" />
               Back to pull requests
@@ -113,10 +113,10 @@ export default async function PullRequestDetailPage({
           </Button>
         </div>
 
-        <Card className="rounded-xl border border-border/60 bg-card/30 backdrop-blur-sm shadow-sm overflow-hidden">
-          <CardHeader className="border-b border-border/40 bg-muted/20 pb-4">
+        <Card className="rounded-xl border border-border/60 bg-card/60 backdrop-blur-sm shadow-sm overflow-hidden hover:border-blue-200/60 dark:hover:border-blue-900/40 transition-colors">
+          <CardHeader className="border-b border-border/40 bg-blue-50/20 dark:bg-blue-950/10 pb-4">
             <CardTitle className="flex flex-wrap items-center gap-2 text-sm font-semibold">
-              <GitPullRequestIcon className="size-4 text-muted-foreground/75" />
+              <GitPullRequestIcon className="size-4 text-blue-500/80" />
               <span className="text-foreground/90">{pullRequest.title}</span>
               <span className="text-xs font-normal text-muted-foreground">
                 #{pullRequest.prNumber}
@@ -128,18 +128,18 @@ export default async function PullRequestDetailPage({
           </CardHeader>
           <CardContent className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-muted-foreground py-4">
             <span className="inline-flex items-center gap-1.5 font-light">
-              <UserIcon className="size-3.5 text-muted-foreground/60" />
+              <UserIcon className="size-3.5 text-blue-400/60" />
               {pullRequest.authorLogin ?? 'unknown'}
             </span>
             <span className="inline-flex items-center gap-1.5 font-light">
-              <GitBranchIcon className="size-3.5 text-muted-foreground/60" />
-              <span className="font-mono text-[10px] bg-neutral-100 dark:bg-neutral-800 px-1.5 py-0.5 rounded text-foreground/80">{pullRequest.baseBranch}</span>
+              <GitBranchIcon className="size-3.5 text-blue-400/60" />
+              <span className="font-mono text-[10px] bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40 px-1.5 py-0.5 rounded text-blue-700 dark:text-blue-400">{pullRequest.baseBranch}</span>
             </span>
             <span className="font-light">opened {openedAgo}</span>
             <Link
               href={prUrl}
               target="_blank"
-              className="ml-auto inline-flex items-center gap-1 hover:text-foreground hover:underline transition-colors font-medium"
+              className="ml-auto inline-flex items-center gap-1 hover:text-blue-600 dark:hover:text-blue-400 hover:underline transition-colors font-medium"
             >
               View on GitHub
               <ExternalLinkIcon className="size-3" />
@@ -147,10 +147,10 @@ export default async function PullRequestDetailPage({
           </CardContent>
         </Card>
 
-        <Card className="rounded-xl border border-border/60 bg-card/30 backdrop-blur-sm shadow-sm overflow-hidden">
-          <CardHeader className="border-b border-border/40 bg-muted/20 pb-4">
+        <Card className="rounded-xl border border-border/60 bg-card/60 backdrop-blur-sm shadow-sm overflow-hidden">
+          <CardHeader className="border-b border-border/40 bg-blue-50/20 dark:bg-blue-950/10 pb-4">
             <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-              <BotIcon className="size-4 text-muted-foreground/75" />
+              <BotIcon className="size-4 text-blue-500/80" />
               <span>AI Review</span>
             </CardTitle>
           </CardHeader>

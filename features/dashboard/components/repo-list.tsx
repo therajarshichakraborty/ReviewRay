@@ -15,7 +15,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { githubReposInfiniteQuery } from '@/features/github/lib/repo-query';
 import { DashboardRepo } from '../lib/types';
-import { statusBadge } from '../lib/status-style';
+import { statusBadge } from '../lib/status-styles';
 import { LockIcon, LockKeyOpenIcon, StarIcon } from '@phosphor-icons/react';
 import SyncRepoButton from '../../repo-sync/components/sync-repo';
 import { cn } from '@/lib/utils';
@@ -132,15 +132,15 @@ export function RepoList() {
       {/* Filtering and Search Controls */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <Tabs value={filter} onValueChange={(value) => setFilter(value as Filter)}>
-          <TabsList className="bg-neutral-100/60 dark:bg-neutral-900/60 p-0.5 rounded-lg border border-border/60">
-            <TabsTrigger value="all" className="rounded-md px-3 py-1.5 text-xs font-medium">All ({counts.all})</TabsTrigger>
-            <TabsTrigger value="public" className="rounded-md px-3 py-1.5 text-xs font-medium">Public ({counts.public})</TabsTrigger>
-            <TabsTrigger value="private" className="rounded-md px-3 py-1.5 text-xs font-medium">Private ({counts.private})</TabsTrigger>
+          <TabsList className="bg-blue-50/60 dark:bg-blue-950/20 p-0.5 rounded-lg border border-blue-200/40 dark:border-blue-900/40">
+            <TabsTrigger value="all" className="rounded-md px-3 py-1.5 text-xs font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-blue-900/40 data-[state=active]:text-blue-700 dark:data-[state=active]:text-blue-300 data-[state=active]:shadow-sm">All ({counts.all})</TabsTrigger>
+            <TabsTrigger value="public" className="rounded-md px-3 py-1.5 text-xs font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-blue-900/40 data-[state=active]:text-blue-700 dark:data-[state=active]:text-blue-300 data-[state=active]:shadow-sm">Public ({counts.public})</TabsTrigger>
+            <TabsTrigger value="private" className="rounded-md px-3 py-1.5 text-xs font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-blue-900/40 data-[state=active]:text-blue-700 dark:data-[state=active]:text-blue-300 data-[state=active]:shadow-sm">Private ({counts.private})</TabsTrigger>
           </TabsList>
         </Tabs>
         <Input
           placeholder="Search repositories…"
-          className="max-w-xs h-9 rounded-lg border-border/60 bg-background/50 focus-visible:ring-1 focus-visible:ring-neutral-400 focus-visible:border-neutral-400"
+          className="max-w-xs h-9 rounded-lg border-border/60 bg-background/50 focus-visible:ring-1 focus-visible:ring-blue-400/60 focus-visible:border-blue-400/60"
           value={search}
           onChange={(event) => setSearch(event.target.value)}
         />
@@ -175,10 +175,10 @@ function RepoRow({ repo }: { repo: DashboardRepo }) {
   const isPrivate = repo.visibility === 'private';
 
   return (
-    <TableRow className="transition-colors hover:bg-muted/30">
+    <TableRow className="transition-colors hover:bg-blue-50/30 dark:hover:bg-blue-950/10">
       <TableCell className="py-4">
         <div className="flex flex-col">
-          <span className="font-semibold text-sm text-foreground/90">{repo.name}</span>
+          <span className="font-semibold text-sm text-foreground/90 group-hover:text-blue-700">{repo.name}</span>
           <span className="text-xs text-muted-foreground font-light">{repo.fullName}</span>
         </div>
       </TableCell>
@@ -186,13 +186,13 @@ function RepoRow({ repo }: { repo: DashboardRepo }) {
         <span className={cn(
           "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium border",
           isPrivate 
-            ? "bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 text-neutral-800 dark:text-neutral-300"
-            : "bg-neutral-50 dark:bg-neutral-900/60 border-neutral-200/60 dark:border-neutral-800 text-neutral-700 dark:text-neutral-400"
+            ? "bg-slate-100 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300"
+            : "bg-blue-50 dark:bg-blue-950/30 border-blue-200/50 dark:border-blue-800/40 text-blue-700 dark:text-blue-400"
         )}>
           {isPrivate ? (
-            <LockIcon className="size-3 text-neutral-500" />
+            <LockIcon className="size-3 text-slate-400" />
           ) : (
-            <LockKeyOpenIcon className="size-3 text-neutral-400" />
+            <LockKeyOpenIcon className="size-3 text-blue-400" />
           )}
           {repo.visibility}
         </span>
