@@ -5,8 +5,8 @@
  * and an expandable AI review section. Links out to GitHub and to local detail pages.
  */
 
-import Link from "next/link";
-import { formatDistanceToNow } from "date-fns";
+import Link from 'next/link';
+import { formatDistanceToNow } from 'date-fns';
 import {
   BotIcon,
   ExternalLinkIcon,
@@ -14,25 +14,23 @@ import {
   GitBranchIcon,
   GitPullRequestIcon,
   UserIcon,
-} from "lucide-react";
+} from 'lucide-react';
 
 import type {
   PullRequestItem,
   RepoPullRequests,
-} from "@/features/pull-requests/types/pull-request";
-import { statusBadge } from "@/features/dashboard/lib/status-styles";
-import { AiReviewMarkdown } from "@/features/pull-requests/components/ai-review-markdown";
-import {
-  PR_STATUS_LABELS,
-  getPrStatusTone,
-} from "@/features/pull-requests/utils/status";
+} from '@/features/pull-requests/types/pull-request';
+import { statusBadge } from '@/features/dashboard/lib/status-styles';
+import { AiReviewMarkdown } from '@/features/pull-requests/components/ai-review-markdown';
+import { PR_STATUS_LABELS, getPrStatusTone } from '@/features/pull-requests/utils/status';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+} from '@/components/ui/accordion';
+import { DASHBOARD_ROUTES } from '@/features/dashboard/lib/routes';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 /**
  * Builds the canonical GitHub URL for a pull request.
@@ -70,7 +68,7 @@ function PullRequestMeta({ pullRequest }: { pullRequest: PullRequestItem }) {
     <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
       <span className="inline-flex items-center gap-1">
         <UserIcon className="size-3" />
-        {pullRequest.authorLogin ?? "unknown"}
+        {pullRequest.authorLogin ?? 'unknown'}
       </span>
       <span className="inline-flex items-center gap-1">
         <GitBranchIcon className="size-3" />
@@ -88,7 +86,7 @@ function PullRequestMeta({ pullRequest }: { pullRequest: PullRequestItem }) {
  * @returns Accordion with review content, rate-limit notice, or waiting message.
  */
 function AiReviewAccordion({ pullRequest }: { pullRequest: PullRequestItem }) {
-  if (pullRequest.status === "rate_limited") {
+  if (pullRequest.status === 'rate_limited') {
     return (
       <p className="text-xs text-muted-foreground">
         Monthly review limit reached — upgrade to Pro for unlimited reviews.
@@ -103,10 +101,10 @@ function AiReviewAccordion({ pullRequest }: { pullRequest: PullRequestItem }) {
       </p>
     );
   }
-  
+
   return (
-    <Accordion>
-      <AccordionItem className="border-none">
+    <Accordion type="single" collapsible>
+      <AccordionItem value="review" className="border-none">
         <AccordionTrigger className="py-1.5 text-muted-foreground hover:text-foreground">
           <span className="inline-flex items-center gap-1.5">
             <BotIcon className="size-3.5" />
@@ -144,7 +142,7 @@ function PullRequestRow({
       <div className="flex flex-wrap items-center gap-2">
         <GitPullRequestIcon className="size-4 shrink-0 text-muted-foreground" />
         <Link
-          href={`/dashboard/pull-requests/${pullRequest.id}`}
+          href={`${DASHBOARD_ROUTES.pullRequest}/${pullRequest.id}`}
           className="font-medium hover:underline"
         >
           {pullRequest.title}
@@ -156,9 +154,7 @@ function PullRequestRow({
         >
           #{pullRequest.prNumber}
         </Link>
-        <span className={statusBadge(tone, "ml-auto")}>
-          {PR_STATUS_LABELS[pullRequest.status]}
-        </span>
+        <span className={statusBadge(tone, 'ml-auto')}>{PR_STATUS_LABELS[pullRequest.status]}</span>
       </div>
 
       <PullRequestMeta pullRequest={pullRequest} />
@@ -175,7 +171,7 @@ function PullRequestRow({
  */
 function RepoCard({ repo }: { repo: RepoPullRequests }) {
   const prCount = repo.pullRequests.length;
-  const prLabel = prCount === 1 ? "pull request" : "pull requests";
+  const prLabel = prCount === 1 ? 'pull request' : 'pull requests';
 
   return (
     <Card className="rounded-none">
@@ -220,9 +216,8 @@ function NoPullRequestsYet() {
       <GitPullRequestIcon className="size-8 text-muted-foreground" />
       <p className="text-sm font-medium">No pull requests yet</p>
       <p className="max-w-sm text-xs text-muted-foreground">
-        Open a pull request on a connected repository and the AI reviewer will
-        pick it up automatically. Reviews show up here and as comments on
-        GitHub.
+        Open a pull request on a connected repository and the AI reviewer will pick it up
+        automatically. Reviews show up here and as comments on GitHub.
       </p>
     </div>
   );

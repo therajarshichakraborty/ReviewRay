@@ -1,4 +1,4 @@
-"use client";
+'use client';
 /**
  * User account dropdown menu — avatar, profile info, sign out.
  *
@@ -7,16 +7,15 @@
  * Better Auth's `useSession` hook.
  */
 
+import { useRouter } from 'next/navigation';
+import { ChevronsUpDownIcon, LogOutIcon } from 'lucide-react';
 
-import { useRouter } from "next/navigation";
-import { ChevronsUpDownIcon, LogOutIcon } from "lucide-react";
-
-import { authClient } from "@/lib/auth-client";
-import { SIGN_IN_PATH } from "@/lib/auth-routes";
-import { cn } from "@/lib/utils";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { authClient } from '@/lib/auth-client';
+import { SIGN_IN_PATH } from '@/lib/auth-routes';
+import { cn } from '@/lib/utils';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,10 +24,10 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 
 /** Default plan label when none is passed from the server. */
-const DEFAULT_PLAN = "Free";
+const DEFAULT_PLAN = 'Free';
 
 /** Minimal user fields needed to render the menu. */
 export type UserMenuUser = {
@@ -38,7 +37,7 @@ export type UserMenuUser = {
 };
 
 /** `compact` — icon-only trigger; `profile` — avatar + name in the trigger. */
-export type UserMenuTriggerVariant = "compact" | "profile";
+export type UserMenuTriggerVariant = 'compact' | 'profile';
 
 type UserMenuProps = {
   user: UserMenuUser;
@@ -55,7 +54,7 @@ type UserMenuProps = {
  * @returns Trimmed name, email username, or fallback `"User"`.
  */
 export function getDisplayName(user: UserMenuUser) {
-  return user.name?.trim() || user.email?.split("@")[0] || "User";
+  return user.name?.trim() || user.email?.split('@')[0] || 'User';
 }
 
 /**
@@ -65,7 +64,7 @@ export function getDisplayName(user: UserMenuUser) {
  * @returns Uppercase initials (e.g. `"JD"` for John Doe).
  */
 export function getInitials(user: UserMenuUser) {
-  const source = user.name?.trim() || user.email || "U";
+  const source = user.name?.trim() || user.email || 'U';
   const parts = source.split(/\s+/).filter(Boolean);
 
   if (parts.length >= 2) {
@@ -84,16 +83,14 @@ export function getInitials(user: UserMenuUser) {
  */
 function UserAvatar({
   user,
-  size = "default",
+  size = 'default',
 }: {
   user: UserMenuUser;
-  size?: "default" | "sm" | "lg";
+  size?: 'default' | 'sm' | 'lg';
 }) {
   return (
     <Avatar size={size}>
-      {user.image ? (
-        <AvatarImage src={user.image} alt={getDisplayName(user)} />
-      ) : null}
+      {user.image ? <AvatarImage src={user.image} alt={getDisplayName(user)} /> : null}
       <AvatarFallback>{getInitials(user)}</AvatarFallback>
     </Avatar>
   );
@@ -110,7 +107,7 @@ function UserAvatar({
  */
 export function UserMenu({
   user,
-  variant = "profile",
+  variant = 'profile',
   plan = DEFAULT_PLAN,
   className,
 }: UserMenuProps) {
@@ -132,7 +129,7 @@ export function UserMenu({
       <DropdownMenuTrigger
         className={cn(className)}
         render={
-          variant === "compact" ? (
+          variant === 'compact' ? (
             <Button
               variant="ghost"
               size="icon"
@@ -140,20 +137,14 @@ export function UserMenu({
               aria-label="Open account menu"
             />
           ) : (
-            <Button
-              variant="ghost"
-              className="h-9 gap-2 px-2"
-              aria-label="Open account menu"
-            />
+            <Button variant="ghost" className="h-9 gap-2 px-2" aria-label="Open account menu" />
           )
         }
       >
-        <UserAvatar user={user} size={variant === "compact" ? "default" : "sm"} />
-        {variant === "profile" ? (
+        <UserAvatar user={user} size={variant === 'compact' ? 'default' : 'sm'} />
+        {variant === 'profile' ? (
           <>
-            <span className="max-w-32 truncate text-left text-xs font-medium">
-              {displayName}
-            </span>
+            <span className="max-w-32 truncate text-left text-xs font-medium">{displayName}</span>
             <ChevronsUpDownIcon className="size-4 text-muted-foreground" />
           </>
         ) : null}
@@ -166,9 +157,7 @@ export function UserMenu({
               <div className="flex min-w-0 flex-1 flex-col gap-1">
                 <p className="truncate text-xs font-medium">{displayName}</p>
                 {user.email ? (
-                  <p className="truncate text-xs text-muted-foreground">
-                    {user.email}
-                  </p>
+                  <p className="truncate text-xs text-muted-foreground">{user.email}</p>
                 ) : null}
                 <Badge variant="secondary" className="w-fit">
                   {plan} plan
@@ -189,7 +178,7 @@ export function UserMenu({
   );
 }
 
-type UserMenuWithSessionProps = Omit<UserMenuProps, "user">;
+type UserMenuWithSessionProps = Omit<UserMenuProps, 'user'>;
 
 /**
  * User menu that loads the current session client-side.

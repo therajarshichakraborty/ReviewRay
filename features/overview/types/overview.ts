@@ -5,10 +5,7 @@
  * as props to `OverviewContent`. Types here describe that contract.
  */
 
-import type {
-  GithubInstallationStatus,
-  SubscriptionPlan,
-} from "@/features/dashboard/lib/types";
+import type { GithubInstallationStatus, SubscriptionPlan } from '@/features/dashboard/lib/types';
 
 /**
  * Repository counts shown on the Overview stat card.
@@ -22,10 +19,7 @@ export type OverviewRepoSummary = {
 };
 
 /** Simplified review outcome labels for the activity feed. */
-export type OverviewActivityStatus =
-  | "approved"
-  | "changes_requested"
-  | "rate_limited";
+export type OverviewActivityStatus = 'approved' | 'changes_requested' | 'rate_limited';
 
 /** One row in the "Recent activity" list on the Overview page. */
 export type OverviewActivityItem = {

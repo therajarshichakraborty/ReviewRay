@@ -1,4 +1,4 @@
-"use client";
+'use client';
 /**
  * Renders AI-generated review text as formatted Markdown.
  *
@@ -7,10 +7,9 @@
  * Streamdown runs in the browser.
  */
 
-
-import { Streamdown } from "streamdown";
-import { code } from "@streamdown/code";
-import "streamdown/styles.css";
+import { Streamdown } from 'streamdown';
+import { code } from '@streamdown/code';
+import 'streamdown/styles.css';
 
 /**
  * Displays an AI review comment with Markdown formatting and code blocks.

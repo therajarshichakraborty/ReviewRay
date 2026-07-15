@@ -6,11 +6,7 @@
  */
 
 /** Lifecycle of an AI review from webhook receipt to completion. */
-export type PullRequestStatus =
-  | "pending"
-  | "processing"
-  | "reviewed"
-  | "rate_limited";
+export type PullRequestStatus = 'pending' | 'processing' | 'reviewed' | 'rate_limited';
 
 /** A single pull request row shown in lists and detail pages. */
 export type PullRequestItem = {

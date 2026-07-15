@@ -1,4 +1,4 @@
-"use client";
+'use client';
 /**
  * Settings page body with Profile and Subscription tabs.
  *
@@ -6,13 +6,12 @@
  * plan details, usage, and upgrade/cancel actions via billing components.
  */
 
-
-import { format } from "date-fns";
-import { UpgradeButton } from "@/features/billing/components/upgrade-button";
-import type { UserSubscription } from "@/features/dashboard/lib/types";
-import { PLAN_DETAILS } from "@/features/settings/lib/plan-details";
-import { cn } from "@/lib/utils";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { format } from 'date-fns';
+import { UpgradeButton } from '@/features/billing/components/upgrade-button';
+import type { UserSubscription } from '@/features/dashboard/lib/types';
+import { PLAN_DETAILS } from '@/features/settings/lib/plan-details';
+import { cn } from '@/lib/utils';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Card,
   CardContent,
@@ -20,16 +19,16 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SettingsProfile } from "@/features/settings/types";
-import { UsageSummary } from "@/features/billing/server/usage";
-import { statusBadge } from "../lib/status-style";
-import { CancelSubscriptionButton } from "@/features/billing/components/cancel-subscription-button";
-import { getDisplayName, getInitials } from "@/features/auth/components/user-menu";
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { SettingsProfile } from '@/features/settings/types';
+import { UsageSummary } from '@/features/billing/server/usage';
+import { statusBadge } from '../lib/status-style';
+import { CancelSubscriptionButton } from '@/features/billing/components/cancel-subscription-button';
+import { getDisplayName, getInitials } from '@/features/auth/components/user-menu';
 
 type SettingsContentProps = {
   profile: SettingsProfile;
@@ -48,7 +47,7 @@ function formatRenewalDate(renewsAt: string | null): string | null {
     return null;
   }
 
-  return format(new Date(renewsAt), "MMMM d, yyyy");
+  return format(new Date(renewsAt), 'MMMM d, yyyy');
 }
 
 /**
@@ -57,16 +56,16 @@ function formatRenewalDate(renewsAt: string | null): string | null {
  * @param status - `active`, `trialing`, or `canceled`.
  * @returns Display string for the status line.
  */
-function getSubscriptionStatusLabel(status: UserSubscription["status"]): string {
-  if (status === "active") {
-    return "active";
+function getSubscriptionStatusLabel(status: UserSubscription['status']): string {
+  if (status === 'active') {
+    return 'active';
   }
 
-  if (status === "trialing") {
-    return "trialing";
+  if (status === 'trialing') {
+    return 'trialing';
   }
 
-  return "canceled";
+  return 'canceled';
 }
 
 /**
@@ -78,22 +77,18 @@ function getSubscriptionStatusLabel(status: UserSubscription["status"]): string 
 function ProfileTab({ profile }: { profile: SettingsProfile }) {
   const displayName = getDisplayName(profile);
   const initials = getInitials(profile);
-  const memberSince = format(new Date(profile.memberSince), "MMMM d, yyyy");
+  const memberSince = format(new Date(profile.memberSince), 'MMMM d, yyyy');
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Profile</CardTitle>
-        <CardDescription>
-          Account information from your GitHub sign-in.
-        </CardDescription>
+        <CardDescription>Account information from your GitHub sign-in.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="flex items-center gap-4">
           <Avatar size="lg">
-            {profile.image ? (
-              <AvatarImage src={profile.image} alt={displayName} />
-            ) : null}
+            {profile.image ? <AvatarImage src={profile.image} alt={displayName} /> : null}
             <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
           <div>
@@ -110,19 +105,13 @@ function ProfileTab({ profile }: { profile: SettingsProfile }) {
           </div>
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              defaultValue={profile.email}
-              readOnly
-            />
+            <Input id="email" type="email" defaultValue={profile.email} readOnly />
           </div>
         </div>
       </CardContent>
       <CardFooter>
         <p className="text-xs text-muted-foreground">
-          Profile details are managed by GitHub. Update them in your GitHub
-          account settings.
+          Profile details are managed by GitHub. Update them in your GitHub account settings.
         </p>
       </CardFooter>
     </Card>
@@ -161,54 +150,45 @@ function SubscriptionTab({
   const renewalDate = formatRenewalDate(subscription.renewsAt);
   const statusLabel = getSubscriptionStatusLabel(subscription.status);
 
-  const isActive = subscription.status === "active" || subscription.status === "trialing";
+  const isActive = subscription.status === 'active' || subscription.status === 'trialing';
 
   // Visual styling reflects active vs inactive subscription
-  let cardBorderClass = "border-border";
-  let planTextClass = "text-foreground";
-  let statusTextClass = "text-muted-foreground";
-  let badgeTone: "success" | "neutral" | "warning" = "neutral";
+  let cardBorderClass = 'border-border';
+  let planTextClass = 'text-foreground';
+  let statusTextClass = 'text-muted-foreground';
+  let badgeTone: 'success' | 'neutral' | 'warning' = 'neutral';
 
   if (isActive) {
-    cardBorderClass = "border-green-500/25";
-    planTextClass = "text-green-800 dark:text-green-300";
-    statusTextClass = "text-green-700 dark:text-green-400";
-    badgeTone = "success";
+    cardBorderClass = 'border-green-500/25';
+    planTextClass = 'text-green-800 dark:text-green-300';
+    statusTextClass = 'text-green-700 dark:text-green-400';
+    badgeTone = 'success';
   }
 
-  if (subscription.status === "canceled") {
-    badgeTone = "warning";
+  if (subscription.status === 'canceled') {
+    badgeTone = 'warning';
   }
 
   return (
     <Card className={cardBorderClass}>
       <CardHeader>
         <CardTitle>Subscription</CardTitle>
-        <CardDescription>
-          Manage your plan and billing for AI code reviews.
-        </CardDescription>
+        <CardDescription>Manage your plan and billing for AI code reviews.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div
           className={cn(
-            "flex flex-wrap items-center justify-between gap-4 rounded-none border p-4",
-            isActive
-              ? "border-green-500/30 bg-green-500/5"
-              : "border-border bg-muted/30"
+            'flex flex-wrap items-center justify-between gap-4 rounded-none border p-4',
+            isActive ? 'border-green-500/30 bg-green-500/5' : 'border-border bg-muted/30',
           )}
         >
           <div>
-            <p className={cn("font-medium", planTextClass)}>
-              {planDetails.label} plan
-            </p>
+            <p className={cn('font-medium', planTextClass)}>{planDetails.label} plan</p>
             <p className="text-xs text-muted-foreground">
-              Status:{" "}
-              <span className={statusTextClass}>{statusLabel}</span>
+              Status: <span className={statusTextClass}>{statusLabel}</span>
             </p>
             {renewalDate ? (
-              <p className="text-xs text-muted-foreground">
-                Renews {renewalDate}
-              </p>
+              <p className="text-xs text-muted-foreground">Renews {renewalDate}</p>
             ) : null}
           </div>
           <span className={statusBadge(badgeTone)}>{planDetails.label}</span>
@@ -221,11 +201,9 @@ function SubscriptionTab({
         </ul>
       </CardContent>
       <CardFooter className="flex flex-wrap gap-2">
-        {subscription.plan === "free" ? <UpgradeButton /> : null}
-        {subscription.plan === "pro" ? (
-          <CancelSubscriptionButton
-            disabled={subscription.status === "canceled"}
-          />
+        {subscription.plan === 'free' ? <UpgradeButton /> : null}
+        {subscription.plan === 'pro' ? (
+          <CancelSubscriptionButton disabled={subscription.status === 'canceled'} />
         ) : null}
       </CardFooter>
     </Card>
@@ -240,11 +218,7 @@ function SubscriptionTab({
  * @param usage - Monthly review usage summary.
  * @returns Tabbed settings UI below `DashboardHeader`.
  */
-export function SettingsContent({
-  profile,
-  subscription,
-  usage,
-}: SettingsContentProps) {
+export function SettingsContent({ profile, subscription, usage }: SettingsContentProps) {
   return (
     <div className="flex flex-1 flex-col p-6">
       <Tabs defaultValue="profile" className="w-full max-w-2xl">

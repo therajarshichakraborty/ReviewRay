@@ -7,13 +7,10 @@
  * Better Auth's API and optionally redirect unauthenticated users.
  */
 
-import { auth } from "@/lib/auth";
-import {
-  DEFAULT_AUTH_CALLBACK,
-  SIGN_IN_PATH,
-} from "@/lib/auth-routes";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { auth } from '@/lib/auth';
+import { DEFAULT_AUTH_CALLBACK, SIGN_IN_PATH } from '@/lib/auth-routes';
+import { headers } from 'next/headers';
+import { redirect } from 'next/navigation';
 
 /**
  * Reads the current user's session on the server.

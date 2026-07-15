@@ -5,16 +5,16 @@
  * and (when connected) a repository summary into one `OverviewData` object.
  */
 
-import type { OverviewData } from "@/features/overview/types/overview";
-import { getUsageSummary } from "@/features/billing/server/usage";
+import type { OverviewData } from '@/features/overview/types/overview';
+import { getUsageSummary } from '@/features/billing/server/usage';
 import {
   getInstallationStatus,
   getUserInstallationId,
-} from "@/features/github/server/installation";
-import { getUserSubscription } from "@/features/settings/server/subcription";
+} from '@/features/github/server/installation';
+import { getUserSubscription } from '@/features/settings/server/subcription';
 
-import { getRecentReviewActivity } from "./activity";
-import { getInstallationRepoSummary } from "./repo-summery";
+import { getRecentReviewActivity } from './activity';
+import { getInstallationRepoSummary } from './repo-summery';
 
 /**
  * Loads the complete overview payload for a signed-in user.

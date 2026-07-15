@@ -1,23 +1,23 @@
 /**
- * Pull requests list page (`/dashboard/pull-requests`).
+ * Pull requests list page (`/dashboard/pull-request`).
  *
  * Groups AI-reviewed PRs by repository. Requires a GitHub App installation;
  * otherwise shows a prompt to connect GitHub first.
  */
 
-import type { Metadata } from "next";
-import Link from "next/link";
+import type { Metadata } from 'next';
+import Link from 'next/link';
 
-import { DashboardHeader } from "@/features/dashboard/components/dashboard-header";
-import { DASHBOARD_ROUTES } from "@/features/dashboard/lib/routes";
-import { getUserInstallationId } from "@/features/github/server/installation";
-import { PullRequestsList } from "@/features/pull-requests/components/pull-requests-list";
-import { getPullRequestsByRepo } from "@/features/pull-requests/server/get-pull-requests";
-import { requireAuth } from "@/lib/auth-session";
-import { Button } from "@/components/ui/button";
+import { DashboardHeader } from '@/features/dashboard/components/dashboard-header';
+import { DASHBOARD_ROUTES } from '@/features/dashboard/lib/routes';
+import { getUserInstallationId } from '@/features/github/server/installation';
+import { PullRequestsList } from '@/features/pull-requests/components/pull-requests-list';
+import { getPullRequestsByRepo } from '@/features/pull-requests/server/get-pull-requests';
+import { requireAuth } from '@/lib/auth-session';
+import { Button } from '@/components/ui/button';
 
 export const metadata: Metadata = {
-  title: "Pull Requests · Dashboard",
+  title: 'Pull Requests · Dashboard',
 };
 
 /**
@@ -31,8 +31,8 @@ function PullRequestsNotConnected() {
       <p className="text-sm text-muted-foreground">
         Install the GitHub App first to see AI-reviewed pull requests.
       </p>
-      <Button nativeButton={false} render={<Link href={DASHBOARD_ROUTES.github} />}>
-        Go to GitHub App
+      <Button asChild>
+        <Link href={DASHBOARD_ROUTES.github}>Go to GitHub App</Link>
       </Button>
     </div>
   );

@@ -7,9 +7,9 @@
  * `callbackUrl` so users return to their original destination after login.
  */
 
-import { auth } from "@/lib/auth";
-import { getSafeCallbackPath, SIGN_IN_PATH } from "@/lib/auth-routes";
-import { NextRequest, NextResponse } from "next/server";
+import { auth } from '@/lib/auth';
+import { getSafeCallbackPath, SIGN_IN_PATH } from '@/lib/auth-routes';
+import { NextRequest, NextResponse } from 'next/server';
 
 /**
  * Builds a redirect response to the sign-in page, preserving the intended destination.
@@ -21,10 +21,7 @@ import { NextRequest, NextResponse } from "next/server";
 function redirectToSignIn(request: NextRequest, pathname: string) {
   const signInUrl = new URL(SIGN_IN_PATH, request.url);
   // Include query string so filters/search params survive the round-trip through sign-in.
-  signInUrl.searchParams.set(
-    "callbackUrl",
-    `${pathname}${request.nextUrl.search}`
-  );
+  signInUrl.searchParams.set('callbackUrl', `${pathname}${request.nextUrl.search}`);
   return NextResponse.redirect(signInUrl);
 }
 
@@ -35,7 +32,7 @@ function redirectToSignIn(request: NextRequest, pathname: string) {
  * @returns A same-site path safe to redirect to (never an external URL).
  */
 function getPostAuthRedirectPath(request: NextRequest): string {
-  const callbackUrl = request.nextUrl.searchParams.get("callbackUrl");
+  const callbackUrl = request.nextUrl.searchParams.get('callbackUrl');
   return getSafeCallbackPath(callbackUrl);
 }
 
@@ -53,7 +50,7 @@ export async function handleAuthProxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Landing page stays public — no session check needed.
-  if (pathname === "/") {
+  if (pathname === '/') {
     return NextResponse.next();
   }
 

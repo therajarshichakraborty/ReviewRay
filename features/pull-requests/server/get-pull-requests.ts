@@ -9,8 +9,8 @@ import type {
   PullRequestItem,
   PullRequestStatus,
   RepoPullRequests,
-} from "@/features/pull-requests/types/pull-request";
-import { prisma } from "@/lib/db.config";
+} from '@/features/pull-requests/types/pull-request';
+import { prisma } from '@/lib/db.config';
 
 /** Shape of a row returned from Prisma before client serialization. */
 type PullRequestRecord = {
@@ -52,12 +52,10 @@ function toPullRequestItem(record: PullRequestRecord): PullRequestItem {
  * @param installationId - GitHub App installation ID for the current user.
  * @returns An array of repo groups, each with its pull requests (newest first within each group).
  */
-export async function getPullRequestsByRepo(
-  installationId: number
-): Promise<RepoPullRequests[]> {
+export async function getPullRequestsByRepo(installationId: number): Promise<RepoPullRequests[]> {
   const records = await prisma.pullRequest.findMany({
     where: { installationId },
-    orderBy: { updatedAt: "desc" },
+    orderBy: { updatedAt: 'desc' },
   });
 
   const groups: RepoPullRequests[] = [];

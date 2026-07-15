@@ -7,12 +7,12 @@
  * action checks the session first — billing changes always require a logged-in user.
  */
 
-"use server";
+'use server';
 
-import { cancelProSubscription } from "@/features/billing/server/cancel-subscription";
-import { createProSubscription } from "@/features/billing/server/create-subscription";
-import { getServerSession } from "@/lib/auth-session";
-import { redirect } from "next/navigation";
+import { cancelProSubscription } from '@/features/billing/server/cancel-subscription';
+import { createProSubscription } from '@/features/billing/server/create-subscription';
+import { getServerSession } from '@/lib/auth-session';
+import { redirect } from 'next/navigation';
 
 /**
  * Creates a Pro checkout session (or equivalent) for the current user.
@@ -25,7 +25,7 @@ export async function startProSubscription() {
   const session = await getServerSession();
 
   if (!session) {
-    redirect("/sign-in");
+    redirect('/sign-in');
   }
 
   return createProSubscription(session.user.id);
@@ -42,7 +42,7 @@ export async function cancelSubscription() {
   const session = await getServerSession();
 
   if (!session) {
-    redirect("/sign-in");
+    redirect('/sign-in');
   }
 
   await cancelProSubscription(session.user.id);

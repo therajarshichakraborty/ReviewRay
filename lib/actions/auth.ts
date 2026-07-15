@@ -7,12 +7,12 @@
  * This file starts the GitHub OAuth flow via Better Auth.
  */
 
-"use server";
+'use server';
 
-import { auth } from "@/lib/auth";
-import { getSafeCallbackPath } from "@/lib/auth-routes";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { auth } from '@/lib/auth';
+import { getSafeCallbackPath } from '@/lib/auth-routes';
+import { headers } from 'next/headers';
+import { redirect } from 'next/navigation';
 
 /**
  * Starts GitHub OAuth sign-in and redirects the browser to GitHub's consent screen.
@@ -24,15 +24,13 @@ import { redirect } from "next/navigation";
  * @returns Never returns on success — `redirect()` sends the user to GitHub.
  */
 export async function signInWithGithub(formData: FormData) {
-  const callbackUrl = formData.get("callbackUrl");
+  const callbackUrl = formData.get('callbackUrl');
   // FormData values are `FormDataEntryValue`; we only accept string callbacks.
-  const redirectTo = getSafeCallbackPath(
-    typeof callbackUrl === "string" ? callbackUrl : null
-  );
+  const redirectTo = getSafeCallbackPath(typeof callbackUrl === 'string' ? callbackUrl : null);
 
   const result = await auth.api.signInSocial({
     body: {
-      provider: "github",
+      provider: 'github',
       callbackURL: redirectTo,
     },
     headers: await headers(),

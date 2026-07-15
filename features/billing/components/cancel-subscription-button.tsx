@@ -1,21 +1,18 @@
-"use client";
+'use client';
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { toast } from "sonner";
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
-
-import { Button } from "@/components/ui/button";
-import { cancelSubscription } from "@/lib/billing";
-import { statusButtonClass } from "@/features/dashboard/lib/status-style";
+import { Button } from '@/components/ui/button';
+import { cancelSubscription } from '@/lib/billing';
+import { statusButtonClass } from '@/features/dashboard/lib/status-style';
 
 type CancelSubscriptionButtonProps = {
   disabled?: boolean;
 };
 
-export function CancelSubscriptionButton({
-  disabled = false,
-}: CancelSubscriptionButtonProps) {
+export function CancelSubscriptionButton({ disabled = false }: CancelSubscriptionButtonProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
@@ -24,11 +21,10 @@ export function CancelSubscriptionButton({
 
     try {
       await cancelSubscription();
-      toast.success("Subscription canceled. Pro access continues until renewal date.");
+      toast.success('Subscription canceled. Pro access continues until renewal date.');
       router.refresh();
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Could not cancel subscription.";
+      const message = error instanceof Error ? error.message : 'Could not cancel subscription.';
       toast.error(message);
     } finally {
       setLoading(false);
@@ -42,7 +38,7 @@ export function CancelSubscriptionButton({
       disabled={disabled || loading}
       className={statusButtonClass.danger}
     >
-      {loading ? "Canceling…" : "Cancel subscription"}
+      {loading ? 'Canceling…' : 'Cancel subscription'}
     </Button>
   );
 }

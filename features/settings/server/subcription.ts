@@ -8,4 +8,4 @@
  * @module features/settings/server/subscription
  */
 
-export { getUserSubscription } from "@/features/billing/server/subscription";
+export { getUserSubscription } from '@/features/billing/server/subscription';

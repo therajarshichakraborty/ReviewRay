@@ -5,10 +5,10 @@
  * installation and maps database status values into display-friendly labels.
  */
 
-import type { OverviewActivityItem } from "@/features/overview/types/overview";
-import { getReviewsThisMonth } from "@/features/billing/server/usage";
-import { getUserInstallationId } from "@/features/github/server/installation";
-import { prisma } from "@/lib/db.config";
+import type { OverviewActivityItem } from '@/features/overview/types/overview';
+import { getReviewsThisMonth } from '@/features/billing/server/usage';
+import { getUserInstallationId } from '@/features/github/server/installation';
+import { prisma } from '@/lib/db.config';
 
 /**
  * Maps internal PR status strings to activity feed status labels.
@@ -18,12 +18,12 @@ import { prisma } from "@/lib/db.config";
  * @param status - Raw status string from the `pullRequest` table.
  * @returns A value suitable for `OverviewActivityItem["status"]`.
  */
-function getActivityStatus(status: string): OverviewActivityItem["status"] {
-  if (status === "rate_limited") {
-    return "rate_limited";
+function getActivityStatus(status: string): OverviewActivityItem['status'] {
+  if (status === 'rate_limited') {
+    return 'rate_limited';
   }
 
-  return "approved";
+  return 'approved';
 }
 
 /**
@@ -35,9 +35,7 @@ function getActivityStatus(status: string): OverviewActivityItem["status"] {
  * @param userId - Authenticated user's database ID.
  * @returns Chronologically ordered activity items (newest first).
  */
-export async function getRecentReviewActivity(
-  userId: string
-): Promise<OverviewActivityItem[]> {
+export async function getRecentReviewActivity(userId: string): Promise<OverviewActivityItem[]> {
   const installationId = await getUserInstallationId(userId);
 
   if (!installationId) {
@@ -48,9 +46,9 @@ export async function getRecentReviewActivity(
     where: {
       installationId,
       // Only show PRs that finished (or hit the rate limit)
-      status: { in: ["reviewed", "rate_limited"] },
+      status: { in: ['reviewed', 'rate_limited'] },
     },
-    orderBy: { updatedAt: "desc" },
+    orderBy: { updatedAt: 'desc' },
     take: 10,
     select: {
       id: true,

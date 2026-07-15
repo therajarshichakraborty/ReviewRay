@@ -6,18 +6,15 @@
  * Server actions handle disconnect; install links out to GitHub's install flow.
  */
 
-import { ExternalLinkIcon, UnplugIcon } from "lucide-react";
+import { ExternalLinkIcon, UnplugIcon } from 'lucide-react';
 
-import { GithubIcon } from "@/features/dashboard/components/icons/github-icon";
-import type { GithubInstallationStatus } from "@/features/dashboard/lib/types";
-import {
-  statusBadge,
-  statusButtonClass,
-} from "@/features/dashboard/lib/status-styles";
-import { getGithubInstallUrl } from "@/features/github/utils/github-app";
-import { disconnectGithubApp } from "@/lib/actions/github";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { GithubIcon } from '@/features/dashboard/components/icons/github-icon';
+import type { GithubInstallationStatus } from '@/features/dashboard/lib/types';
+import { statusBadge, statusButtonClass } from '@/features/dashboard/lib/status-styles';
+import { getGithubInstallUrl } from '@/features/github/utils/github-app';
+import { disconnectGithubApp } from '@/lib/actions/github';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -25,7 +22,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 
 type GithubConnectCardProps = {
   userId: string;
@@ -41,12 +38,9 @@ type GithubConnectCardProps = {
 function ConnectedDetails({ accountLogin }: { accountLogin: string | null }) {
   return (
     <p className="text-xs text-muted-foreground">
-      Installed for{" "}
-      <span className="font-medium text-green-700 dark:text-green-400">
-        @{accountLogin}
-      </span>
-      . The app can read repository metadata and post review comments on pull
-      requests.
+      Installed for{' '}
+      <span className="font-medium text-green-700 dark:text-green-400">@{accountLogin}</span>. The
+      app can read repository metadata and post review comments on pull requests.
     </p>
   );
 }
@@ -74,11 +68,7 @@ function DisconnectedDetails() {
 function ConnectedActions() {
   return (
     <form action={disconnectGithubApp}>
-      <Button
-        type="submit"
-        variant="outline"
-        className={statusButtonClass.danger}
-      >
+      <Button type="submit" variant="outline" className={statusButtonClass.danger}>
         <UnplugIcon />
         Disconnect GitHub App
       </Button>
@@ -94,15 +84,12 @@ function ConnectedActions() {
  */
 function DisconnectedActions({ installUrl }: { installUrl: string }) {
   return (
-    
-    <Button
-      nativeButton={false}
-      render={<a href={installUrl} />}
-      className={statusButtonClass.success}
-    >
-      <GithubIcon />
-      Install GitHub App
-      <ExternalLinkIcon className="size-3 opacity-80" />
+    <Button asChild className={statusButtonClass.success}>
+      <a href={installUrl}>
+        <GithubIcon />
+        Install GitHub App
+        <ExternalLinkIcon className="size-3 opacity-80" />
+      </a>
     </Button>
   );
 }
@@ -135,13 +122,7 @@ function ConnectionDetails({
  * @param installUrl - GitHub install URL used when not connected.
  * @returns Either `ConnectedActions` or `DisconnectedActions`.
  */
-function ConnectionActions({
-  connected,
-  installUrl,
-}: {
-  connected: boolean;
-  installUrl: string;
-}) {
+function ConnectionActions({ connected, installUrl }: { connected: boolean; installUrl: string }) {
   if (connected) {
     return <ConnectedActions />;
   }
@@ -158,38 +139,34 @@ function ConnectionActions({
  * @param installation - Current connection status from the database.
  * @returns The full GitHub App settings card.
  */
-export function GithubConnectCard({
-  userId,
-  installation,
-}: GithubConnectCardProps) {
+export function GithubConnectCard({ userId, installation }: GithubConnectCardProps) {
   const { connected, accountLogin } = installation;
   // Install URL encodes userId so the callback can associate the installation
   const installUrl = getGithubInstallUrl(userId);
 
   // Default to neutral styling; switch to green when connected
-  let cardBorderClass = "border-border";
-  let iconWrapperClass = "border-border bg-muted";
-  let statusTone: "success" | "neutral" = "neutral";
-  let statusLabel = "Not connected";
+  let cardBorderClass = 'border-border';
+  let iconWrapperClass = 'border-border bg-muted';
+  let statusTone: 'success' | 'neutral' = 'neutral';
+  let statusLabel = 'Not connected';
 
   if (connected) {
-    cardBorderClass = "border-green-500/30";
-    iconWrapperClass =
-      "border-green-500/40 bg-green-500/10 text-green-700 dark:text-green-400";
-    statusTone = "success";
-    statusLabel = "Connected";
+    cardBorderClass = 'border-green-500/30';
+    iconWrapperClass = 'border-green-500/40 bg-green-500/10 text-green-700 dark:text-green-400';
+    statusTone = 'success';
+    statusLabel = 'Connected';
   }
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-6">
-      <Card className={cn("max-w-2xl transition-colors", cardBorderClass)}>
+      <Card className={cn('max-w-2xl transition-colors', cardBorderClass)}>
         <CardHeader>
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-3">
               <span
                 className={cn(
-                  "flex size-10 items-center justify-center rounded-none border",
-                  iconWrapperClass
+                  'flex size-10 items-center justify-center rounded-none border',
+                  iconWrapperClass,
                 )}
               >
                 <GithubIcon className="size-5" />
@@ -197,8 +174,8 @@ export function GithubConnectCard({
               <div>
                 <CardTitle>GitHub App</CardTitle>
                 <CardDescription>
-                  Install the Chai reviewer app on your GitHub account or
-                  organization to access public and private repositories.
+                  Install the Chai reviewer app on your GitHub account or organization to access
+                  public and private repositories.
                 </CardDescription>
               </div>
             </div>

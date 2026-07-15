@@ -1,14 +1,15 @@
 /**
- * Single pull request detail page (`/dashboard/pull-requests/[id]`).
+ * Single pull request detail page (`/dashboard/pull-request/[id]`).
  *
  * Shows PR metadata, links to GitHub, and the full AI review markdown.
  * Returns 404 when the PR does not exist or belongs to another installation.
  */
 
-import type { Metadata } from "next";
-import Link from "next/link";
-import { notFound } from "next/navigation";
-import { formatDistanceToNow } from "date-fns";
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { notFound, redirect } from 'next/navigation';
+import { prisma } from '@/lib/db.config';
+import { formatDistanceToNow } from 'date-fns';
 import {
   ArrowLeftIcon,
   BotIcon,
@@ -16,25 +17,22 @@ import {
   GitBranchIcon,
   GitPullRequestIcon,
   UserIcon,
-} from "lucide-react";
+} from 'lucide-react';
 
-import { DashboardHeader } from "@/features/dashboard/components/dashboard-header";
-import { DASHBOARD_ROUTES } from "@/features/dashboard/lib/routes";
-import { statusBadge } from "@/features/dashboard/lib/status-styles";
-import { getUserInstallationId } from "@/features/github/server/installation";
-import { AiReviewMarkdown } from "@/features/pull-requests/components/ai-review-markdown";
-import { getPullRequestById } from "@/features/pull-requests/server/get-pull-request";
-import type { PullRequestStatus } from "@/features/pull-requests/types/pull-request";
-import {
-  PR_STATUS_LABELS,
-  getPrStatusTone,
-} from "@/features/pull-requests/utils/status";
-import { requireAuth } from "@/lib/auth-session";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DashboardHeader } from '@/features/dashboard/components/dashboard-header';
+import { DASHBOARD_ROUTES } from '@/features/dashboard/lib/routes';
+import { statusBadge } from '@/features/dashboard/lib/status-styles';
+import { getUserInstallationId } from '@/features/github/server/installation';
+import { AiReviewMarkdown } from '@/features/pull-requests/components/ai-review-markdown';
+import { getPullRequestById } from '@/features/pull-requests/server/get-pull-request';
+import type { PullRequestStatus } from '@/features/pull-requests/types/pull-request';
+import { PR_STATUS_LABELS, getPrStatusTone } from '@/features/pull-requests/utils/status';
+import { requireAuth } from '@/lib/auth-session';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export const metadata: Metadata = {
-  title: "Pull Request Review · Dashboard",
+  title: 'Pull Request Review · Dashboard',
 };
 
 /**
@@ -44,18 +42,12 @@ export const metadata: Metadata = {
  * @param status - PR lifecycle status (rate_limited shows upgrade message).
  * @returns Placeholder text or `AiReviewMarkdown` component.
  */
-function ReviewBody({
-  review,
-  status,
-}: {
-  review: string | null;
-  status: PullRequestStatus;
-}) {
-  if (status === "rate_limited") {
+function ReviewBody({ review, status }: { review: string | null; status: PullRequestStatus }) {
+  if (status === 'rate_limited') {
     return (
       <p className="text-sm text-muted-foreground">
-        Monthly review limit reached. Upgrade to Pro for unlimited reviews, or
-        wait until next month when your limit resets.
+        Monthly review limit reached. Upgrade to Pro for unlimited reviews, or wait until next month
+        when your limit resets.
       </p>
     );
   }
@@ -63,8 +55,7 @@ function ReviewBody({
   if (!review) {
     return (
       <p className="text-sm text-muted-foreground">
-        The AI review is not ready yet. It will appear here once the reviewer
-        finishes.
+        The AI review is not ready yet. It will appear here once the reviewer finishes.
       </p>
     );
   }
@@ -87,14 +78,16 @@ export default async function PullRequestDetailPage({
   const session = await requireAuth();
   const installationId = await getUserInstallationId(session.user.id);
 
-  if (!installationId) {
-    notFound();
-  }
-
-  const pullRequest = await getPullRequestById(installationId, id);
+  const pullRequest = await prisma.pullRequest.findUnique({
+    where: { id },
+  });
 
   if (!pullRequest) {
     notFound();
+  }
+
+  if (!installationId || pullRequest.installationId !== installationId) {
+    redirect(`https://github.com/${pullRequest.repoFullName}/commit/${pullRequest.headSha}`);
   }
 
   const status = pullRequest.status as PullRequestStatus;
@@ -112,14 +105,11 @@ export default async function PullRequestDetailPage({
 
       <div className="flex flex-col gap-4 p-6">
         <div>
-          <Button
-            variant="ghost"
-            size="sm"
-            nativeButton={false}
-            render={<Link href={DASHBOARD_ROUTES.pullRequests} />}
-          >
-            <ArrowLeftIcon />
-            Back to pull requests
+          <Button variant="ghost" size="sm" asChild>
+            <Link href={DASHBOARD_ROUTES.pullRequest}>
+              <ArrowLeftIcon />
+              Back to pull requests
+            </Link>
           </Button>
         </div>
 
@@ -131,7 +121,7 @@ export default async function PullRequestDetailPage({
               <span className="text-xs font-normal text-muted-foreground">
                 #{pullRequest.prNumber}
               </span>
-              <span className={statusBadge(getPrStatusTone(status), "ml-auto")}>
+              <span className={statusBadge(getPrStatusTone(status), 'ml-auto')}>
                 {PR_STATUS_LABELS[status]}
               </span>
             </CardTitle>
@@ -139,7 +129,7 @@ export default async function PullRequestDetailPage({
           <CardContent className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
             <span className="inline-flex items-center gap-1">
               <UserIcon className="size-3" />
-              {pullRequest.authorLogin ?? "unknown"}
+              {pullRequest.authorLogin ?? 'unknown'}
             </span>
             <span className="inline-flex items-center gap-1">
               <GitBranchIcon className="size-3" />

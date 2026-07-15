@@ -5,7 +5,7 @@
  * GitHub App installation, preventing ID-guessing across tenants.
  */
 
-import { prisma } from "@/lib/db.config";
+import { prisma } from '@/lib/db.config';
 
 /**
  * Fetches one pull request by ID, scoped to the user's installation.
@@ -14,10 +14,7 @@ import { prisma } from "@/lib/db.config";
  * @param pullRequestId - Database UUID from the URL `[id]` segment.
  * @returns The Prisma record, or `null` if not found or not owned by this installation.
  */
-export async function getPullRequestById(
-  installationId: number,
-  pullRequestId: string
-) {
+export async function getPullRequestById(installationId: number, pullRequestId: string) {
   const pullRequest = await prisma.pullRequest.findUnique({
     where: { id: pullRequestId },
   });

@@ -1,10 +1,8 @@
-import type { UserSubscription } from "@/features/dashboard/lib/types";
-import { getRazorpay } from "@/features/billing/lib/razorpay";
-import { prisma } from "@/lib/db.config";
+import type { UserSubscription } from '@/features/dashboard/lib/types';
+import { getRazorpay } from '@/features/billing/lib/razorpay';
+import { prisma } from '@/lib/db.config';
 
-export async function getUserSubscription(
-  userId: string
-): Promise<UserSubscription> {
+export async function getUserSubscription(userId: string): Promise<UserSubscription> {
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: {
@@ -15,47 +13,47 @@ export async function getUserSubscription(
   });
 
   if (!user) {
-    return { plan: "free", status: "active", renewsAt: null };
+    return { plan: 'free', status: 'active', renewsAt: null };
   }
 
   const renewsAt = user.subscriptionRenewsAt?.toISOString() ?? null;
 
-  if (user.plan !== "pro") {
-    return { plan: "free", status: "active", renewsAt };
+  if (user.plan !== 'pro') {
+    return { plan: 'free', status: 'active', renewsAt };
   }
 
-  if (user.subscriptionStatus === "pending") {
-    return { plan: "free", status: "trialing", renewsAt };
+  if (user.subscriptionStatus === 'pending') {
+    return { plan: 'free', status: 'trialing', renewsAt };
   }
 
-  if (user.subscriptionStatus === "canceled") {
+  if (user.subscriptionStatus === 'canceled') {
     const stillActive =
       user.subscriptionRenewsAt !== null && user.subscriptionRenewsAt > new Date();
 
     if (stillActive) {
-      return { plan: "pro", status: "active", renewsAt };
+      return { plan: 'pro', status: 'active', renewsAt };
     }
 
-    return { plan: "free", status: "canceled", renewsAt };
+    return { plan: 'free', status: 'canceled', renewsAt };
   }
 
-  if (user.subscriptionStatus === "active") {
-    return { plan: "pro", status: "active", renewsAt };
+  if (user.subscriptionStatus === 'active') {
+    return { plan: 'pro', status: 'active', renewsAt };
   }
 
-  return { plan: "free", status: "canceled", renewsAt };
+  return { plan: 'free', status: 'canceled', renewsAt };
 }
 
 export async function createProSubscription(userId: string) {
   const subscription = await getUserSubscription(userId);
 
-  if (subscription.plan === "pro" && subscription.status === "active") {
-    throw new Error("You already have an active Pro subscription.");
+  if (subscription.plan === 'pro' && subscription.status === 'active') {
+    throw new Error('You already have an active Pro subscription.');
   }
 
   const planId = process.env.NEXT_PUBLIC_RAZORPAY_PLAN_ID;
   if (!planId) {
-    throw new Error("Razorpay plan is not configured.");
+    throw new Error('Razorpay plan is not configured.');
   }
 
   const razorpay = getRazorpay();
@@ -70,7 +68,7 @@ export async function createProSubscription(userId: string) {
     where: { id: userId },
     data: {
       razorpaySubscriptionId: razorpaySubscription.id,
-      subscriptionStatus: "pending",
+      subscriptionStatus: 'pending',
     },
   });
 
@@ -84,7 +82,7 @@ export async function cancelProSubscription(userId: string) {
   });
 
   if (!user?.razorpaySubscriptionId) {
-    throw new Error("No active subscription found.");
+    throw new Error('No active subscription found.');
   }
 
   const razorpay = getRazorpay();
@@ -92,6 +90,6 @@ export async function cancelProSubscription(userId: string) {
 
   await prisma.user.update({
     where: { id: userId },
-    data: { subscriptionStatus: "canceled" },
+    data: { subscriptionStatus: 'canceled' },
   });
 }

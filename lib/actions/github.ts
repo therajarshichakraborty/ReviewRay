@@ -6,12 +6,12 @@
  * enforce authentication before mutating installation data stored for the user.
  */
 
-"use server";
+'use server';
 
-import { DASHBOARD_ROUTES } from "@/features/dashboard/lib/routes";
-import { deleteInstallation } from "@/features/github/server/installation";
-import { getServerSession } from "@/lib/auth-session";
-import { redirect } from "next/navigation";
+import { DASHBOARD_ROUTES } from '@/features/dashboard/lib/routes';
+import { deleteInstallation } from '@/features/github/server/installation';
+import { getServerSession } from '@/lib/auth-session';
+import { redirect } from 'next/navigation';
 
 /**
  * Disconnects the signed-in user's GitHub App installation from this product.
@@ -25,7 +25,7 @@ export async function disconnectGithubApp() {
   const session = await getServerSession();
 
   if (!session) {
-    redirect("/sign-in");
+    redirect('/sign-in');
   }
 
   await deleteInstallation(session.user.id);
