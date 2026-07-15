@@ -57,8 +57,8 @@ export default function RazorpayButton({ keyId, email, name }: RazorpayButtonPro
         modal: {
           ondismiss: function () {
             setLoading(false);
-          }
-        }
+          },
+        },
       };
 
       if (typeof window !== 'undefined' && window.Razorpay) {

@@ -105,7 +105,12 @@ export default async function PullRequestDetailPage({
 
       <div className="flex flex-col gap-6 p-6 max-w-5xl">
         <div>
-          <Button variant="ghost" size="sm" asChild className="rounded-lg text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400">
+          <Button
+            variant="ghost"
+            size="sm"
+            asChild
+            className="rounded-lg text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400"
+          >
             <Link href={DASHBOARD_ROUTES.pullRequest}>
               <ArrowLeftIcon className="mr-1.5 size-4" />
               Back to pull requests
@@ -121,7 +126,9 @@ export default async function PullRequestDetailPage({
               <span className="text-xs font-normal text-muted-foreground">
                 #{pullRequest.prNumber}
               </span>
-              <span className={statusBadge(getPrStatusTone(status), 'ml-auto text-[10px] font-medium')}>
+              <span
+                className={statusBadge(getPrStatusTone(status), 'ml-auto text-[10px] font-medium')}
+              >
                 {PR_STATUS_LABELS[status]}
               </span>
             </CardTitle>
@@ -133,7 +140,9 @@ export default async function PullRequestDetailPage({
             </span>
             <span className="inline-flex items-center gap-1.5 font-light">
               <GitBranchIcon className="size-3.5 text-blue-400/60" />
-              <span className="font-mono text-[10px] bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40 px-1.5 py-0.5 rounded text-blue-700 dark:text-blue-400">{pullRequest.baseBranch}</span>
+              <span className="font-mono text-[10px] bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40 px-1.5 py-0.5 rounded text-blue-700 dark:text-blue-400">
+                {pullRequest.baseBranch}
+              </span>
             </span>
             <span className="font-light">opened {openedAgo}</span>
             <Link

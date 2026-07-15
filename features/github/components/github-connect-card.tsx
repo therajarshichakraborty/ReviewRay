@@ -80,7 +80,11 @@ function ConnectedActions() {
 
 function DisconnectedActions({ installUrl }: { installUrl: string }) {
   return (
-    <Button asChild size="sm" className="rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm transition-colors">
+    <Button
+      asChild
+      size="sm"
+      className="rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm transition-colors"
+    >
       <a href={installUrl}>
         <GithubLogo className="size-4 mr-1.5" />
         Install GitHub App
@@ -141,19 +145,11 @@ export function GithubConnectCard({ userId, installation }: GithubConnectCardPro
         </CardHeader>
 
         <CardContent className="py-5">
-          {connected ? (
-            <ConnectedDetails accountLogin={accountLogin} />
-          ) : (
-            <DisconnectedDetails />
-          )}
+          {connected ? <ConnectedDetails accountLogin={accountLogin} /> : <DisconnectedDetails />}
         </CardContent>
 
         <CardFooter className="flex flex-wrap gap-2 border-t border-border/40 pt-4 bg-muted/20">
-          {connected ? (
-            <ConnectedActions />
-          ) : (
-            <DisconnectedActions installUrl={installUrl} />
-          )}
+          {connected ? <ConnectedActions /> : <DisconnectedActions installUrl={installUrl} />}
         </CardFooter>
       </Card>
     </div>

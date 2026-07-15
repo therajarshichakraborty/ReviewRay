@@ -8,7 +8,8 @@ import { PublicHeader } from '@/components/public-header';
 
 export const metadata = {
   title: 'Pricing - ReviewRay',
-  description: 'Simple, transparent pricing. Start free with 5 AI reviews per month. Upgrade to Pro for unlimited reviews.',
+  description:
+    'Simple, transparent pricing. Start free with 5 AI reviews per month. Upgrade to Pro for unlimited reviews.',
 };
 
 const FREE_FEATURES = [
@@ -51,7 +52,8 @@ export default async function PricingPage() {
             Start free. Scale when ready.
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground font-light max-w-xl mx-auto leading-relaxed">
-            ReviewRay is free for small teams. Upgrade to Pro for unlimited reviews and priority processing.
+            ReviewRay is free for small teams. Upgrade to Pro for unlimited reviews and priority
+            processing.
           </p>
         </div>
       </section>
@@ -60,7 +62,6 @@ export default async function PricingPage() {
       <section className="pb-24 px-4 sm:px-6">
         <div className="container mx-auto max-w-4xl">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-
             {/* Free Plan */}
             <div className="relative rounded-2xl border border-border/60 bg-card/60 backdrop-blur-sm p-8 shadow-sm flex flex-col gap-6">
               <div className="space-y-2">
@@ -75,11 +76,17 @@ export default async function PricingPage() {
                   <span className="text-sm text-muted-foreground font-light">/ month</span>
                 </div>
                 <p className="text-xs text-muted-foreground font-light leading-relaxed">
-                  Perfect for solo developers and small open-source projects. No credit card required.
+                  Perfect for solo developers and small open-source projects. No credit card
+                  required.
                 </p>
               </div>
 
-              <Button asChild variant="outline" size="lg" className="w-full h-11 rounded-xl border-border/60 font-medium">
+              <Button
+                asChild
+                variant="outline"
+                size="lg"
+                className="w-full h-11 rounded-xl border-border/60 font-medium"
+              >
                 <Link href={isLoggedIn ? '/dashboard' : '/sign-in'}>
                   {isLoggedIn ? 'Go to Dashboard' : 'Get started free'}
                   <ArrowRight className="ml-2 size-4" />
@@ -88,7 +95,10 @@ export default async function PricingPage() {
 
               <ul className="space-y-3">
                 {FREE_FEATURES.map((f) => (
-                  <li key={f} className="flex items-start gap-3 text-xs text-muted-foreground font-light">
+                  <li
+                    key={f}
+                    className="flex items-start gap-3 text-xs text-muted-foreground font-light"
+                  >
                     <Check className="size-3.5 text-emerald-500 mt-0.5 shrink-0" />
                     {f}
                   </li>
@@ -107,7 +117,9 @@ export default async function PricingPage() {
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-bold tracking-tight text-blue-700 dark:text-blue-300">Pro</h2>
+                  <h2 className="text-lg font-bold tracking-tight text-blue-700 dark:text-blue-300">
+                    Pro
+                  </h2>
                   <div className="flex items-center gap-1.5 text-[11px] text-blue-600 dark:text-blue-400 font-medium">
                     <Zap className="size-3" /> Unlimited reviews
                   </div>
@@ -117,7 +129,8 @@ export default async function PricingPage() {
                   <span className="text-sm text-muted-foreground font-light">/ month</span>
                 </div>
                 <p className="text-xs text-muted-foreground font-light leading-relaxed">
-                  For professional developers and growing teams who need unlimited AI reviews without limits.
+                  For professional developers and growing teams who need unlimited AI reviews
+                  without limits.
                 </p>
               </div>
 
@@ -131,7 +144,10 @@ export default async function PricingPage() {
 
               <ul className="space-y-3">
                 {PRO_FEATURES.map((f) => (
-                  <li key={f} className="flex items-start gap-3 text-xs text-muted-foreground font-light">
+                  <li
+                    key={f}
+                    className="flex items-start gap-3 text-xs text-muted-foreground font-light"
+                  >
                     <Check className="size-3.5 text-blue-500 mt-0.5 shrink-0" />
                     {f}
                   </li>
@@ -149,7 +165,8 @@ export default async function PricingPage() {
               { icon: <Shield className="size-3 text-blue-500" />, label: 'Secure via Razorpay' },
             ].map((b) => (
               <span key={b.label} className="flex items-center gap-1.5 font-light">
-                {b.icon}{b.label}
+                {b.icon}
+                {b.label}
               </span>
             ))}
           </div>
@@ -159,7 +176,9 @@ export default async function PricingPage() {
       {/* FAQ */}
       <section className="border-t border-border/40 py-16 bg-muted/20">
         <div className="container mx-auto max-w-2xl px-4 sm:px-6">
-          <h2 className="text-xl font-bold tracking-tight mb-8 text-center">Frequently asked questions</h2>
+          <h2 className="text-xl font-bold tracking-tight mb-8 text-center">
+            Frequently asked questions
+          </h2>
           <div className="space-y-6">
             {[
               {
@@ -201,8 +220,12 @@ export default async function PricingPage() {
             © {new Date().getFullYear()} ReviewRay. All rights reserved.
           </p>
           <div className="flex gap-4 text-xs text-muted-foreground">
-            <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
-            <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
+            <Link href="/terms" className="hover:text-foreground transition-colors">
+              Terms
+            </Link>
+            <Link href="/privacy" className="hover:text-foreground transition-colors">
+              Privacy
+            </Link>
           </div>
         </div>
       </footer>
@@ -239,9 +262,7 @@ function RazorpayCheckoutButton({
     );
   }
 
-  return (
-    <RazorpayButton keyId={keyId} email={userEmail} name={userName} />
-  );
+  return <RazorpayButton keyId={keyId} email={userEmail} name={userName} />;
 }
 
 // Inline client component for Razorpay

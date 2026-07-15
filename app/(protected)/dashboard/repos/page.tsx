@@ -20,9 +20,14 @@ function ReposNotConnected() {
       </div>
       <p className="text-sm font-semibold text-foreground/80">Connect GitHub App first</p>
       <p className="text-xs text-muted-foreground font-light leading-relaxed">
-        Install the ReviewRay app on your GitHub account to see your repositories and select which ones to sync.
+        Install the ReviewRay app on your GitHub account to see your repositories and select which
+        ones to sync.
       </p>
-      <Button asChild size="sm" className="mt-2 rounded-full px-4 bg-blue-600 hover:bg-blue-700 text-white transition-colors">
+      <Button
+        asChild
+        size="sm"
+        className="mt-2 rounded-full px-4 bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+      >
         <Link href={DASHBOARD_ROUTES.github}>Go to GitHub App Settings</Link>
       </Button>
     </div>

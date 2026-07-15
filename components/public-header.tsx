@@ -20,27 +20,59 @@ export async function PublicHeader() {
         </Link>
 
         <nav className="hidden md:flex items-center gap-6 text-[11px] text-muted-foreground">
-          <Link href="/#features" className="transition-colors hover:text-foreground">Features</Link>
-          <Link href="/#how-it-works" className="transition-colors hover:text-foreground">How it works</Link>
-          <Link href="/pricing" className="transition-colors hover:text-foreground font-medium text-blue-600 dark:text-blue-400">Pricing</Link>
-          <Link href="https://github.com" target="_blank" className="transition-colors hover:text-foreground">Docs</Link>
+          <Link href="/#features" className="transition-colors hover:text-foreground">
+            Features
+          </Link>
+          <Link href="/#how-it-works" className="transition-colors hover:text-foreground">
+            How it works
+          </Link>
+          <Link
+            href="/pricing"
+            className="transition-colors hover:text-foreground font-medium text-blue-600 dark:text-blue-400"
+          >
+            Pricing
+          </Link>
+          <Link
+            href="https://github.com"
+            target="_blank"
+            className="transition-colors hover:text-foreground"
+          >
+            Docs
+          </Link>
         </nav>
 
         <div className="flex items-center gap-2">
           {isLoggedIn ? (
             <>
-              <Button asChild size="sm" variant="ghost" className="h-7 px-3 text-[11px] rounded-full hidden sm:flex">
+              <Button
+                asChild
+                size="sm"
+                variant="ghost"
+                className="h-7 px-3 text-[11px] rounded-full hidden sm:flex"
+              >
                 <Link href="/dashboard">Dashboard</Link>
               </Button>
               <UserMenuWithSession variant="compact" />
             </>
           ) : (
             <>
-              <Button asChild size="sm" variant="ghost" className="h-7 px-3 text-[11px] rounded-full hidden sm:flex">
+              <Button
+                asChild
+                size="sm"
+                variant="ghost"
+                className="h-7 px-3 text-[11px] rounded-full hidden sm:flex"
+              >
                 <Link href="/sign-in">Sign in</Link>
               </Button>
-              <Button asChild size="sm" className="h-7 px-3 text-[11px] rounded-full bg-blue-600 hover:bg-blue-700 text-white border-none shadow-sm">
-                <Link href="/sign-in"><GithubLogo className="mr-1.5 size-3" />Get started</Link>
+              <Button
+                asChild
+                size="sm"
+                className="h-7 px-3 text-[11px] rounded-full bg-blue-600 hover:bg-blue-700 text-white border-none shadow-sm"
+              >
+                <Link href="/sign-in">
+                  <GithubLogo className="mr-1.5 size-3" />
+                  Get started
+                </Link>
               </Button>
             </>
           )}

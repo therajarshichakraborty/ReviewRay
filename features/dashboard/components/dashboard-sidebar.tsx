@@ -27,12 +27,19 @@ export function DashboardSidebar({ user, plan = 'Pro' }: DashboardSidebarProps) 
       <SidebarHeader className="py-4 px-3">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild size="lg" tooltip="ReviewRay" className="hover:bg-transparent active:bg-transparent">
+            <SidebarMenuButton
+              asChild
+              size="lg"
+              tooltip="ReviewRay"
+              className="hover:bg-transparent active:bg-transparent"
+            >
               <Link href={DASHBOARD_ROUTES.overview} className="flex items-center gap-2.5 px-1.5">
                 <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-foreground text-background shadow-md">
                   <span className="font-mono text-xs font-black select-none">R</span>
                 </div>
-                <span className="font-sans text-sm font-semibold tracking-tight text-foreground group-data-[collapsible=icon]:hidden">ReviewRay</span>
+                <span className="font-sans text-sm font-semibold tracking-tight text-foreground group-data-[collapsible=icon]:hidden">
+                  ReviewRay
+                </span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

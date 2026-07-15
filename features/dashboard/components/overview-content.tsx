@@ -35,15 +35,25 @@ function getRepoDescription(repos: OverviewRepoSummary): string {
 
 function getGithubStat(installation: OverviewData['installation']) {
   if (!installation.connected) {
-    return { value: 'Not connected', description: 'Install the GitHub App to start', accent: undefined };
+    return {
+      value: 'Not connected',
+      description: 'Install the GitHub App to start',
+      accent: undefined,
+    };
   }
-  const account = installation.accountLogin ? `@${installation.accountLogin}` : 'Installation active';
+  const account = installation.accountLogin
+    ? `@${installation.accountLogin}`
+    : 'Installation active';
   return { value: 'Connected', description: account, accent: 'success' as const };
 }
 
 function getRepositoriesStat(repos: OverviewRepoSummary | null) {
   if (!repos) return { value: '—', description: 'Connect GitHub App first', accent: undefined };
-  return { value: String(repos.totalCount), description: getRepoDescription(repos), accent: 'info' as const };
+  return {
+    value: String(repos.totalCount),
+    description: getRepoDescription(repos),
+    accent: 'info' as const,
+  };
 }
 
 type StatCard = {
@@ -58,7 +68,10 @@ function getReviewsStat(overview: OverviewData) {
   if (overview.reviewsLimit === null) {
     return { value: String(overview.reviewsUsed), description: 'Unlimited reviews on Pro' };
   }
-  return { value: `${overview.reviewsUsed} / ${overview.reviewsLimit}`, description: 'AI reviews used this month' };
+  return {
+    value: `${overview.reviewsUsed} / ${overview.reviewsLimit}`,
+    description: 'AI reviews used this month',
+  };
 }
 
 function buildStats(overview: OverviewData): StatCard[] {
@@ -68,10 +81,33 @@ function buildStats(overview: OverviewData): StatCard[] {
   const reviewsStat = getReviewsStat(overview);
 
   return [
-    { title: 'Repositories', value: repoStat.value, description: repoStat.description, icon: FolderGit2Icon, accent: repoStat.accent },
-    { title: 'Reviews this month', value: reviewsStat.value, description: reviewsStat.description, icon: GitPullRequestIcon },
-    { title: 'GitHub App', value: githubStat.value, description: githubStat.description, icon: GithubIcon, accent: githubStat.accent },
-    { title: 'Current plan', value: planLabel, description: 'Manage in settings', icon: SparklesIcon, accent: overview.plan === 'free' ? undefined : 'success' },
+    {
+      title: 'Repositories',
+      value: repoStat.value,
+      description: repoStat.description,
+      icon: FolderGit2Icon,
+      accent: repoStat.accent,
+    },
+    {
+      title: 'Reviews this month',
+      value: reviewsStat.value,
+      description: reviewsStat.description,
+      icon: GitPullRequestIcon,
+    },
+    {
+      title: 'GitHub App',
+      value: githubStat.value,
+      description: githubStat.description,
+      icon: GithubIcon,
+      accent: githubStat.accent,
+    },
+    {
+      title: 'Current plan',
+      value: planLabel,
+      description: 'Manage in settings',
+      icon: SparklesIcon,
+      accent: overview.plan === 'free' ? undefined : 'success',
+    },
   ];
 }
 
@@ -85,13 +121,19 @@ function ConnectGithubBanner() {
             <GithubIcon className="size-5" />
           </div>
           <div className="space-y-0.5">
-            <p className="text-sm font-semibold tracking-tight text-foreground">Connect GitHub to get started</p>
+            <p className="text-sm font-semibold tracking-tight text-foreground">
+              Connect GitHub to get started
+            </p>
             <p className="text-xs text-muted-foreground font-light">
               Install the GitHub App to list repositories and enable AI reviews on pull requests.
             </p>
           </div>
         </div>
-        <Button asChild size="sm" className="shrink-0 rounded-full h-8 px-4 text-xs font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-colors">
+        <Button
+          asChild
+          size="sm"
+          className="shrink-0 rounded-full h-8 px-4 text-xs font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-colors"
+        >
           <Link href={DASHBOARD_ROUTES.github}>Connect GitHub</Link>
         </Button>
       </div>
@@ -119,13 +161,18 @@ function ActivityList({ items }: { items: OverviewActivityItem[] }) {
       {items.map((item) => {
         const config = ACTIVITY_STATUS[item.status];
         return (
-          <div key={item.id} className="flex flex-wrap items-center justify-between gap-2 py-3.5 last:pb-0 first:pt-0 group">
+          <div
+            key={item.id}
+            className="flex flex-wrap items-center justify-between gap-2 py-3.5 last:pb-0 first:pt-0 group"
+          >
             <div className="flex items-center gap-3">
               <div className="size-1.5 rounded-full bg-blue-500 shrink-0" />
               <div className="space-y-0.5">
                 <p className="text-xs font-semibold tracking-tight text-foreground/90 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                   {item.repoFullName}{' '}
-                  <span className="text-muted-foreground font-mono font-normal">#{item.prNumber}</span>
+                  <span className="text-muted-foreground font-mono font-normal">
+                    #{item.prNumber}
+                  </span>
                 </p>
                 <p className="text-[10px] text-muted-foreground font-light">
                   {formatDistanceToNow(new Date(item.reviewedAt), { addSuffix: true })}

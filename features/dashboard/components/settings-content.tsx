@@ -46,7 +46,8 @@ function getSubscriptionStatusLabel(status: UserSubscription['status']): string 
 }
 
 function getUsageText(usage: UsageSummary): string {
-  if (usage.limit === null) return `You've used ${usage.used} reviews this month (unlimited reviews).`;
+  if (usage.limit === null)
+    return `You've used ${usage.used} reviews this month (unlimited reviews).`;
   return `You've used ${usage.used} out of your ${usage.limit} monthly reviews.`;
 }
 
@@ -78,7 +79,9 @@ function ProfileTab({ profile }: { profile: SettingsProfile }) {
           <div className="space-y-0.5">
             <p className="font-semibold text-sm text-foreground/90">{displayName}</p>
             <p className="text-xs text-muted-foreground font-light">{profile.email}</p>
-            <p className="text-[10px] text-muted-foreground font-light">Member since {memberSince}</p>
+            <p className="text-[10px] text-muted-foreground font-light">
+              Member since {memberSince}
+            </p>
           </div>
         </div>
 
@@ -87,7 +90,9 @@ function ProfileTab({ profile }: { profile: SettingsProfile }) {
         {/* Read-only fields */}
         <div className="grid gap-4 max-w-md">
           <div className="grid gap-1.5">
-            <Label htmlFor="name" className="text-xs font-medium text-foreground/80">Display name</Label>
+            <Label htmlFor="name" className="text-xs font-medium text-foreground/80">
+              Display name
+            </Label>
             <Input
               id="name"
               defaultValue={profile.name}
@@ -96,7 +101,9 @@ function ProfileTab({ profile }: { profile: SettingsProfile }) {
             />
           </div>
           <div className="grid gap-1.5">
-            <Label htmlFor="email" className="text-xs font-medium text-foreground/80">Email address</Label>
+            <Label htmlFor="email" className="text-xs font-medium text-foreground/80">
+              Email address
+            </Label>
             <Input
               id="email"
               type="email"
@@ -110,9 +117,14 @@ function ProfileTab({ profile }: { profile: SettingsProfile }) {
       <CardFooter className="border-t border-border/40 pt-4 bg-muted/10">
         <p className="text-xs text-muted-foreground/80 font-light">
           Profile details are managed by GitHub. Update them directly in your{' '}
-          <a href="https://github.com/settings/profile" target="_blank" className="text-blue-600 dark:text-blue-400 hover:underline">
+          <a
+            href="https://github.com/settings/profile"
+            target="_blank"
+            className="text-blue-600 dark:text-blue-400 hover:underline"
+          >
             GitHub account settings
-          </a>.
+          </a>
+          .
         </p>
       </CardFooter>
     </Card>
@@ -135,7 +147,9 @@ function SubscriptionTab({
 
   const isActive = subscription.status === 'active' || subscription.status === 'trialing';
 
-  const cardBorderClass = isActive ? 'border-blue-500/20 dark:border-blue-500/10' : 'border-border/50';
+  const cardBorderClass = isActive
+    ? 'border-blue-500/20 dark:border-blue-500/10'
+    : 'border-border/50';
   let badgeTone: 'success' | 'neutral' | 'warning' | 'primary' = 'neutral';
   if (isActive) badgeTone = 'primary';
   if (subscription.status === 'canceled') badgeTone = 'warning';
@@ -145,7 +159,12 @@ function SubscriptionTab({
     : null;
 
   return (
-    <Card className={cn('rounded-xl bg-card overflow-hidden shadow-sm transition-colors', cardBorderClass)}>
+    <Card
+      className={cn(
+        'rounded-xl bg-card overflow-hidden shadow-sm transition-colors',
+        cardBorderClass,
+      )}
+    >
       <CardHeader className="border-b border-border/40 pb-5 bg-muted/20">
         <CardTitle className="text-base font-semibold tracking-tight">Subscription Plan</CardTitle>
         <CardDescription className="text-xs text-muted-foreground font-light">
@@ -154,24 +173,38 @@ function SubscriptionTab({
       </CardHeader>
       <CardContent className="space-y-6 pt-6">
         {/* Plan info block */}
-        <div className={cn(
-          'flex flex-wrap items-center justify-between gap-4 rounded-xl border p-4 transition-colors',
-          isActive
-            ? 'border-blue-500/15 bg-blue-500/[0.02] dark:border-blue-500/5'
-            : 'border-border bg-muted/10',
-        )}>
+        <div
+          className={cn(
+            'flex flex-wrap items-center justify-between gap-4 rounded-xl border p-4 transition-colors',
+            isActive
+              ? 'border-blue-500/15 bg-blue-500/[0.02] dark:border-blue-500/5'
+              : 'border-border bg-muted/10',
+          )}
+        >
           <div className="space-y-1">
-            <p className={cn('text-sm font-bold tracking-tight', isActive ? 'text-blue-600 dark:text-blue-400' : 'text-foreground/80')}>
+            <p
+              className={cn(
+                'text-sm font-bold tracking-tight',
+                isActive ? 'text-blue-600 dark:text-blue-400' : 'text-foreground/80',
+              )}
+            >
               {planDetails.label} Plan
             </p>
             <p className="text-xs text-muted-foreground font-light">
-              Status: <span className={isActive ? 'text-blue-600 dark:text-blue-400 font-medium' : ''}>{statusLabel}</span>
+              Status:{' '}
+              <span className={isActive ? 'text-blue-600 dark:text-blue-400 font-medium' : ''}>
+                {statusLabel}
+              </span>
             </p>
             {renewalDate && (
-              <p className="text-[10px] text-muted-foreground font-light">Renews on {renewalDate}</p>
+              <p className="text-[10px] text-muted-foreground font-light">
+                Renews on {renewalDate}
+              </p>
             )}
           </div>
-          <span className={statusBadge(badgeTone, 'text-[10px] font-medium')}>{planDetails.label}</span>
+          <span className={statusBadge(badgeTone, 'text-[10px] font-medium')}>
+            {planDetails.label}
+          </span>
         </div>
 
         {/* Usage meter */}
@@ -187,13 +220,19 @@ function SubscriptionTab({
               <div
                 className={cn(
                   'h-full rounded-full transition-all',
-                  usagePercent >= 90 ? 'bg-red-500' : usagePercent >= 70 ? 'bg-amber-500' : 'bg-blue-500',
+                  usagePercent >= 90
+                    ? 'bg-red-500'
+                    : usagePercent >= 70
+                      ? 'bg-amber-500'
+                      : 'bg-blue-500',
                 )}
                 style={{ width: `${usagePercent}%` }}
               />
             </div>
           )}
-          <p className="text-xs text-muted-foreground font-light leading-relaxed">{getUsageText(usage)}</p>
+          <p className="text-xs text-muted-foreground font-light leading-relaxed">
+            {getUsageText(usage)}
+          </p>
         </div>
 
         {/* Features list */}

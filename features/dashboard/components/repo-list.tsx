@@ -166,13 +166,27 @@ export function RepoList() {
         <Table>
           <TableHeader className="bg-muted/30 border-b border-border/40">
             <TableRow className="hover:bg-transparent">
-              <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground py-3">Repository</TableHead>
-              <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground py-3">Visibility</TableHead>
-              <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground py-3">Branch</TableHead>
-              <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground py-3">Language</TableHead>
-              <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground py-3 text-right">Stars</TableHead>
-              <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground py-3 text-right">Updated</TableHead>
-              <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground py-3 text-right">Codebase</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground py-3">
+                Repository
+              </TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground py-3">
+                Visibility
+              </TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground py-3">
+                Branch
+              </TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground py-3">
+                Language
+              </TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground py-3 text-right">
+                Stars
+              </TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground py-3 text-right">
+                Updated
+              </TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground py-3 text-right">
+                Codebase
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody className="divide-y divide-border/30">{rows}</TableBody>
@@ -200,12 +214,14 @@ function RepoRow({ repo }: { repo: DashboardRepo }) {
         </div>
       </TableCell>
       <TableCell className="py-4">
-        <span className={cn(
-          "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-medium border",
-          isPrivate 
-            ? "bg-muted border-border text-muted-foreground"
-            : "bg-blue-500/10 border-blue-500/20 text-blue-600 dark:text-blue-400"
-        )}>
+        <span
+          className={cn(
+            'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-medium border',
+            isPrivate
+              ? 'bg-muted border-border text-muted-foreground'
+              : 'bg-blue-500/10 border-blue-500/20 text-blue-600 dark:text-blue-400',
+          )}
+        >
           {isPrivate ? (
             <LockIcon className="size-3 text-muted-foreground" />
           ) : (
@@ -214,7 +230,9 @@ function RepoRow({ repo }: { repo: DashboardRepo }) {
           {repo.visibility}
         </span>
       </TableCell>
-      <TableCell className="py-4 text-xs font-mono text-muted-foreground">{repo.defaultBranch}</TableCell>
+      <TableCell className="py-4 text-xs font-mono text-muted-foreground">
+        {repo.defaultBranch}
+      </TableCell>
       <TableCell className="py-4 text-xs text-foreground/80">{repo.language ?? '—'}</TableCell>
       <TableCell className="py-4 text-right">
         <span className="inline-flex items-center justify-end gap-1 text-xs text-muted-foreground font-light">

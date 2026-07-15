@@ -22,9 +22,13 @@ export function DashboardHeader({ title, description }: DashboardHeaderProps) {
       <Separator orientation="vertical" className="mr-2 h-5 bg-border/60 relative" />
 
       <div className="relative flex min-w-0 flex-col gap-0.5">
-        <h1 className="truncate text-sm font-bold tracking-tight text-foreground leading-none">{title}</h1>
+        <h1 className="truncate text-sm font-bold tracking-tight text-foreground leading-none">
+          {title}
+        </h1>
         {description ? (
-          <p className="truncate text-[11px] text-muted-foreground font-light leading-none">{description}</p>
+          <p className="truncate text-[11px] text-muted-foreground font-light leading-none">
+            {description}
+          </p>
         ) : null}
       </div>
     </header>

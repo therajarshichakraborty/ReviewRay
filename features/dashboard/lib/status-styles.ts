@@ -11,8 +11,8 @@ import { cn } from '@/lib/utils';
 export const statusBadgeClass = {
   success: 'border-emerald-500/35 bg-emerald-500/12 text-emerald-700 dark:text-emerald-400',
   warning: 'border-amber-500/35 bg-amber-500/12 text-amber-700 dark:text-amber-400',
-  danger:  'border-red-500/35 bg-red-500/12 text-red-700 dark:text-red-400',
-  info:    'border-blue-500/35 bg-blue-500/12 text-blue-700 dark:text-blue-400',
+  danger: 'border-red-500/35 bg-red-500/12 text-red-700 dark:text-red-400',
+  info: 'border-blue-500/35 bg-blue-500/12 text-blue-700 dark:text-blue-400',
   primary: 'border-blue-600/40 bg-blue-600/10 text-blue-700 dark:text-blue-400',
   neutral: 'border-border bg-muted/60 text-muted-foreground',
 } as const;
