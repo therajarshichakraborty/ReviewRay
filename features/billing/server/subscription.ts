@@ -53,7 +53,7 @@ export async function createProSubscription(userId: string) {
     throw new Error("You already have an active Pro subscription.");
   }
 
-  const planId = process.env.RAZORPAY_PLAN_ID;
+  const planId = process.env.NEXT_PUBLIC_RAZORPAY_PLAN_ID;
   if (!planId) {
     throw new Error("Razorpay plan is not configured.");
   }
