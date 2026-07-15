@@ -1,5 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
@@ -17,21 +18,24 @@ model Test {
 }
 
 model User {
-  id            String    @id
-  name          String
-  email         String
-  emailVerified Boolean   @default(false)
-  image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  sessions      Session[]
-  accounts      Account[]
-  githubInstallation GithubInstallation?
+  id                     String              @id
+  name                   String
+  email                  String
+  emailVerified          Boolean             @default(false)
+  image                  String?
+  plan                   String              @default("free") // free | pro
+  razorpaySubscriptionId String?
+  subscriptionStatus     String? // active | canceled | trialing
+  subscriptionRenewsAt   DateTime?
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+  sessions               Session[]
+  accounts               Account[]
+  githubInstallation     GithubInstallation?
 
   @@unique([email])
   @@map("user")
 }
-
 
 model GithubInstallation {
   id             String   @id @default(cuid())
@@ -49,14 +53,14 @@ model GithubInstallation {
 model PullRequest {
   id             String    @id @default(cuid())
   installationId Int
-  repoFullName   String 
+  repoFullName   String // e.g. "owner/repo"
   prNumber       Int
   title          String
   authorLogin    String?
-  headSha        String 
+  headSha        String // latest commit on the PR branch
   baseBranch     String
-  status         String    @default("pending") 
-  reviewComment  String? 
+  status         String    @default("pending") // pending | processing | reviewed | rate_limited
+  reviewComment  String? // AI-generated markdown saved after review completes
   reviewedAt     DateTime?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
@@ -64,7 +68,6 @@ model PullRequest {
   @@unique([repoFullName, prNumber])
   @@map("pull_request")
 }
-
 
 model RepoSync {
   id             String    @id @default(cuid())
@@ -80,8 +83,6 @@ model RepoSync {
   @@unique([repoFullName])
   @@map("repo_sync")
 }
-
-
 
 model Session {
   id        String   @id
