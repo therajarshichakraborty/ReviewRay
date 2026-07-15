@@ -4,8 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Check, ArrowRight, Zap, Shield, Cpu, Crown } from 'lucide-react';
 import { GithubLogo } from '@phosphor-icons/react/dist/ssr';
 
+import { PublicHeader } from '@/components/public-header';
+
 export const metadata = {
-  title: 'Pricing — ReviewRay',
+  title: 'Pricing - ReviewRay',
   description: 'Simple, transparent pricing. Start free with 5 AI reviews per month. Upgrade to Pro for unlimited reviews.',
 };
 
@@ -27,7 +29,7 @@ const PRO_FEATURES = [
   'All Free plan features',
 ];
 
-const RAZORPAY_KEY_ID = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ?? '';
+const RAZORPAY_KEY_ID = process.env.NEXT_PUBLIC_RAZORPAY_TEST_API_KEY ?? '';
 
 export default async function PricingPage() {
   const session = await getServerSession();
@@ -35,30 +37,9 @@ export default async function PricingPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Nav */}
-      <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl">
-        <div className="container mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="flex size-7 items-center justify-center rounded-lg bg-foreground text-background shadow-sm">
-              <span className="font-mono text-xs font-black">R</span>
-            </div>
-            <span className="font-sans text-sm font-semibold tracking-tight">ReviewRay</span>
-          </Link>
-          <div className="flex items-center gap-2">
-            {isLoggedIn ? (
-              <Button asChild size="sm" className="h-8 px-3 text-xs rounded-lg">
-                <Link href="/dashboard">Dashboard <ArrowRight className="ml-1 size-3" /></Link>
-              </Button>
-            ) : (
-              <Button asChild size="sm" className="h-8 px-3 text-xs rounded-lg">
-                <Link href="/sign-in"><GithubLogo className="mr-1.5 size-3" />Get started</Link>
-              </Button>
-            )}
-          </div>
-        </div>
-      </header>
-
-      {/* Hero */}
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,oklch(0.93_0.03_255/60%),transparent)] dark:bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,oklch(0.20_0.04_255/50%),transparent)]">
+        <PublicHeader />
+      </div>
       <section className="relative py-20 text-center overflow-hidden">
         <div className="hero-grid-bg animate-grid absolute inset-0 opacity-40 pointer-events-none" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_0%,oklch(0.93_0.03_255/60%),transparent)] dark:bg-[radial-gradient(ellipse_70%_50%_at_50%_0%,oklch(0.20_0.04_255/40%),transparent)] pointer-events-none" />
@@ -116,7 +97,7 @@ export default async function PricingPage() {
             </div>
 
             {/* Pro Plan */}
-            <div className="relative rounded-2xl border-2 border-blue-500/50 bg-gradient-to-b from-blue-50/40 to-card/60 dark:from-blue-950/30 dark:to-card/60 backdrop-blur-sm p-8 shadow-lg flex flex-col gap-6">
+            <div className="relative rounded-2xl border-2 border-blue-500 bg-gradient-to-b from-blue-50/40 to-card/60 dark:from-blue-950/30 dark:to-card/60 backdrop-blur-sm p-8 shadow-lg flex flex-col gap-6">
               {/* Popular badge */}
               <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-600 px-3 py-1 text-[11px] font-semibold text-white shadow-sm">

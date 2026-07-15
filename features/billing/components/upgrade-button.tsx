@@ -9,13 +9,10 @@ import { Button } from '@/components/ui/button';
 import { statusButtonClass } from '@/features/dashboard/lib/status-styles';
 import { startProSubscription } from '@/lib/billing';
 
-type RazorpayCheckout = new (options: Record<string, unknown>) => {
-  open: () => void;
-};
-
 declare global {
   interface Window {
-    Razorpay?: RazorpayCheckout;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Razorpay?: any;
   }
 }
 
@@ -54,7 +51,7 @@ export function UpgradeButton() {
       });
 
       checkout.open();
-    } catch (error: any) {
+    } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Could not start checkout.';
       toast.error(message);
     } finally {

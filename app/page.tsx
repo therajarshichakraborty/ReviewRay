@@ -19,7 +19,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { GithubLogo } from '@phosphor-icons/react/dist/ssr';
-import { UserMenuWithSession } from '@/features/auth/components/user-menu';
+import { PublicHeader } from '@/components/public-header';
 
 export default async function Home() {
   const session = await getServerSession();
@@ -27,54 +27,17 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
-
-      {/* ── Navigation ──────────────────────────────────────────── */}
-      <div className="sticky top-0 z-50 w-full flex justify-center px-4 py-4 pointer-events-none">
-        <header className="pointer-events-auto w-full md:w-[75%] max-w-5xl h-12 rounded-full border border-border/40 bg-background/60 backdrop-blur-lg shadow-lg shadow-black/[0.03] transition-all flex items-center justify-between px-6">
-          <div className="flex items-center gap-2.5">
-            <div className="flex size-6 items-center justify-center rounded-full bg-foreground text-background shadow-sm">
-              <span className="font-mono text-[10px] font-black">R</span>
-            </div>
-            <span className="font-sans text-xs font-semibold tracking-tight">ReviewRay</span>
-          </div>
-
-          <nav className="hidden md:flex items-center gap-6 text-[11px] text-muted-foreground">
-            <Link href="#features" className="transition-colors hover:text-foreground">Features</Link>
-            <Link href="#how-it-works" className="transition-colors hover:text-foreground">How it works</Link>
-            <Link href="/pricing" className="transition-colors hover:text-foreground font-medium text-blue-600 dark:text-blue-400">Pricing</Link>
-            <Link href="https://github.com" target="_blank" className="transition-colors hover:text-foreground">Docs</Link>
-          </nav>
-
-          <div className="flex items-center gap-2">
-            {isLoggedIn ? (
-              <>
-                <Button asChild size="sm" variant="ghost" className="h-7 px-3 text-[11px] rounded-full hidden sm:flex">
-                  <Link href="/dashboard">Dashboard</Link>
-                </Button>
-                <UserMenuWithSession variant="compact" />
-              </>
-            ) : (
-              <>
-                <Button asChild size="sm" variant="ghost" className="h-7 px-3 text-[11px] rounded-full hidden sm:flex">
-                  <Link href="/sign-in">Sign in</Link>
-                </Button>
-                <Button asChild size="sm" className="h-7 px-3 text-[11px] rounded-full">
-                  <Link href="/sign-in"><GithubLogo className="mr-1.5 size-3" />Get started</Link>
-                </Button>
-              </>
-            )}
-          </div>
-        </header>
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,oklch(0.93_0.03_255/60%),transparent)] dark:bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,oklch(0.20_0.04_255/50%),transparent)]">
+        <PublicHeader />
       </div>
 
-      {/* ── Hero ────────────────────────────────────────────────── */}
       <section className="relative min-h-[88vh] flex flex-col items-center justify-center py-24 md:py-36 overflow-hidden">
         <div className="hero-grid-bg animate-grid absolute inset-0 pointer-events-none opacity-50" />
         <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,oklch(0.93_0.03_255/60%),transparent)] dark:bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,oklch(0.20_0.04_255/50%),transparent)]" />
 
         <div className="container mx-auto max-w-5xl px-4 sm:px-6 text-center relative z-10">
           {/* Pill badge */}
-          <div className="animate-badge-in inline-flex items-center gap-2 rounded-full border border-blue-200/60 dark:border-blue-800/50 bg-blue-50/80 dark:bg-blue-950/40 backdrop-blur-sm px-3.5 py-1.5 text-[11px] font-medium text-blue-700 dark:text-blue-400 shadow-sm mb-8">
+          <div className="animate-badge-in inline-flex items-center gap-2 rounded-full border border-blue-200/60 dark:border-blue-800 bg-blue-50/80 dark:bg-blue-950 backdrop-blur-sm px-3.5 py-1.5 text-[11px] font-medium text-blue-700 dark:text-blue-400 shadow-sm mb-8">
             <span className="relative flex size-2">
               <span className="animate-ping-slow absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
               <span className="relative inline-flex size-2 rounded-full bg-blue-500" />
@@ -89,20 +52,20 @@ export default async function Home() {
           </h1>
 
           <p className="animate-fade-up delay-200 text-sm sm:text-lg text-muted-foreground max-w-xl mx-auto mb-10 font-light leading-relaxed text-balance">
-            ReviewRay connects to GitHub and posts contextual, codebase-aware AI reviews directly on your pull requests — within seconds.
+            ReviewRay connects to GitHub and posts contextual, codebase-aware AI reviews directly on your pull requests - within seconds.
           </p>
 
           <div className="animate-fade-up delay-300 flex flex-col sm:flex-row items-center justify-center gap-3 mb-16">
             {isLoggedIn ? (
-              <Button asChild size="lg" className="h-11 px-7 rounded-xl text-sm font-medium shadow-sm">
+              <Button asChild size="lg" className="h-11 px-7 bg-blue-500 text-white rounded-xl text-sm font-medium shadow-sm">
                 <Link href="/dashboard">Go to Dashboard <ArrowRight className="ml-2 size-4" /></Link>
               </Button>
             ) : (
               <Button asChild size="lg" className="h-11 px-7 rounded-xl text-sm font-medium shadow-sm">
-                <Link href="/sign-in"><GithubLogo className="mr-2 size-4" />Connect GitHub — it&apos;s free</Link>
+                <Link href="/sign-in"><GithubLogo className="mr-2 size-4" />Connect GitHub - it&apos;s free</Link>
               </Button>
             )}
-            <Button asChild size="lg" variant="outline" className="h-11 px-7 rounded-xl text-sm font-medium border-blue-200/50 dark:border-blue-800/40 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30">
+            <Button asChild size="lg" variant="outline" className="h-11 px-7 rounded-xl text-sm font-medium border-blue-200/50 dark:border-blue-800 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30">
               <Link href="/pricing">
                 View Pricing <Zap className="ml-2 size-3.5" />
               </Link>

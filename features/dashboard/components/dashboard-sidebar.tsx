@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import Link from 'next/link';
 
 import { DASHBOARD_ROUTES } from '@/features/dashboard/lib/routes';
@@ -24,36 +23,26 @@ type DashboardSidebarProps = {
 
 export function DashboardSidebar({ user, plan = 'Pro' }: DashboardSidebarProps) {
   return (
-    <Sidebar collapsible="icon">
-      <SidebarHeader>
+    <Sidebar collapsible="icon" className="border-r border-border/40">
+      <SidebarHeader className="py-4 px-3">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild size="lg" tooltip="ReviewRay">
-              <Link href={DASHBOARD_ROUTES.overview}>
-                <span className="flex size-8 shrink-0 w-full items-center justify-center overflow-hidden rounded-none bg-sidebar">
-                  <Image
-                    src="/logo.svg"
-                    alt="Logo"
-                    width={96}
-                    height={96}
-                    className="w-24"
-                    style={{ height: 'auto' }}
-                    loading="eager"
-                  />
-                </span>
-                <span className="grid flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden">
-                  <span className="truncate font-medium">ReviewRay</span>
-                </span>
+            <SidebarMenuButton asChild size="lg" tooltip="ReviewRay" className="hover:bg-transparent active:bg-transparent">
+              <Link href={DASHBOARD_ROUTES.overview} className="flex items-center gap-2.5 px-1.5">
+                <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-foreground text-background shadow-md">
+                  <span className="font-mono text-xs font-black select-none">R</span>
+                </div>
+                <span className="font-sans text-sm font-semibold tracking-tight text-foreground group-data-[collapsible=icon]:hidden">ReviewRay</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="px-2">
         <DashboardNav />
       </SidebarContent>
-      <SidebarFooter>
-        <SidebarSeparator />
+      <SidebarFooter className="p-3">
+        <SidebarSeparator className="my-2 bg-border/40" />
         <SidebarUserButton user={user} plan={plan} />
       </SidebarFooter>
       <SidebarRail />
