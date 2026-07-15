@@ -7,6 +7,7 @@
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { GitPullRequestIcon } from 'lucide-react';
 
 import { DashboardHeader } from '@/features/dashboard/components/dashboard-header';
 import { DASHBOARD_ROUTES } from '@/features/dashboard/lib/routes';
@@ -27,12 +28,16 @@ export const metadata: Metadata = {
  */
 function PullRequestsNotConnected() {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6">
-      <p className="text-sm text-muted-foreground">
-        Install the GitHub App first to see AI-reviewed pull requests.
+    <div className="flex flex-1 flex-col items-center justify-center gap-3 p-12 text-center max-w-lg mx-auto">
+      <div className="flex size-12 items-center justify-center rounded-2xl bg-muted border border-border/50">
+        <GitPullRequestIcon className="size-6 text-muted-foreground" />
+      </div>
+      <p className="text-sm font-semibold text-foreground/80">Connect GitHub App first</p>
+      <p className="text-xs text-muted-foreground font-light leading-relaxed">
+        Install the ReviewRay app on your GitHub account to see and manage AI-reviewed pull requests.
       </p>
-      <Button asChild>
-        <Link href={DASHBOARD_ROUTES.github}>Go to GitHub App</Link>
+      <Button asChild size="sm" className="mt-2 rounded-full px-4 bg-blue-600 hover:bg-blue-700 text-white transition-colors">
+        <Link href={DASHBOARD_ROUTES.github}>Go to GitHub App Settings</Link>
       </Button>
     </div>
   );

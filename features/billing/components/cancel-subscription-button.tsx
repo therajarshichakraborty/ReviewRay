@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { cancelSubscription } from '@/lib/billing';
-import { statusButtonClass } from '@/features/dashboard/lib/status-style';
+import { statusButtonClass } from '@/features/dashboard/lib/status-styles';
 
 type CancelSubscriptionButtonProps = {
   disabled?: boolean;

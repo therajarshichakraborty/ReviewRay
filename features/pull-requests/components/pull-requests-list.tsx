@@ -1,8 +1,6 @@
 /**
  * Pull requests list UI grouped by repository.
- *
- * Each repo gets a card containing its PRs with status badges, metadata,
- * and an expandable AI review section. Links out to GitHub and to local detail pages.
+ * Aesthetic, minimalist styling matching the landing page.
  */
 
 import Link from 'next/link';
@@ -32,63 +30,38 @@ import {
 import { DASHBOARD_ROUTES } from '@/features/dashboard/lib/routes';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-/**
- * Builds the canonical GitHub URL for a pull request.
- *
- * @param repoFullName - `owner/repo` slug.
- * @param prNumber - GitHub PR number.
- * @returns Full HTTPS URL to the PR on github.com.
- */
 function buildPrUrl(repoFullName: string, prNumber: number) {
   return `https://github.com/${repoFullName}/pull/${prNumber}`;
 }
 
-/**
- * Builds the canonical GitHub URL for a repository.
- *
- * @param repoFullName - `owner/repo` slug.
- * @returns Full HTTPS URL to the repo on github.com.
- */
 function buildRepoUrl(repoFullName: string) {
   return `https://github.com/${repoFullName}`;
 }
 
-/**
- * Shows author, target branch, and how long ago the PR was opened.
- *
- * @param pullRequest - PR item with author and branch fields.
- * @returns A row of muted metadata chips.
- */
 function PullRequestMeta({ pullRequest }: { pullRequest: PullRequestItem }) {
-  const openedAgo = formatDistanceToNow(new Date(pullRequest.createdAt), {
-    addSuffix: true,
-  });
+  const openedAgo = formatDistanceToNow(new Date(pullRequest.createdAt), { addSuffix: true });
 
   return (
-    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-      <span className="inline-flex items-center gap-1">
-        <UserIcon className="size-3" />
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground/80 font-light">
+      <span className="inline-flex items-center gap-1.5">
+        <UserIcon className="size-3.5 text-muted-foreground/60" />
         {pullRequest.authorLogin ?? 'unknown'}
       </span>
-      <span className="inline-flex items-center gap-1">
-        <GitBranchIcon className="size-3" />
-        {pullRequest.baseBranch}
+      <span className="inline-flex items-center gap-1.5">
+        <GitBranchIcon className="size-3.5 text-muted-foreground/60" />
+        <span className="font-mono text-[10px] bg-muted border border-border px-1.5 py-0.5 rounded text-foreground/85">
+          {pullRequest.baseBranch}
+        </span>
       </span>
       <span>opened {openedAgo}</span>
     </div>
   );
 }
 
-/**
- * Collapsible section for the AI review markdown, or a placeholder message.
- *
- * @param pullRequest - PR item including status and optional review text.
- * @returns Accordion with review content, rate-limit notice, or waiting message.
- */
 function AiReviewAccordion({ pullRequest }: { pullRequest: PullRequestItem }) {
   if (pullRequest.status === 'rate_limited') {
     return (
-      <p className="text-xs text-muted-foreground">
+      <p className="text-[11px] text-amber-700 dark:text-amber-400 font-light italic border border-amber-300/40 bg-amber-50/50 dark:bg-amber-950/10 px-3 py-1.5 rounded-lg w-fit">
         Monthly review limit reached — upgrade to Pro for unlimited reviews.
       </p>
     );
@@ -96,23 +69,23 @@ function AiReviewAccordion({ pullRequest }: { pullRequest: PullRequestItem }) {
 
   if (!pullRequest.reviewComment) {
     return (
-      <p className="text-xs text-muted-foreground">
+      <p className="text-[11px] text-muted-foreground/70 font-light italic">
         The AI review will appear here once it is ready.
       </p>
     );
   }
 
   return (
-    <Accordion type="single" collapsible>
+    <Accordion type="single" collapsible className="w-full">
       <AccordionItem value="review" className="border-none">
-        <AccordionTrigger className="py-1.5 text-muted-foreground hover:text-foreground">
+        <AccordionTrigger className="py-1.5 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 no-underline hover:no-underline font-medium">
           <span className="inline-flex items-center gap-1.5">
             <BotIcon className="size-3.5" />
             View AI review
           </span>
         </AccordionTrigger>
-        <AccordionContent>
-          <div className="rounded-none border border-border bg-muted/40 p-3">
+        <AccordionContent className="pt-2 pb-0">
+          <div className="rounded-xl border border-border bg-card p-4 overflow-x-auto text-xs shadow-inner">
             <AiReviewMarkdown review={pullRequest.reviewComment} />
           </div>
         </AccordionContent>
@@ -121,13 +94,6 @@ function AiReviewAccordion({ pullRequest }: { pullRequest: PullRequestItem }) {
   );
 }
 
-/**
- * Single pull request row inside a repo card.
- *
- * @param repoFullName - Parent repository slug for GitHub links.
- * @param pullRequest - PR data to display.
- * @returns A bordered row with title, links, status, meta, and review accordion.
- */
 function PullRequestRow({
   repoFullName,
   pullRequest,
@@ -138,23 +104,25 @@ function PullRequestRow({
   const tone = getPrStatusTone(pullRequest.status);
 
   return (
-    <div className="flex flex-col gap-2 border-b border-border py-4 last:border-b-0 last:pb-0 first:pt-0">
+    <div className="flex flex-col gap-3 border-b border-border/40 py-4 last:border-b-0 last:pb-0 first:pt-0 group">
       <div className="flex flex-wrap items-center gap-2">
-        <GitPullRequestIcon className="size-4 shrink-0 text-muted-foreground" />
+        <GitPullRequestIcon className="size-4 shrink-0 text-muted-foreground/75 group-hover:text-blue-500 transition-colors" />
         <Link
           href={`${DASHBOARD_ROUTES.pullRequest}/${pullRequest.id}`}
-          className="font-medium hover:underline"
+          className="font-semibold text-sm hover:underline text-foreground/90 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
         >
           {pullRequest.title}
         </Link>
         <Link
           href={buildPrUrl(repoFullName, pullRequest.prNumber)}
           target="_blank"
-          className="text-xs text-muted-foreground hover:underline"
+          className="text-xs text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 hover:underline font-mono font-light transition-colors"
         >
           #{pullRequest.prNumber}
         </Link>
-        <span className={statusBadge(tone, 'ml-auto')}>{PR_STATUS_LABELS[pullRequest.status]}</span>
+        <span className={statusBadge(tone, 'ml-auto text-[10px] font-medium')}>
+          {PR_STATUS_LABELS[pullRequest.status]}
+        </span>
       </div>
 
       <PullRequestMeta pullRequest={pullRequest} />
@@ -163,36 +131,30 @@ function PullRequestRow({
   );
 }
 
-/**
- * Card wrapping all pull requests for one repository.
- *
- * @param repo - Repo full name and its pull request items.
- * @returns A card with header (repo link) and PR rows in the body.
- */
 function RepoCard({ repo }: { repo: RepoPullRequests }) {
   const prCount = repo.pullRequests.length;
   const prLabel = prCount === 1 ? 'pull request' : 'pull requests';
 
   return (
-    <Card className="rounded-none">
-      <CardHeader>
+    <Card className="rounded-xl border border-border/50 bg-card overflow-hidden hover:border-blue-500/30 dark:hover:border-blue-500/10 transition-colors duration-200 shadow-sm">
+      <CardHeader className="border-b border-border/40 bg-muted/40">
         <CardTitle className="flex flex-wrap items-center gap-2 text-sm">
-          <FolderGit2Icon className="size-4 text-muted-foreground" />
-          {repo.repoFullName}
+          <FolderGit2Icon className="size-4 text-muted-foreground/75" />
+          <span className="font-semibold">{repo.repoFullName}</span>
           <span className="font-normal text-xs text-muted-foreground">
             {prCount} {prLabel}
           </span>
           <Link
             href={buildRepoUrl(repo.repoFullName)}
             target="_blank"
-            className="ml-auto inline-flex items-center gap-1 text-xs font-normal text-muted-foreground hover:text-foreground hover:underline"
+            className="ml-auto inline-flex items-center gap-1 text-xs font-normal text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 hover:underline transition-colors"
           >
             View on GitHub
             <ExternalLinkIcon className="size-3" />
           </Link>
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-4">
         {repo.pullRequests.map((pullRequest) => (
           <PullRequestRow
             key={pullRequest.id}
@@ -205,17 +167,14 @@ function RepoCard({ repo }: { repo: RepoPullRequests }) {
   );
 }
 
-/**
- * Empty state when no pull requests exist yet for the installation.
- *
- * @returns Centered illustration and guidance text.
- */
 function NoPullRequestsYet() {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-2 p-6 text-center">
-      <GitPullRequestIcon className="size-8 text-muted-foreground" />
-      <p className="text-sm font-medium">No pull requests yet</p>
-      <p className="max-w-sm text-xs text-muted-foreground">
+    <div className="flex flex-1 flex-col items-center justify-center gap-3 p-12 text-center max-w-lg mx-auto">
+      <div className="flex size-12 items-center justify-center rounded-2xl bg-muted border border-border/50">
+        <GitPullRequestIcon className="size-6 text-muted-foreground" />
+      </div>
+      <p className="text-sm font-semibold text-foreground/80">No pull requests yet</p>
+      <p className="text-xs text-muted-foreground font-light leading-relaxed">
         Open a pull request on a connected repository and the AI reviewer will pick it up
         automatically. Reviews show up here and as comments on GitHub.
       </p>
@@ -223,19 +182,13 @@ function NoPullRequestsYet() {
   );
 }
 
-/**
- * Top-level list component: one card per repo, or empty state.
- *
- * @param repos - Pull requests grouped by repository from the server loader.
- * @returns The full pull requests page body content.
- */
 export function PullRequestsList({ repos }: { repos: RepoPullRequests[] }) {
   if (repos.length === 0) {
     return <NoPullRequestsYet />;
   }
 
   return (
-    <div className="flex flex-col gap-4 p-6">
+    <div className="flex flex-col gap-4 p-6 max-w-6xl mx-auto w-full">
       {repos.map((repo) => (
         <RepoCard key={repo.repoFullName} repo={repo} />
       ))}

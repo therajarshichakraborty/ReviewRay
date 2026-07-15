@@ -6,6 +6,7 @@ import { getInstallationStatus } from '@/features/github/server/installation';
 import { Button } from '@/components/ui/button';
 import { requireAuth } from '@/features/auth/actions';
 import { RepoList } from '@/features/dashboard/components/repo-list';
+import { FolderGit2Icon } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Repositories · Dashboard',
@@ -13,12 +14,16 @@ export const metadata: Metadata = {
 
 function ReposNotConnected() {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6">
-      <p className="text-sm text-muted-foreground">
-        Install the GitHub App first to see your repositories.
+    <div className="flex flex-1 flex-col items-center justify-center gap-3 p-12 text-center max-w-lg mx-auto">
+      <div className="flex size-12 items-center justify-center rounded-2xl bg-muted border border-border/50">
+        <FolderGit2Icon className="size-6 text-muted-foreground" />
+      </div>
+      <p className="text-sm font-semibold text-foreground/80">Connect GitHub App first</p>
+      <p className="text-xs text-muted-foreground font-light leading-relaxed">
+        Install the ReviewRay app on your GitHub account to see your repositories and select which ones to sync.
       </p>
-      <Button asChild>
-        <Link href={DASHBOARD_ROUTES.github}>Go to GitHub App</Link>
+      <Button asChild size="sm" className="mt-2 rounded-full px-4 bg-blue-600 hover:bg-blue-700 text-white transition-colors">
+        <Link href={DASHBOARD_ROUTES.github}>Go to GitHub App Settings</Link>
       </Button>
     </div>
   );
