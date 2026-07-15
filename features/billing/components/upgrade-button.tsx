@@ -27,7 +27,7 @@ export function UpgradeButton() {
 
 
     async function handleUpgrade() {
-        const key = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+        const key = process.env.NEXT_PUBLIC_RAZORPAY_TEST_API_KEY;
         if (!key) {
           toast.error("Razorpay is not configured yet.");
           return;
@@ -46,8 +46,8 @@ export function UpgradeButton() {
           const checkout = new window.Razorpay({
             key,
             subscription_id: subscriptionId,
-            name: "Chai Code Reviewer",
-            description: "Pro plan — unlimited AI reviews",
+            name: "ReviewRay",
+            description: "Pro plan - unlimited AI reviews",
             handler: () => {
               toast.success("Payment successful! Your Pro plan will activate shortly.");
               router.refresh();
@@ -55,7 +55,7 @@ export function UpgradeButton() {
           });
     
           checkout.open();
-        } catch (error) {
+        } catch (error:any) {
           const message =
             error instanceof Error ? error.message : "Could not start checkout.";
           toast.error(message);
