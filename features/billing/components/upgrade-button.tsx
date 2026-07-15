@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { statusButtonClass } from '@/features/dashboard/lib/status-style';
+import { statusButtonClass } from '@/features/dashboard/lib/status-styles';
 import { startProSubscription } from '@/lib/billing';
 
 type RazorpayCheckout = new (options: Record<string, unknown>) => {

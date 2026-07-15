@@ -25,9 +25,9 @@ type GithubConnectCardProps = {
 
 function ConnectedDetails({ accountLogin }: { accountLogin: string | null }) {
   return (
-    <div className="rounded-xl border border-blue-200/50 dark:border-blue-900/40 bg-blue-50/40 dark:bg-blue-950/20 p-4">
+    <div className="rounded-xl border border-border bg-muted/40 p-4">
       <div className="flex items-start gap-3">
-        <div className="mt-1.5 size-2 rounded-full bg-emerald-500 shrink-0" />
+        <div className="mt-1.5 size-2 rounded-full bg-emerald-500 shrink-0 shadow-sm" />
         <p className="text-xs text-muted-foreground leading-relaxed">
           Currently installed for{' '}
           <span className="font-semibold text-foreground">@{accountLogin}</span>. ReviewRay has
@@ -46,15 +46,15 @@ function DisconnectedDetails() {
       </p>
       <ul className="space-y-2.5 text-xs text-muted-foreground font-light">
         <li className="flex items-center gap-2.5">
-          <span className="flex size-1.5 rounded-full bg-blue-400" />
+          <span className="flex size-1.5 rounded-full bg-muted-foreground/60" />
           Access public and private repositories you explicitly select
         </li>
         <li className="flex items-center gap-2.5">
-          <span className="flex size-1.5 rounded-full bg-blue-400" />
+          <span className="flex size-1.5 rounded-full bg-muted-foreground/60" />
           Receive automated webhooks for pull request lifecycle events
         </li>
         <li className="flex items-center gap-2.5">
-          <span className="flex size-1.5 rounded-full bg-blue-400" />
+          <span className="flex size-1.5 rounded-full bg-muted-foreground/60" />
           Post AI-generated codebase-aware review comments on PRs
         </li>
       </ul>
@@ -69,7 +69,7 @@ function ConnectedActions() {
         type="submit"
         variant="outline"
         size="sm"
-        className="rounded-lg border-border/60 hover:bg-red-50 hover:text-red-600 hover:border-red-200 dark:hover:bg-red-950/20 dark:hover:text-red-400 dark:hover:border-red-900/40 transition-colors"
+        className="rounded-lg border-border/60 hover:bg-red-500/10 hover:text-red-600 hover:border-red-500/25 dark:hover:bg-red-950/20 dark:hover:text-red-400 dark:hover:border-red-900/40 transition-colors"
       >
         <Plugs className="size-4 mr-1.5" />
         Disconnect GitHub App
@@ -80,7 +80,7 @@ function ConnectedActions() {
 
 function DisconnectedActions({ installUrl }: { installUrl: string }) {
   return (
-    <Button asChild size="sm" className="rounded-lg">
+    <Button asChild size="sm" className="rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm transition-colors">
       <a href={installUrl}>
         <GithubLogo className="size-4 mr-1.5" />
         Install GitHub App
@@ -95,21 +95,21 @@ export function GithubConnectCard({ userId, installation }: GithubConnectCardPro
   const installUrl = getGithubInstallUrl(userId);
 
   const cardBorderClass = connected
-    ? 'border-blue-300/50 dark:border-blue-800/50'
-    : 'border-border/60';
+    ? 'border-emerald-500/20 dark:border-emerald-500/10 shadow-sm'
+    : 'border-border/50';
 
   const iconWrapperClass = connected
-    ? 'border-blue-300/60 dark:border-blue-800/60 bg-blue-100/60 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400'
-    : 'border-border/60 bg-muted text-muted-foreground';
+    ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+    : 'border-border bg-muted text-muted-foreground';
 
   const statusTone = connected ? ('success' as const) : ('neutral' as const);
   const statusLabel = connected ? 'Connected' : 'Not connected';
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-6 max-w-3xl">
+    <div className="flex flex-1 flex-col gap-6 p-6 max-w-3xl mx-auto w-full">
       <Card
         className={cn(
-          'transition-all duration-200 rounded-xl shadow-sm bg-card/60 backdrop-blur-sm overflow-hidden',
+          'transition-all duration-200 rounded-xl shadow-sm bg-card overflow-hidden',
           cardBorderClass,
         )}
       >
@@ -148,7 +148,7 @@ export function GithubConnectCard({ userId, installation }: GithubConnectCardPro
           )}
         </CardContent>
 
-        <CardFooter className="flex flex-wrap gap-2 border-t border-border/40 pt-4 bg-blue-50/20 dark:bg-blue-950/10">
+        <CardFooter className="flex flex-wrap gap-2 border-t border-border/40 pt-4 bg-muted/20">
           {connected ? (
             <ConnectedActions />
           ) : (

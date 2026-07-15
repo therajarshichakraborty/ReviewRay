@@ -29,16 +29,16 @@ export default async function Home() {
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
 
       {/* ── Navigation ──────────────────────────────────────────── */}
-      <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/70">
-        <div className="container mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
+      <div className="sticky top-0 z-50 w-full flex justify-center px-4 py-4 pointer-events-none">
+        <header className="pointer-events-auto w-full md:w-[75%] max-w-5xl h-12 rounded-full border border-border/40 bg-background/60 backdrop-blur-lg shadow-lg shadow-black/[0.03] transition-all flex items-center justify-between px-6">
           <div className="flex items-center gap-2.5">
-            <div className="flex size-7 items-center justify-center rounded-lg bg-foreground text-background shadow-sm">
-              <span className="font-mono text-xs font-black">R</span>
+            <div className="flex size-6 items-center justify-center rounded-full bg-foreground text-background shadow-sm">
+              <span className="font-mono text-[10px] font-black">R</span>
             </div>
-            <span className="font-sans text-sm font-semibold tracking-tight">ReviewRay</span>
+            <span className="font-sans text-xs font-semibold tracking-tight">ReviewRay</span>
           </div>
 
-          <nav className="hidden md:flex items-center gap-6 text-xs text-muted-foreground">
+          <nav className="hidden md:flex items-center gap-6 text-[11px] text-muted-foreground">
             <Link href="#features" className="transition-colors hover:text-foreground">Features</Link>
             <Link href="#how-it-works" className="transition-colors hover:text-foreground">How it works</Link>
             <Link href="/pricing" className="transition-colors hover:text-foreground font-medium text-blue-600 dark:text-blue-400">Pricing</Link>
@@ -48,24 +48,24 @@ export default async function Home() {
           <div className="flex items-center gap-2">
             {isLoggedIn ? (
               <>
-                <Button asChild size="sm" variant="ghost" className="h-8 px-3 text-xs rounded-lg hidden sm:flex">
+                <Button asChild size="sm" variant="ghost" className="h-7 px-3 text-[11px] rounded-full hidden sm:flex">
                   <Link href="/dashboard">Dashboard</Link>
                 </Button>
                 <UserMenuWithSession variant="compact" />
               </>
             ) : (
               <>
-                <Button asChild size="sm" variant="ghost" className="h-8 px-3 text-xs rounded-lg hidden sm:flex">
+                <Button asChild size="sm" variant="ghost" className="h-7 px-3 text-[11px] rounded-full hidden sm:flex">
                   <Link href="/sign-in">Sign in</Link>
                 </Button>
-                <Button asChild size="sm" className="h-8 px-3 text-xs rounded-lg">
+                <Button asChild size="sm" className="h-7 px-3 text-[11px] rounded-full">
                   <Link href="/sign-in"><GithubLogo className="mr-1.5 size-3" />Get started</Link>
                 </Button>
               </>
             )}
           </div>
-        </div>
-      </header>
+        </header>
+      </div>
 
       {/* ── Hero ────────────────────────────────────────────────── */}
       <section className="relative min-h-[88vh] flex flex-col items-center justify-center py-24 md:py-36 overflow-hidden">

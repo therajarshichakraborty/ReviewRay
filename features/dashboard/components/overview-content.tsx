@@ -1,6 +1,6 @@
 /**
  * Dashboard Overview page body — stat cards, connect banner, and activity feed.
- * Blue-slate aesthetic: blue accent on stat cards, blue connect banner CTA.
+ * Clean, premium aesthetic with subtle borders and high-contrast accents.
  */
 
 import type { ComponentType } from 'react';
@@ -28,8 +28,8 @@ const ACTIVITY_STATUS = {
 };
 
 function getRepoDescription(repos: OverviewRepoSummary): string {
-  if (repos.totalCount === 0) return 'No repositories selected for the app';
-  if (repos.hasMorePages) return `${repos.totalCount} repositories connected`;
+  if (repos.totalCount === 0) return 'No repositories selected';
+  if (repos.hasMorePages) return `${repos.totalCount} connected`;
   return `${repos.publicCount} public · ${repos.privateCount} private`;
 }
 
@@ -77,12 +77,12 @@ function buildStats(overview: OverviewData): StatCard[] {
 
 function ConnectGithubBanner() {
   return (
-    <div className="relative overflow-hidden rounded-xl border border-blue-500/25 bg-gradient-to-r from-blue-600/8 via-blue-500/5 to-indigo-600/8 p-5 shadow-sm">
-      <div className="absolute inset-0 hero-grid-bg opacity-20 pointer-events-none" />
+    <div className="relative overflow-hidden rounded-xl border border-border/80 bg-card p-6 shadow-sm">
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-500/[0.03] to-transparent dark:from-blue-500/[0.01] pointer-events-none" />
       <div className="relative flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="flex size-10 items-center justify-center rounded-xl bg-blue-600/10 border border-blue-500/25">
-            <GithubIcon className="size-5 text-blue-600 dark:text-blue-400" />
+        <div className="flex items-center gap-4">
+          <div className="flex size-10 items-center justify-center rounded-lg bg-muted text-foreground border border-border/50">
+            <GithubIcon className="size-5" />
           </div>
           <div className="space-y-0.5">
             <p className="text-sm font-semibold tracking-tight text-foreground">Connect GitHub to get started</p>
@@ -91,7 +91,7 @@ function ConnectGithubBanner() {
             </p>
           </div>
         </div>
-        <Button asChild size="sm" className="shrink-0 rounded-lg h-8 px-4 text-xs">
+        <Button asChild size="sm" className="shrink-0 rounded-full h-8 px-4 text-xs font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-colors">
           <Link href={DASHBOARD_ROUTES.github}>Connect GitHub</Link>
         </Button>
       </div>
@@ -102,12 +102,12 @@ function ConnectGithubBanner() {
 function ActivityList({ items }: { items: OverviewActivityItem[] }) {
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-10 text-center gap-3">
-        <div className="flex size-10 items-center justify-center rounded-xl bg-muted border border-border/60">
-          <TrendingUpIcon className="size-5 text-muted-foreground" />
+      <div className="flex flex-col items-center justify-center py-12 text-center gap-3">
+        <div className="flex size-10 items-center justify-center rounded-full bg-muted border border-border/50">
+          <TrendingUpIcon className="size-4 text-muted-foreground" />
         </div>
-        <p className="text-sm font-medium text-foreground/70">No reviews yet</p>
-        <p className="text-xs text-muted-foreground font-light max-w-xs">
+        <p className="text-xs font-medium text-foreground/70">No activity yet</p>
+        <p className="text-[11px] text-muted-foreground font-light max-w-xs">
           Once AI PR reviews are enabled, summaries will appear here.
         </p>
       </div>
@@ -120,10 +120,10 @@ function ActivityList({ items }: { items: OverviewActivityItem[] }) {
         const config = ACTIVITY_STATUS[item.status];
         return (
           <div key={item.id} className="flex flex-wrap items-center justify-between gap-2 py-3.5 last:pb-0 first:pt-0 group">
-            <div className="flex items-start gap-3">
-              <div className="mt-0.5 size-1.5 rounded-full bg-blue-500/60 shrink-0 mt-1.5" />
+            <div className="flex items-center gap-3">
+              <div className="size-1.5 rounded-full bg-blue-500 shrink-0" />
               <div className="space-y-0.5">
-                <p className="text-xs font-semibold tracking-tight text-foreground/90">
+                <p className="text-xs font-semibold tracking-tight text-foreground/90 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                   {item.repoFullName}{' '}
                   <span className="text-muted-foreground font-mono font-normal">#{item.prNumber}</span>
                 </p>
@@ -147,30 +147,20 @@ export function OverviewContent({ overview }: OverviewContentProps) {
   const showConnectBanner = !overview.installation.connected;
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-6">
+    <div className="flex flex-1 flex-col gap-6 p-6 max-w-6xl mx-auto w-full">
       {/* Stat cards */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map((stat) => (
           <Card
             key={stat.title}
-            className={cn(
-              'border-border/60 bg-card/60 backdrop-blur-sm shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5',
-              stat.accent === 'success' && 'hover:border-emerald-500/40',
-              stat.accent === 'info' && 'hover:border-blue-500/40',
-              !stat.accent && 'hover:border-blue-500/20',
-            )}
+            className="border-border/50 bg-card hover:border-blue-500/40 dark:hover:border-blue-500/20 transition-all duration-200 hover:-translate-y-0.5 shadow-sm"
           >
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-[10px] font-semibold tracking-widest text-muted-foreground uppercase">
                 {stat.title}
               </CardTitle>
-              <div className={cn(
-                'flex size-8 items-center justify-center rounded-lg border',
-                stat.accent === 'success' ? 'bg-emerald-500/10 border-emerald-500/25 text-emerald-600 dark:text-emerald-400' :
-                stat.accent === 'info' ? 'bg-blue-500/10 border-blue-500/25 text-blue-600 dark:text-blue-400' :
-                'bg-muted border-border/60 text-muted-foreground',
-              )}>
-                <stat.icon className="size-4" />
+              <div className="flex size-7 items-center justify-center rounded-lg bg-muted text-muted-foreground border border-border/50">
+                <stat.icon className="size-3.5" />
               </div>
             </CardHeader>
             <CardContent className="space-y-0.5">
@@ -184,7 +174,7 @@ export function OverviewContent({ overview }: OverviewContentProps) {
       {showConnectBanner ? <ConnectGithubBanner /> : null}
 
       {/* Activity feed */}
-      <Card className="border-border/60 bg-card/60 backdrop-blur-sm shadow-sm">
+      <Card className="border-border/50 bg-card shadow-sm">
         <CardHeader className="border-b border-border/40 pb-4">
           <CardTitle className="text-sm font-semibold tracking-tight">Recent activity</CardTitle>
           <CardDescription className="text-xs text-muted-foreground font-light">

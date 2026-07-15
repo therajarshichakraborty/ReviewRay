@@ -128,28 +128,43 @@ export function RepoList() {
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-6">
+    <div className="flex flex-1 flex-col gap-6 p-6 max-w-6xl mx-auto w-full">
       {/* Filtering and Search Controls */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <Tabs value={filter} onValueChange={(value) => setFilter(value as Filter)}>
-          <TabsList className="bg-blue-50/60 dark:bg-blue-950/20 p-0.5 rounded-lg border border-blue-200/40 dark:border-blue-900/40">
-            <TabsTrigger value="all" className="rounded-md px-3 py-1.5 text-xs font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-blue-900/40 data-[state=active]:text-blue-700 dark:data-[state=active]:text-blue-300 data-[state=active]:shadow-sm">All ({counts.all})</TabsTrigger>
-            <TabsTrigger value="public" className="rounded-md px-3 py-1.5 text-xs font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-blue-900/40 data-[state=active]:text-blue-700 dark:data-[state=active]:text-blue-300 data-[state=active]:shadow-sm">Public ({counts.public})</TabsTrigger>
-            <TabsTrigger value="private" className="rounded-md px-3 py-1.5 text-xs font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-blue-900/40 data-[state=active]:text-blue-700 dark:data-[state=active]:text-blue-300 data-[state=active]:shadow-sm">Private ({counts.private})</TabsTrigger>
+          <TabsList className="bg-muted p-0.5 rounded-lg border border-border/50">
+            <TabsTrigger
+              value="all"
+              className="rounded-md px-3 py-1.5 text-xs font-medium data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+            >
+              All ({counts.all})
+            </TabsTrigger>
+            <TabsTrigger
+              value="public"
+              className="rounded-md px-3 py-1.5 text-xs font-medium data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+            >
+              Public ({counts.public})
+            </TabsTrigger>
+            <TabsTrigger
+              value="private"
+              className="rounded-md px-3 py-1.5 text-xs font-medium data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+            >
+              Private ({counts.private})
+            </TabsTrigger>
           </TabsList>
         </Tabs>
         <Input
           placeholder="Search repositories…"
-          className="max-w-xs h-9 rounded-lg border-border/60 bg-background/50 focus-visible:ring-1 focus-visible:ring-blue-400/60 focus-visible:border-blue-400/60"
+          className="max-w-xs h-9 rounded-lg border-border/50 bg-background/50 focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:border-blue-500"
           value={search}
           onChange={(event) => setSearch(event.target.value)}
         />
       </div>
 
       {/* Modern Table Container */}
-      <div className="rounded-xl border border-border/60 bg-card/30 backdrop-blur-sm overflow-hidden shadow-sm">
+      <div className="rounded-xl border border-border/50 bg-card overflow-hidden shadow-sm">
         <Table>
-          <TableHeader className="bg-muted/40 border-b border-border/40">
+          <TableHeader className="bg-muted/30 border-b border-border/40">
             <TableRow className="hover:bg-transparent">
               <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground py-3">Repository</TableHead>
               <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground py-3">Visibility</TableHead>
@@ -175,24 +190,26 @@ function RepoRow({ repo }: { repo: DashboardRepo }) {
   const isPrivate = repo.visibility === 'private';
 
   return (
-    <TableRow className="transition-colors hover:bg-blue-50/30 dark:hover:bg-blue-950/10">
+    <TableRow className="transition-colors hover:bg-muted/30 group">
       <TableCell className="py-4">
         <div className="flex flex-col">
-          <span className="font-semibold text-sm text-foreground/90 group-hover:text-blue-700">{repo.name}</span>
+          <span className="font-semibold text-sm text-foreground/90 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+            {repo.name}
+          </span>
           <span className="text-xs text-muted-foreground font-light">{repo.fullName}</span>
         </div>
       </TableCell>
       <TableCell className="py-4">
         <span className={cn(
-          "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium border",
+          "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-medium border",
           isPrivate 
-            ? "bg-slate-100 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300"
-            : "bg-blue-50 dark:bg-blue-950/30 border-blue-200/50 dark:border-blue-800/40 text-blue-700 dark:text-blue-400"
+            ? "bg-muted border-border text-muted-foreground"
+            : "bg-blue-500/10 border-blue-500/20 text-blue-600 dark:text-blue-400"
         )}>
           {isPrivate ? (
-            <LockIcon className="size-3 text-slate-400" />
+            <LockIcon className="size-3 text-muted-foreground" />
           ) : (
-            <LockKeyOpenIcon className="size-3 text-blue-400" />
+            <LockKeyOpenIcon className="size-3" />
           )}
           {repo.visibility}
         </span>
@@ -201,7 +218,7 @@ function RepoRow({ repo }: { repo: DashboardRepo }) {
       <TableCell className="py-4 text-xs text-foreground/80">{repo.language ?? '—'}</TableCell>
       <TableCell className="py-4 text-right">
         <span className="inline-flex items-center justify-end gap-1 text-xs text-muted-foreground font-light">
-          <StarIcon className="size-3 text-neutral-400" />
+          <StarIcon className="size-3" />
           {repo.stars}
         </span>
       </TableCell>
