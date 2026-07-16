@@ -126,28 +126,27 @@ export function UserMenu({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger
-        className={cn(className)}
-        render={
-          variant === 'compact' ? (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="rounded-full"
-              aria-label="Open account menu"
-            />
-          ) : (
-            <Button variant="ghost" className="h-9 gap-2 px-2" aria-label="Open account menu" />
-          )
-        }
-      >
-        <UserAvatar user={user} size={variant === 'compact' ? 'default' : 'sm'} />
-        {variant === 'profile' ? (
-          <>
+      <DropdownMenuTrigger asChild>
+        {variant === 'compact' ? (
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn('rounded-full', className)}
+            aria-label="Open account menu"
+          >
+            <UserAvatar user={user} size="default" />
+          </Button>
+        ) : (
+          <Button
+            variant="ghost"
+            className={cn('h-9 gap-2 px-2', className)}
+            aria-label="Open account menu"
+          >
+            <UserAvatar user={user} size="sm" />
             <span className="max-w-32 truncate text-left text-xs font-medium">{displayName}</span>
             <ChevronsUpDownIcon className="size-4 text-muted-foreground" />
-          </>
-        ) : null}
+          </Button>
+        )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuGroup>

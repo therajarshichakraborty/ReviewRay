@@ -13,7 +13,7 @@ import { redirect } from 'next/navigation';
 
 import { DASHBOARD_ROUTES } from '@/features/dashboard/lib/routes';
 import { getUserInstallationId } from '@/features/github/server/installation';
-import { triggerRepoSync } from '@/features/repo-sync/server/trigger-sync';
+import { triggerRepoSync } from '@/features/repo-sync/server/repo-sync';
 import { getServerSession } from '@/lib/auth-session';
 
 /**

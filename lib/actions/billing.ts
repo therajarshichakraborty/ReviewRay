@@ -9,8 +9,10 @@
 
 'use server';
 
-import { cancelProSubscription } from '@/features/billing/server/cancel-subscription';
-import { createProSubscription } from '@/features/billing/server/create-subscription';
+import {
+  cancelProSubscription,
+  createProSubscription,
+} from '@/features/billing/server/subscription';
 import { getServerSession } from '@/lib/auth-session';
 import { redirect } from 'next/navigation';
 
