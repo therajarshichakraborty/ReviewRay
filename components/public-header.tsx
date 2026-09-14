@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { getServerSession } from '@/lib/auth-session';
 import { Button } from '@/components/ui/button';
-import { GithubLogo } from '@phosphor-icons/react/dist/ssr';
 import { UserMenuWithSession } from '@/features/auth/components/user-menu';
 import { ArrowRight } from 'lucide-react';
 
@@ -10,45 +9,63 @@ export async function PublicHeader() {
   const isLoggedIn = !!session?.user;
 
   return (
-    <div className="sticky top-0 z-50 w-full flex justify-center px-4 py-4 pointer-events-none">
-      <header className="pointer-events-auto w-full md:w-[75%] max-w-5xl h-12 rounded-xl border border-border/30 bg-background/50 backdrop-blur-md shadow-lg shadow-black/[0.02] dark:shadow-black/[0.2] transition-all flex items-center justify-between px-6">
+    <header className="sticky top-0 z-50 w-full border-b border-slate-200/70 dark:border-slate-800/80 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md transition-all">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5 hover:opacity-90 transition-opacity">
-          <div className="flex size-6 items-center justify-center rounded-full bg-foreground text-background shadow-sm">
-            <span className="font-mono text-[10px] font-black">R</span>
+          <div className="flex size-7 items-center justify-center rounded-lg bg-slate-950 dark:bg-white text-white dark:text-slate-950 shadow-sm">
+            <span className="font-mono text-xs font-black">R</span>
           </div>
-          <span className="font-sans text-xs font-semibold tracking-tight">ReviewRay</span>
+          <span className="font-sans text-sm sm:text-base font-bold tracking-tight text-slate-900 dark:text-white">
+            ReviewRay
+          </span>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-6 text-[11px] text-muted-foreground">
-          <Link href="/#features" className="transition-colors hover:text-foreground">
+        {/* Navigation links */}
+        <nav className="hidden md:flex items-center gap-7 text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-300">
+          <Link
+            href="/#features"
+            className="transition-colors hover:text-slate-950 dark:hover:text-white"
+          >
             Features
           </Link>
-          <Link href="/#how-it-works" className="transition-colors hover:text-foreground">
+          <Link
+            href="/#how-it-works"
+            className="transition-colors hover:text-slate-950 dark:hover:text-white"
+          >
             How it works
           </Link>
           <Link
             href="/pricing"
-            className="transition-colors hover:text-foreground font-medium text-blue-600 dark:text-blue-400"
+            className="transition-colors hover:text-slate-950 dark:hover:text-white"
           >
             Pricing
           </Link>
           <Link
             href="https://github.com"
             target="_blank"
-            className="transition-colors hover:text-foreground"
+            rel="noopener noreferrer"
+            className="transition-colors hover:text-slate-950 dark:hover:text-white"
           >
             Docs
           </Link>
+          <Link
+            href="/#changelog"
+            className="transition-colors hover:text-slate-950 dark:hover:text-white"
+          >
+            Changelog
+          </Link>
         </nav>
 
-        <div className="flex items-center gap-2">
+        {/* Action buttons */}
+        <div className="flex items-center gap-3">
           {isLoggedIn ? (
             <>
               <Button
                 asChild
                 size="sm"
                 variant="ghost"
-                className="h-7 px-3 text-[11px] rounded-full hidden sm:flex"
+                className="h-9 px-4 text-xs sm:text-sm font-medium rounded-full hidden sm:flex text-slate-700 dark:text-slate-200"
               >
                 <Link href="/dashboard">Dashboard</Link>
               </Button>
@@ -56,28 +73,26 @@ export async function PublicHeader() {
             </>
           ) : (
             <>
+              <Link
+                href="/sign-in"
+                className="text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white transition-colors px-3 py-1.5"
+              >
+                Sign in
+              </Link>
               <Button
                 asChild
                 size="sm"
-                variant="ghost"
-                className="h-7 px-3 text-[11px] rounded-full hidden sm:flex"
+                className="h-9 px-4 text-xs sm:text-sm font-medium rounded-full bg-slate-950 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100 shadow-sm transition-all"
               >
-                <Link href="/sign-in">Sign in</Link>
-              </Button>
-              <Button
-                asChild
-                size="sm"
-                className="h-7 px-3 text-[11px] rounded-full bg-blue-600 hover:bg-blue-700 text-white border-none shadow-sm"
-              >
-                <Link href="/sign-in">
-                  <GithubLogo className="mr-1.5 size-3" />
-                  Get started
+                <Link href="/sign-in" className="flex items-center gap-1.5">
+                  <span>Get started</span>
+                  <ArrowRight className="size-3.5" />
                 </Link>
               </Button>
             </>
           )}
         </div>
-      </header>
-    </div>
+      </div>
+    </header>
   );
 }
