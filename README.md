@@ -5,23 +5,26 @@ ReviewRay is a codebase-aware, automated AI code review engine designed to integ
 ## System Previews
 
 ### Landing Page
+
 ![Landing Page](public/landing.png)
 
 ### Developer Dashboard
+
 ![Developer Dashboard](public/dashboard.png)
 
 ### Account Settings and Billing
+
 ![Account Settings](public/settings.png)
 
 ---
 
 ## Core Features
 
-* **Contextual Codebase Intelligence**: Resolves file structures and module imports to provide code reviews that understand project-wide architecture instead of analyzing files in isolation.
-* **Asynchronous Webhook Processing**: Employs background task queues to process incoming GitHub pull request events without blocking main thread executions.
-* **Vector Semantic Search**: Leverages vector embeddings to build an indexed map of repository code chunks, allowing fast retrieval of relevant code snippets.
-* **Automated Pull Request Integration**: Automatically posts granular inline comments directly onto specific code lines in active pull requests.
-* **SaaS Subscription Lifecycle**: Implements full billing lifecycles including upgrades, renewals, and cancellations.
+- **Contextual Codebase Intelligence**: Resolves file structures and module imports to provide code reviews that understand project-wide architecture instead of analyzing files in isolation.
+- **Asynchronous Webhook Processing**: Employs background task queues to process incoming GitHub pull request events without blocking main thread executions.
+- **Vector Semantic Search**: Leverages vector embeddings to build an indexed map of repository code chunks, allowing fast retrieval of relevant code snippets.
+- **Automated Pull Request Integration**: Automatically posts granular inline comments directly onto specific code lines in active pull requests.
+- **SaaS Subscription Lifecycle**: Implements full billing lifecycles including upgrades, renewals, and cancellations.
 
 ---
 
@@ -53,14 +56,14 @@ ReviewRay is built around a Retrieval-Augmented Generation (RAG) pipeline design
 
 ## Technology Stack
 
-* **Core Framework**: Next.js (App Router) utilizing React 19
-* **Language**: TypeScript (Strict Mode)
-* **Database Layer**: PostgreSQL managed via Prisma ORM
-* **Vector Database**: Pinecone Client
-* **Queue Management**: Inngest asynchronous job scheduling
-* **Authentication**: Better Auth with GitHub OAuth integration
-* **Billing and Subscriptions**: Razorpay Payment Gateway integration
-* **UI Styling**: Tailwind CSS v4, Radix UI primitives, Lucide React, and Phosphor Icons
+- **Core Framework**: Next.js (App Router) utilizing React 19
+- **Language**: TypeScript (Strict Mode)
+- **Database Layer**: PostgreSQL managed via Prisma ORM
+- **Vector Database**: Pinecone Client
+- **Queue Management**: Inngest asynchronous job scheduling
+- **Authentication**: Better Auth with GitHub OAuth integration
+- **Billing and Subscriptions**: Razorpay Payment Gateway integration
+- **UI Styling**: Tailwind CSS v4, Radix UI primitives, Lucide React, and Phosphor Icons
 
 ---
 
@@ -105,21 +108,25 @@ NEXT_PUBLIC_RAZORPAY_WEBHOOK_SECRET="your_razorpay_webhook_secret"
 ## Installation and Execution
 
 1. Clone the repository and install all dependencies:
+
    ```bash
    bun install
    ```
 
 2. Generate the Prisma client interface:
+
    ```bash
    bunx prisma generate
    ```
 
 3. Synchronize database schemas:
+
    ```bash
    bunx prisma db push
    ```
 
 4. Start the local Inngest development server:
+
    ```bash
    bunx inngest-cli dev
    ```
