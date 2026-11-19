@@ -1,74 +1,82 @@
-/**
- * Single pull request detail page (`/dashboard/pull-request/[id]`).
- *
- * Shows PR metadata, links to GitHub, and the full AI review markdown.
- * Returns 404 when the PR does not exist or belongs to another installation.
- */
-
+import { format, formatDistanceToNow } from 'date-fns';
+import {
+  AlertTriangle,
+  ArrowUpRight,
+  Clock,
+  GitBranch,
+  Loader2,
+  SearchX,
+  User,
+} from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound, redirect } from 'next/navigation';
-import { prisma } from '@/lib/db.config';
-import { formatDistanceToNow } from 'date-fns';
-import {
-  ArrowLeftIcon,
-  BotIcon,
-  ExternalLinkIcon,
-  GitBranchIcon,
-  GitPullRequestIcon,
-  UserIcon,
-} from 'lucide-react';
+import { notFound } from 'next/navigation';
 
-import { DashboardHeader } from '@/features/dashboard/components/dashboard-header';
+import { LogoMark } from '@/components/brand/logo';
+import { Button } from '@/components/ui/button';
+import { requireAuth } from '@/features/auth/server/session';
+import { DashboardHeader, PageBody } from '@/features/dashboard/components/dashboard-header';
+import { EmptyState } from '@/features/dashboard/components/ui';
 import { DASHBOARD_ROUTES } from '@/features/dashboard/lib/routes';
-import { statusBadge } from '@/features/dashboard/lib/status-styles';
+import { statusBadge, statusDotClass } from '@/features/dashboard/lib/status-styles';
 import { getUserInstallationId } from '@/features/github/server/installation';
 import { AiReviewMarkdown } from '@/features/pull-requests/components/ai-review-markdown';
 import { getPullRequestById } from '@/features/pull-requests/server/get-pull-request';
-import type { PullRequestStatus } from '@/features/pull-requests/types/pull-request';
-import { PR_STATUS_LABELS, getPrStatusTone } from '@/features/pull-requests/utils/status';
-import { requireAuth } from '@/lib/auth-session';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  toPullRequestStatus,
+  type PullRequestStatus,
+} from '@/features/pull-requests/types/pull-request';
+import { getPrStatusTone, PR_STATUS_LABELS } from '@/features/pull-requests/utils/status';
+import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
-  title: 'Pull Request Review · Dashboard',
+  title: 'Pull request review',
 };
 
-/**
- * Renders the AI review section based on status and available comment text.
- *
- * @param review - Markdown review comment or null if not ready.
- * @param status - PR lifecycle status (rate_limited shows upgrade message).
- * @returns Placeholder text or `AiReviewMarkdown` component.
- */
-function ReviewBody({ review, status }: { review: string | null; status: PullRequestStatus }) {
-  if (status === 'rate_limited') {
-    return (
-      <p className="text-sm text-muted-foreground">
-        Monthly review limit reached. Upgrade to Pro for unlimited reviews, or wait until next month
-        when your limit resets.
-      </p>
-    );
+function ReviewPlaceholder({ status }: { status: PullRequestStatus }) {
+  switch (status) {
+    case 'rate_limited':
+      return (
+        <EmptyState
+          icon={Clock}
+          title="Monthly review limit reached"
+          description="This pull request arrived after the free plan's monthly reviews were used. Upgrade to Pro for unlimited reviews, or push again after the limit resets."
+          action={
+            <Button asChild className="rounded-lg">
+              <Link href="/pricing">See Pro</Link>
+            </Button>
+          }
+        />
+      );
+    case 'failed':
+      return (
+        <EmptyState
+          icon={AlertTriangle}
+          iconClassName="text-amber-500"
+          title="The review could not be completed"
+          description="The AI provider did not respond after several retries. Push a new commit to the pull request to try again."
+        />
+      );
+    case 'skipped':
+      return (
+        <EmptyState
+          icon={SearchX}
+          title="Nothing to review"
+          description="This pull request only changes generated files, lockfiles, binaries or deletions."
+        />
+      );
+    default:
+      return (
+        <EmptyState
+          icon={Loader2}
+          iconClassName="animate-spin text-primary"
+          title="Review in progress"
+          description="ReviewRay is reading the diff. This usually takes under a minute; refresh to see the result."
+        />
+      );
   }
-
-  if (!review) {
-    return (
-      <p className="text-sm text-muted-foreground">
-        The AI review is not ready yet. It will appear here once the reviewer finishes.
-      </p>
-    );
-  }
-
-  return <AiReviewMarkdown review={review} />;
 }
 
-/**
- * Pull request detail view with metadata and AI review card.
- *
- * @param params - Async route params containing the PR database `id`.
- * @returns Full detail page or `notFound()` when unauthorized/missing.
- */
 export default async function PullRequestDetailPage({
   params,
 }: {
@@ -77,97 +85,82 @@ export default async function PullRequestDetailPage({
   const { id } = await params;
   const session = await requireAuth();
   const installationId = await getUserInstallationId(session.user.id);
+  const pullRequest = installationId ? await getPullRequestById(installationId, id) : null;
 
-  const pullRequest = await prisma.pullRequest.findUnique({
-    where: { id },
-  });
+  // Missing and not-yours look identical, so ids cannot be probed.
+  if (!pullRequest) notFound();
 
-  if (!pullRequest) {
-    notFound();
-  }
-
-  if (!installationId || pullRequest.installationId !== installationId) {
-    redirect(`https://github.com/${pullRequest.repoFullName}/commit/${pullRequest.headSha}`);
-  }
-
-  const status = pullRequest.status as PullRequestStatus;
+  const status = toPullRequestStatus(pullRequest.status);
+  const tone = getPrStatusTone(status);
   const prUrl = `https://github.com/${pullRequest.repoFullName}/pull/${pullRequest.prNumber}`;
-  const openedAgo = formatDistanceToNow(pullRequest.createdAt, {
-    addSuffix: true,
-  });
 
   return (
     <>
       <DashboardHeader
-        title={`PR #${pullRequest.prNumber}`}
-        description={pullRequest.repoFullName}
+        title={`#${pullRequest.prNumber}`}
+        parents={[
+          { label: 'Pull requests', href: DASHBOARD_ROUTES.pullRequest },
+          { label: pullRequest.repoFullName },
+        ]}
       />
-
-      <div className="flex flex-col gap-6 p-6 max-w-5xl">
-        <div>
-          <Button
-            variant="ghost"
-            size="sm"
-            asChild
-            className="rounded-lg text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400"
-          >
-            <Link href={DASHBOARD_ROUTES.pullRequest}>
-              <ArrowLeftIcon className="mr-1.5 size-4" />
-              Back to pull requests
-            </Link>
-          </Button>
-        </div>
-
-        <Card className="rounded-xl border border-border/60 bg-card/60 backdrop-blur-sm shadow-sm overflow-hidden hover:border-blue-200/60 dark:hover:border-blue-900/40 transition-colors">
-          <CardHeader className="border-b border-border/40 bg-blue-50/20 dark:bg-blue-950/10 pb-4">
-            <CardTitle className="flex flex-wrap items-center gap-2 text-sm font-semibold">
-              <GitPullRequestIcon className="size-4 text-blue-500/80" />
-              <span className="text-foreground/90">{pullRequest.title}</span>
-              <span className="text-xs font-normal text-muted-foreground">
-                #{pullRequest.prNumber}
-              </span>
-              <span
-                className={statusBadge(getPrStatusTone(status), 'ml-auto text-[10px] font-medium')}
-              >
-                {PR_STATUS_LABELS[status]}
-              </span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-muted-foreground py-4">
-            <span className="inline-flex items-center gap-1.5 font-light">
-              <UserIcon className="size-3.5 text-blue-400/60" />
+      <PageBody className="max-w-4xl">
+        <div className="animate-fade-up">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className={statusBadge(tone)}>
+              <span className={cn('size-1.5 rounded-full', statusDotClass[tone])} />
+              {PR_STATUS_LABELS[status]}
+            </span>
+            <span className="font-mono text-sm text-muted-foreground">
+              {pullRequest.repoFullName}#{pullRequest.prNumber}
+            </span>
+          </div>
+          <h2 className="mt-4 text-2xl font-semibold tracking-[-0.025em] text-balance sm:text-[28px]">
+            {pullRequest.title}
+          </h2>
+          <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground">
+            <span className="inline-flex items-center gap-1.5">
+              <User className="size-4" />
               {pullRequest.authorLogin ?? 'unknown'}
             </span>
-            <span className="inline-flex items-center gap-1.5 font-light">
-              <GitBranchIcon className="size-3.5 text-blue-400/60" />
-              <span className="font-mono text-[10px] bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40 px-1.5 py-0.5 rounded text-blue-700 dark:text-blue-400">
+            <span className="inline-flex items-center gap-1.5">
+              <GitBranch className="size-4" />
+              into{' '}
+              <span className="rounded bg-surface px-1.5 py-0.5 font-mono text-xs text-foreground">
                 {pullRequest.baseBranch}
               </span>
             </span>
-            <span className="font-light">opened {openedAgo}</span>
-            <Link
-              href={prUrl}
-              target="_blank"
-              className="ml-auto inline-flex items-center gap-1 hover:text-blue-600 dark:hover:text-blue-400 hover:underline transition-colors font-medium"
-            >
-              View on GitHub
-              <ExternalLinkIcon className="size-3" />
-            </Link>
-          </CardContent>
-        </Card>
+            <span>opened {formatDistanceToNow(pullRequest.createdAt, { addSuffix: true })}</span>
+            <Button asChild variant="secondary" size="sm" className="group ml-auto">
+              <a href={prUrl} target="_blank" rel="noopener noreferrer">
+                Open on GitHub
+                <ArrowUpRight className="size-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              </a>
+            </Button>
+          </div>
+        </div>
 
-        <Card className="rounded-xl border border-border/60 bg-card/60 backdrop-blur-sm shadow-sm overflow-hidden">
-          <CardHeader className="border-b border-border/40 bg-blue-50/20 dark:bg-blue-950/10 pb-4">
-            <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-              <BotIcon className="size-4 text-blue-500/80" />
-              <span>AI Review</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <ReviewBody review={pullRequest.reviewComment} status={status} />
-          </CardContent>
-        </Card>
-      </div>
+        {pullRequest.reviewComment && status === 'reviewed' ? (
+          <article className="animate-fade-up overflow-hidden rounded-2xl bg-surface [animation-delay:120ms]">
+            <header className="flex items-center gap-2.5 px-5 pt-5 sm:px-7">
+              <LogoMark className="size-6 rounded-md" />
+              <span className="text-sm font-medium">ReviewRay</span>
+              <span className="rounded-full bg-background px-1.5 py-px text-[10px] text-muted-foreground">
+                bot
+              </span>
+              {pullRequest.reviewedAt ? (
+                <span className="ml-auto text-sm text-muted-foreground">
+                  {format(pullRequest.reviewedAt, "MMM d, yyyy 'at' h:mm a")}
+                </span>
+              ) : null}
+            </header>
+            <div className="p-5 sm:p-7">
+              <AiReviewMarkdown review={pullRequest.reviewComment} />
+            </div>
+          </article>
+        ) : (
+          <ReviewPlaceholder status={status} />
+        )}
+      </PageBody>
     </>
   );
 }
