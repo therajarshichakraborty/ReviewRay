@@ -89,7 +89,7 @@ export default function RazorpayButton({ keyId, email, name }: RazorpayButtonPro
       onClick={handlePayment}
     >
       <Zap className="mr-2 size-4" />
-      {loading ? 'Opening Checkout…' : 'Upgrade to Pro — ₹199/mo'}
+      {loading ? 'Opening Checkout...' : 'Upgrade to Pro - ₹199/mo'}
     </Button>
   );
 }
