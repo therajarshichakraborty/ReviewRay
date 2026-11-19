@@ -233,7 +233,7 @@ function RepoRow({ repo }: { repo: DashboardRepo }) {
       <TableCell className="py-4 text-xs font-mono text-muted-foreground">
         {repo.defaultBranch}
       </TableCell>
-      <TableCell className="py-4 text-xs text-foreground/80">{repo.language ?? '—'}</TableCell>
+      <TableCell className="py-4 text-xs text-foreground/80">{repo.language ?? '-'}</TableCell>
       <TableCell className="py-4 text-right">
         <span className="inline-flex items-center justify-end gap-1 text-xs text-muted-foreground font-light">
           <StarIcon className="size-3" />
