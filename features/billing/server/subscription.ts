@@ -1,5 +1,5 @@
 import type { UserSubscription } from '@/features/dashboard/lib/types';
-import { getRazorpay } from '@/features/billing/lib/razorpay';
+import { getRazorpay, razorpayEnv } from '@/features/billing/lib/razorpay';
 import { prisma } from '@/lib/db.config';
 
 export async function getUserSubscription(userId: string): Promise<UserSubscription> {
@@ -51,7 +51,7 @@ export async function createProSubscription(userId: string) {
     throw new Error('You already have an active Pro subscription.');
   }
 
-  const planId = process.env.NEXT_PUBLIC_RAZORPAY_PLAN_ID;
+  const planId = razorpayEnv.planId();
   if (!planId) {
     throw new Error('Razorpay plan is not configured.');
   }
