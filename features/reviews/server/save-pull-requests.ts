@@ -1,18 +1,11 @@
-import type { PullRequestWebhookPayload } from '@/features/github/server/webhook-handler';
+import type { PullRequestWebhookPayload } from '@/features/github/types/webhook';
 import { prisma } from '@/lib/db.config';
-
-function getAuthorLogin(user: { login: string } | null): string | null {
-  if (!user) {
-    return null;
-  }
-  return user.login;
-}
 
 export async function savePullRequest(payload: PullRequestWebhookPayload) {
   const repoFullName = payload.repository.full_name;
   const prNumber = payload.pull_request.number;
 
-  const pullRequest = await prisma.pullRequest.upsert({
+  return prisma.pullRequest.upsert({
     where: {
       repoFullName_prNumber: { repoFullName, prNumber },
     },
@@ -21,18 +14,17 @@ export async function savePullRequest(payload: PullRequestWebhookPayload) {
       repoFullName,
       prNumber,
       title: payload.pull_request.title,
-      authorLogin: getAuthorLogin(payload.pull_request.user),
+      authorLogin: payload.pull_request.user?.login ?? null,
       headSha: payload.pull_request.head.sha,
       baseBranch: payload.pull_request.base.ref,
       status: 'pending',
     },
     update: {
+      installationId: payload.installation.id,
       title: payload.pull_request.title,
       headSha: payload.pull_request.head.sha,
-
+      baseBranch: payload.pull_request.base.ref,
       status: 'pending',
     },
   });
-
-  return pullRequest;
 }
