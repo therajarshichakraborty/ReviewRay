@@ -1,87 +1,80 @@
-import React from 'react';
+import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
-import { ArrowRight, Check } from 'lucide-react';
 
-interface CtaBannerSectionProps {
-  isLoggedIn?: boolean;
+import { Reveal } from '@/components/motion/reveal';
+import { Button } from '@/components/ui/button';
+import { SIGN_IN_PATH } from '@/features/auth/utils';
+import { DASHBOARD_ROUTES } from '@/features/dashboard/lib/routes';
+import { MonoNote, Section, SelectionBox, Serif } from './primitives';
+
+const GLYPHS = ' .:;+=*#%$&{}[]()<>/\\|~!?01xX';
+
+/** Deterministic pseudo-random texture so server and client markup always match. */
+function buildAsciiField(rows: number, cols: number): string {
+  let seed = 1442;
+  const next = () => {
+    seed = (seed * 1103515245 + 12345) % 2147483648;
+    return seed / 2147483648;
+  };
+
+  const lines: string[] = [];
+  for (let row = 0; row < rows; row++) {
+    let line = '';
+    for (let col = 0; col < cols; col++) {
+      line += next() < 0.42 ? GLYPHS[Math.floor(next() * GLYPHS.length)] : ' ';
+    }
+    lines.push(line);
+  }
+  return lines.join('\n');
 }
 
-export function CtaBannerSection({ isLoggedIn }: CtaBannerSectionProps) {
+const ASCII_FIELD = buildAsciiField(22, 180);
+
+export function CtaBannerSection({ isLoggedIn }: { isLoggedIn: boolean }) {
   return (
-    <section className="relative py-28 sm:py-36 overflow-hidden border-t border-slate-100 dark:border-slate-900 bg-white dark:bg-slate-950">
-      {/* Subtle ASCII / Code Matrix Pattern Background (Aceternity Image 2 style) */}
-      <div className="absolute inset-0 pointer-events-none select-none opacity-[0.035] dark:opacity-[0.05] font-mono text-xs leading-loose overflow-hidden">
-        <p className="break-words">
-          01010100 01100101 01110011 01110100 {'{'} const token = verify(jwt); if (!token) return error; {'}'} 
-          git checkout -b feature/precision-review && npm run build --release 1440x900 #0066FF 0x2A7F
-          type ReviewPipeline = &#123; ast: ASTNode; model: &apos;gpt-4o-mini&apos;; latency: number; emojis: 0; &#125;
-          function analyzeAST(diff: GitDiff): PrecisionReport &#123; return diff.filter(isVulnerable); &#125;
-          01010100 01100101 01110011 01110100 {'{'} const token = verify(jwt); if (!token) return error; {'}'} 
-          git checkout -b feature/precision-review && npm run build --release 1440x900 #0066FF 0x2A7F
-          type ReviewPipeline = &#123; ast: ASTNode; model: &apos;gpt-4o-mini&apos;; latency: number; emojis: 0; &#125;
-        </p>
-      </div>
+    <Section className="overflow-hidden">
+      <pre
+        aria-hidden
+        className="mask-radial pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden font-mono text-[13px] leading-[1.6] text-foreground/[0.09] select-none"
+      >
+        {ASCII_FIELD}
+      </pre>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-        {/* Main Headline with Aceternity Inspect Selection Box (Image 2 style) */}
-        <h2 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-[-0.035em] text-slate-950 dark:text-white leading-[1.12]">
-          Stop waiting on
-          <br className="hidden sm:inline" />{' '}
-          <span className="relative inline-block mt-2 sm:mt-0">
-            {/* Outer selection border */}
-            <span className="relative z-10 px-2 py-1 border border-blue-500/80 dark:border-blue-400 bg-blue-50/30 dark:bg-blue-950/20 rounded-md">
-              pull request reviews.
-              {/* Corner selection square handles */}
-              <span className="absolute -top-1 -left-1 size-2 bg-white border border-blue-600 rounded-xs" />
-              <span className="absolute -top-1 -right-1 size-2 bg-white border border-blue-600 rounded-xs" />
-              <span className="absolute -bottom-1 -left-1 size-2 bg-white border border-blue-600 rounded-xs" />
-              <span className="absolute -bottom-1 -right-1 size-2 bg-white border border-blue-600 rounded-xs" />
-            </span>
-            {/* Floating dimension tag below selection box */}
-            <span className="absolute left-1/2 -translate-x-1/2 -bottom-5 z-20 font-mono text-[9px] font-semibold bg-blue-600 text-white px-2 py-0.5 rounded-sm shadow-xs uppercase tracking-wider">
-              1440 x 900
-            </span>
-          </span>
-        </h2>
-
-        {/* Subtitle */}
-        <p className="mt-8 text-base sm:text-lg text-slate-600 dark:text-slate-400 max-w-xl mx-auto font-normal leading-relaxed">
-          Connect your GitHub repositories in two minutes. Your first automated review is already waiting.
-        </p>
-
-        {/* Action Buttons (Solid Blue + White Outline) */}
-        <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-          <Link
-            href={isLoggedIn ? '/dashboard' : '/sign-in'}
-            className="inline-flex items-center gap-2 h-11 px-7 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-semibold shadow-md shadow-blue-500/25 transition-all"
+      <div className="relative px-5 py-24 text-center sm:px-10 lg:py-32">
+        <Reveal>
+          <h2 className="mx-auto max-w-3xl text-5xl leading-[1.02] font-semibold tracking-[-0.04em] text-balance sm:text-6xl lg:text-7xl">
+            Stop <Serif>waiting on</Serif>{' '}
+            <SelectionBox tag="PR #142 · reviewed in 38s" className="px-1">
+              reviews.
+            </SelectionBox>
+          </h2>
+        </Reveal>
+        <Reveal delay={120}>
+          <p className="mx-auto mt-10 max-w-xl text-lg text-pretty text-muted-foreground">
+            Connect a repository in two minutes. Your next pull request is reviewed before you
+            finish writing its description.
+          </p>
+        </Reveal>
+        <Reveal delay={220} className="mt-9 flex flex-wrap items-center justify-center gap-3">
+          <Button
+            asChild
+            className="group h-11 rounded-lg px-6 text-[15px] shadow-md shadow-primary/25 transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/30"
           >
-            <span>Start reviewing</span>
-            <ArrowRight className="size-4" />
-          </Link>
-          <Link
-            href="/pricing"
-            className="inline-flex items-center justify-center h-11 px-7 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/80 text-xs sm:text-sm font-semibold shadow-xs transition-all"
+            <Link href={isLoggedIn ? DASHBOARD_ROUTES.overview : SIGN_IN_PATH}>
+              {isLoggedIn ? 'Open dashboard' : 'Start reviewing'}
+              <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+            </Link>
+          </Button>
+          <Button
+            asChild
+            variant="outline"
+            className="h-11 rounded-lg bg-background px-6 text-[15px] transition-all hover:-translate-y-0.5"
           >
-            Book a demo
-          </Link>
-        </div>
-
-        {/* Feature Checkpoints */}
-        <div className="mt-10 flex flex-wrap items-center justify-center gap-8 text-xs text-slate-600 dark:text-slate-400 font-medium">
-          <span className="flex items-center gap-1.5">
-            <Check className="size-3.5 text-blue-600 dark:text-blue-400 stroke-[2.5]" />
-            No credit card
-          </span>
-          <span className="flex items-center gap-1.5">
-            <Check className="size-3.5 text-blue-600 dark:text-blue-400 stroke-[2.5]" />
-            Official OpenAI pipeline
-          </span>
-          <span className="flex items-center gap-1.5">
-            <Check className="size-3.5 text-blue-600 dark:text-blue-400 stroke-[2.5]" />
-            Zero emoji clutter
-          </span>
-        </div>
+            <Link href="/pricing">View pricing</Link>
+          </Button>
+        </Reveal>
+        <MonoNote className="mt-6 block">5 free reviews every month · no card required</MonoNote>
       </div>
-    </section>
+    </Section>
   );
 }
