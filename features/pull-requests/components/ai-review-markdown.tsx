@@ -1,26 +1,25 @@
 'use client';
 
 /**
- * Renders AI-generated review text as formatted Markdown.
+ * Renders an AI review as Markdown with highlighted code blocks.
  *
- * Uses Streamdown for streaming-friendly Markdown with syntax highlighting
- * via the `@streamdown/code` plugin.
+ * Reviews are sanitized again at display time, so reviews stored before the
+ * current pipeline (which could contain emojis or em dashes) render cleanly too.
  */
 
-import { Streamdown } from 'streamdown';
 import { code } from '@streamdown/code';
+import { useMemo } from 'react';
+import { Streamdown } from 'streamdown';
 import 'streamdown/styles.css';
 
-/**
- * Displays an AI review comment with Markdown formatting and code blocks.
- *
- * @param review - Raw Markdown string stored in `pullRequest.reviewComment`.
- * @returns A styled Markdown container.
- */
+import { sanitizeReview } from '@/features/reviews/utils/sanitize-review';
+
 export function AiReviewMarkdown({ review }: { review: string }) {
+  const clean = useMemo(() => sanitizeReview(review), [review]);
+
   return (
     <div className="ai-review-content text-sm leading-relaxed text-foreground">
-      <Streamdown plugins={{ code }}>{review}</Streamdown>
+      <Streamdown plugins={{ code }}>{clean}</Streamdown>
     </div>
   );
 }
