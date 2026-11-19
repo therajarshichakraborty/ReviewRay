@@ -20,11 +20,13 @@ ReviewRay is a codebase-aware, automated AI code review engine designed to integ
 
 ## Core Features
 
-- **Contextual Codebase Intelligence**: Resolves file structures and module imports to provide code reviews that understand project-wide architecture instead of analyzing files in isolation.
-- **Asynchronous Webhook Processing**: Employs background task queues to process incoming GitHub pull request events without blocking main thread executions.
-- **Vector Semantic Search**: Leverages vector embeddings to build an indexed map of repository code chunks, allowing fast retrieval of relevant code snippets.
-- **Automated Pull Request Integration**: Automatically posts granular inline comments directly onto specific code lines in active pull requests.
-- **SaaS Subscription Lifecycle**: Implements full billing lifecycles including upgrades, renewals, and cancellations.
+- **Codebase-aware reviews**: Synced repositories are indexed in Pinecone, so each review can reference related code outside the diff.
+- **Plan-based model routing**: Free reviews run on free OpenRouter models with automatic fallbacks; Pro reviews run on OpenAI. Switching is configuration only.
+- **Token-budgeted prompts**: Lockfiles, generated and binary files are stripped, patches are normalized, and source files are prioritized within a per-plan character budget.
+- **Consistent, clean output**: A fixed review structure (summary, verdict, severity-ranked issues with fixes, suggestions, strengths) plus a sanitizer that guarantees no emojis or em dashes, whichever model answers.
+- **Durable background jobs**: Inngest steps retry independently, rapid pushes are debounced into one review, and terminal failures are surfaced in the dashboard.
+- **One living comment per PR**: New pushes update ReviewRay's existing comment instead of adding new ones.
+- **SaaS billing**: Razorpay subscriptions with a 5-review monthly free tier, enforced per installation and counting reviews still in flight.
 
 ---
 
@@ -33,24 +35,34 @@ ReviewRay is a codebase-aware, automated AI code review engine designed to integ
 ReviewRay is built around a Retrieval-Augmented Generation (RAG) pipeline designed for software codebases. The data flow proceeds as follows:
 
 ```
-[GitHub PR Event] ──> [Vercel Webhook Endpoint] ──> [Inngest Event Queue]
-                                                             │
-                                                             ▼
-[Pinecone Index] <── [Fetch Code Context] <── [Parse PR Diff & Target Files]
-       │
-       ▼
-[OpenRouter API] ──> [Assemble Prompts] ──> [Generate Automated Review]
-                                                             │
-                                                             ▼
-                                                [Post Comments to GitHub]
+[GitHub PR event] ──> [Webhook: verify signature, check plan limit] ──> [Inngest queue]
+                                                                              │
+                                                                              ▼
+[Resolve plan] ──> [Fetch PR diff] ──> [Search Pinecone for related code (synced repos)]
+                                                                              │
+                                                                              ▼
+[Budget diff + context] ──> [Free: OpenRouter | Pro: OpenAI] ──> [Sanitize output]
+                                                                              │
+                                                                              ▼
+                                               [Create or update the PR comment on GitHub]
 ```
 
-1. **Ingestion and Embedding**: When a repository is synchronized, code files are retrieved, parsed into logical semantic chunks, processed into vector embeddings, and stored in a Pinecone index.
-2. **Event Interception**: A dedicated GitHub App registers webhook subscriptions for active repositories. Opening or updating a pull request triggers an event payload.
-3. **Context Retrieval**: The system reads the pull request diff, identifies files modified, and queries Pinecone to fetch semantically relevant code from the surrounding project.
-4. **Prompt Compilation**: The system compiles a prompt comprising the pull request diff, the retrieved code context, and architectural guidelines.
-5. **Review Generation**: The payload is sent to OpenRouter to run reasoning models.
-6. **Publishing Feedback**: The structured review comment is formatted and posted back to the GitHub Pull Request using the Octokit client.
+1. **Ingestion**: When a repository is synced, its files are chunked and upserted into a per-repository Pinecone namespace with integrated embeddings.
+2. **Webhook**: The GitHub App delivers `pull_request` events. The signature is verified and the installation's monthly usage is checked before any work is queued.
+3. **Diff**: The full PR diff and description are fetched. Noise files are dropped and the remaining patches are fit to the plan's budget.
+4. **Context**: For synced repositories, Pinecone returns related code using the PR title and changed paths as the query.
+5. **Generation**: The provider chain for the plan is called through an OpenAI-compatible client with timeouts, fallbacks and truncation handling.
+6. **Publishing**: The sanitized review is written to ReviewRay's single comment on the PR and stored for the dashboard.
+
+### AI configuration
+
+| Variable                     | Purpose                                                             |
+| ---------------------------- | ------------------------------------------------------------------- |
+| `OPENROUTER_API_KEY`         | Enables free-plan reviews on OpenRouter                             |
+| `OPENROUTER_MODEL`           | Primary free model (default `google/gemma-4-31b-it:free`)           |
+| `OPENROUTER_FALLBACK_MODELS` | Comma-separated fallbacks, tried when the primary is busy           |
+| `OPENAI_API_KEY`             | Enables OpenAI for Pro reviews. Until set, Pro falls back to OpenRouter |
+| `OPENAI_MODEL`               | OpenAI model for Pro (default `gpt-4.1-mini`)                       |
 
 ---
 
@@ -63,45 +75,20 @@ ReviewRay is built around a Retrieval-Augmented Generation (RAG) pipeline design
 - **Queue Management**: Inngest asynchronous job scheduling
 - **Authentication**: Better Auth with GitHub OAuth integration
 - **Billing and Subscriptions**: Razorpay Payment Gateway integration
-- **UI Styling**: Tailwind CSS v4, Radix UI primitives, Lucide React, and Phosphor Icons
+- **AI Providers**: OpenRouter (free models) and OpenAI, via a dependency-free OpenAI-compatible client
+- **UI Styling**: Tailwind CSS v4, Radix UI primitives, Lucide React, Geist and Instrument Serif
 
 ---
 
 ## Environment Setup
 
-To run the application locally, create a `.env` file in the root directory containing the following configuration:
+Copy `.env.example` to `.env` and fill in the values. Every variable is documented there.
 
-```env
-# Database Configuration
-DATABASE_URL="postgresql://user:password@host:port/dbname?sslmode=require"
-
-# Better Auth Configuration
-BETTER_AUTH_SECRET="your_32_character_session_signing_secret"
-BETTER_AUTH_URL="http://localhost:3000"
-
-# GitHub Auth and App Credentials
-GITHUB_CLIENT_ID="your_github_oauth_client_id"
-GITHUB_CLIENT_SECRET="your_github_oauth_client_secret"
-GITHUB_APP_ID="your_github_app_id"
-GITHUB_APP_NAME="your_github_app_name"
-GITHUB_WEBHOOK_SECRET="your_github_webhook_secret"
-GITHUB_APP_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\nyour_github_app_private_key_escaped_newlines\n-----END RSA PRIVATE KEY-----"
-NEXT_PUBLIC_GITHUB_PUBLIC_LINK="https://github.com/apps/your-app-slug"
-
-# Vector Indexing
-PINECONE_INDEX="your_pinecone_index_name"
-PINECONE_API_KEY="your_pinecone_api_key"
-PINECONE_HOST_NAME="your_pinecone_index_host_url"
-
-# LLM Provider
-OPENROUTER_API_KEY="your_openrouter_api_key"
-
-# Payment Processor
-NEXT_PUBLIC_RAZORPAY_TEST_API_KEY="your_razorpay_key_id"
-NEXT_PUBLIC_RAZORPAY_TEST_KEY_SECRET="your_razorpay_key_secret"
-NEXT_PUBLIC_RAZORPAY_PLAN_ID="your_razorpay_subscription_plan_id"
-NEXT_PUBLIC_RAZORPAY_WEBHOOK_SECRET="your_razorpay_webhook_secret"
+```bash
+cp .env.example .env
 ```
+
+Subscribe the GitHub App to the **Pull request** and **Installation** webhook events.
 
 ---
 
