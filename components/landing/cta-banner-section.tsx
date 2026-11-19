@@ -1,7 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
 import { ArrowRight, Check } from 'lucide-react';
-import { GitHubIcon } from './icons';
 
 interface CtaBannerSectionProps {
   isLoggedIn?: boolean;
@@ -9,101 +8,78 @@ interface CtaBannerSectionProps {
 
 export function CtaBannerSection({ isLoggedIn }: CtaBannerSectionProps) {
   return (
-    <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="relative rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-gradient-to-br from-blue-50/50 via-white to-slate-50/60 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900 p-8 sm:p-12 lg:p-16 overflow-hidden shadow-xl shadow-blue-500/5">
-        {/* Soft decorative background glow */}
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-96 h-96 bg-blue-400/10 dark:bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+    <section className="relative py-28 sm:py-36 overflow-hidden border-t border-slate-100 dark:border-slate-900 bg-white dark:bg-slate-950">
+      {/* Subtle ASCII / Code Matrix Pattern Background (Aceternity Image 2 style) */}
+      <div className="absolute inset-0 pointer-events-none select-none opacity-[0.035] dark:opacity-[0.05] font-mono text-xs leading-loose overflow-hidden">
+        <p className="break-words">
+          01010100 01100101 01110011 01110100 {'{'} const token = verify(jwt); if (!token) return error; {'}'} 
+          git checkout -b feature/precision-review && npm run build --release 1440x900 #0066FF 0x2A7F
+          type ReviewPipeline = &#123; ast: ASTNode; model: &apos;gpt-4o-mini&apos;; latency: number; emojis: 0; &#125;
+          function analyzeAST(diff: GitDiff): PrecisionReport &#123; return diff.filter(isVulnerable); &#125;
+          01010100 01100101 01110011 01110100 {'{'} const token = verify(jwt); if (!token) return error; {'}'} 
+          git checkout -b feature/precision-review && npm run build --release 1440x900 #0066FF 0x2A7F
+          type ReviewPipeline = &#123; ast: ASTNode; model: &apos;gpt-4o-mini&apos;; latency: number; emojis: 0; &#125;
+        </p>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative z-10">
-          {/* Left Column: Heading, buttons, checklist */}
-          <div className="lg:col-span-7 text-left">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-600 border border-blue-200/60 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-900/50 mb-6">
-              <span className="size-1.5 rounded-full bg-blue-600 dark:bg-blue-400" />
-              Ready to build better?
-            </div>
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+        {/* Main Headline with Aceternity Inspect Selection Box (Image 2 style) */}
+        <h2 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-[-0.035em] text-slate-950 dark:text-white leading-[1.12]">
+          Stop waiting on
+          <br className="hidden sm:inline" />{' '}
+          <span className="relative inline-block mt-2 sm:mt-0">
+            {/* Outer selection border */}
+            <span className="relative z-10 px-2 py-1 border border-blue-500/80 dark:border-blue-400 bg-blue-50/30 dark:bg-blue-950/20 rounded-md">
+              pull request reviews.
+              {/* Corner selection square handles */}
+              <span className="absolute -top-1 -left-1 size-2 bg-white border border-blue-600 rounded-xs" />
+              <span className="absolute -top-1 -right-1 size-2 bg-white border border-blue-600 rounded-xs" />
+              <span className="absolute -bottom-1 -left-1 size-2 bg-white border border-blue-600 rounded-xs" />
+              <span className="absolute -bottom-1 -right-1 size-2 bg-white border border-blue-600 rounded-xs" />
+            </span>
+            {/* Floating dimension tag below selection box */}
+            <span className="absolute left-1/2 -translate-x-1/2 -bottom-5 z-20 font-mono text-[9px] font-semibold bg-blue-600 text-white px-2 py-0.5 rounded-sm shadow-xs uppercase tracking-wider">
+              1440 x 900
+            </span>
+          </span>
+        </h2>
 
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-[-0.03em] leading-tight text-slate-950 dark:text-white">
-              Start reviewing smarter, today.
-            </h2>
+        {/* Subtitle */}
+        <p className="mt-8 text-base sm:text-lg text-slate-600 dark:text-slate-400 max-w-xl mx-auto font-normal leading-relaxed">
+          Connect your GitHub repositories in two minutes. Your first automated review is already waiting.
+        </p>
 
-            <p className="mt-4 text-base text-slate-600 dark:text-slate-400 font-normal">
-              Join developers who ship better code with ReviewRay.
-            </p>
+        {/* Action Buttons (Solid Blue + White Outline) */}
+        <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+          <Link
+            href={isLoggedIn ? '/dashboard' : '/sign-in'}
+            className="inline-flex items-center gap-2 h-11 px-7 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-semibold shadow-md shadow-blue-500/25 transition-all"
+          >
+            <span>Start reviewing</span>
+            <ArrowRight className="size-4" />
+          </Link>
+          <Link
+            href="/pricing"
+            className="inline-flex items-center justify-center h-11 px-7 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/80 text-xs sm:text-sm font-semibold shadow-xs transition-all"
+          >
+            Book a demo
+          </Link>
+        </div>
 
-            {/* Buttons */}
-            <div className="mt-8 flex flex-wrap items-center gap-3.5">
-              <Link
-                href={isLoggedIn ? '/dashboard' : '/sign-in'}
-                className="inline-flex items-center gap-2 h-11 px-6 rounded-full bg-slate-950 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100 text-xs sm:text-sm font-semibold shadow-sm transition-all"
-              >
-                Get started for free
-                <ArrowRight className="size-4" />
-              </Link>
-              <Link
-                href="/pricing"
-                className="inline-flex items-center justify-center h-11 px-6 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/80 text-xs sm:text-sm font-semibold shadow-sm transition-all"
-              >
-                View pricing
-              </Link>
-            </div>
-
-            {/* Value checklist */}
-            <div className="mt-8 flex flex-wrap items-center gap-6 text-xs text-slate-600 dark:text-slate-400 font-medium">
-              <span className="flex items-center gap-1.5">
-                <Check className="size-3.5 text-slate-800 dark:text-slate-200 stroke-[2.5]" />
-                No credit card
-              </span>
-              <span className="flex items-center gap-1.5">
-                <Check className="size-3.5 text-slate-800 dark:text-slate-200 stroke-[2.5]" />2
-                minute setup
-              </span>
-              <span className="flex items-center gap-1.5">
-                <Check className="size-3.5 text-slate-800 dark:text-slate-200 stroke-[2.5]" />
-                Cancel anytime
-              </span>
-            </div>
-          </div>
-
-          {/* Right Column: Isometric GitHub Glass Card Illustration */}
-          <div className="lg:col-span-5 flex flex-col items-center justify-center relative">
-            <div className="relative w-64 sm:w-72 aspect-square flex items-center justify-center">
-              {/* Layered Glass Isometric Card */}
-              <div className="absolute inset-4 rounded-3xl bg-blue-100/50 dark:bg-blue-900/20 transform rotate-6 border border-blue-200/40 dark:border-blue-800/30" />
-              <div className="relative size-44 sm:size-48 rounded-3xl bg-white/90 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 shadow-2xl flex flex-col items-center justify-center backdrop-blur-md">
-                <div className="size-16 rounded-2xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white flex items-center justify-center border border-slate-100 dark:border-slate-700 shadow-inner">
-                  <GitHubIcon className="size-10" />
-                </div>
-                <span className="mt-3 text-xs font-bold text-slate-800 dark:text-slate-200 tracking-tight">
-                  GitHub Native
-                </span>
-                <span className="text-[10px] text-slate-400">One-click install</span>
-              </div>
-            </div>
-
-            {/* Hand-drawn Arrow & Script Annotation */}
-            <div className="flex items-center gap-2 -mt-4 select-none pointer-events-none">
-              <div className="text-right">
-                <p className="text-xs sm:text-sm font-semibold text-blue-600 dark:text-blue-400 italic transform -rotate-2">
-                  Connect GitHub
-                </p>
-                <p className="text-xs sm:text-sm font-semibold text-blue-600 dark:text-blue-400 italic transform -rotate-1">
-                  and get instant AI reviews.
-                </p>
-              </div>
-              <svg
-                className="w-8 h-8 text-blue-500 dark:text-blue-400 -translate-y-2 rotate-12"
-                viewBox="0 0 48 48"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M 10 36 C 22 36, 36 28, 38 12" />
-                <path d="M 30 14 L 38 12 L 40 20" />
-              </svg>
-            </div>
-          </div>
+        {/* Feature Checkpoints */}
+        <div className="mt-10 flex flex-wrap items-center justify-center gap-8 text-xs text-slate-600 dark:text-slate-400 font-medium">
+          <span className="flex items-center gap-1.5">
+            <Check className="size-3.5 text-blue-600 dark:text-blue-400 stroke-[2.5]" />
+            No credit card
+          </span>
+          <span className="flex items-center gap-1.5">
+            <Check className="size-3.5 text-blue-600 dark:text-blue-400 stroke-[2.5]" />
+            Official OpenAI pipeline
+          </span>
+          <span className="flex items-center gap-1.5">
+            <Check className="size-3.5 text-blue-600 dark:text-blue-400 stroke-[2.5]" />
+            Zero emoji clutter
+          </span>
         </div>
       </div>
     </section>
