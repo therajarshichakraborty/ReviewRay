@@ -1,7 +1,7 @@
 /**
  * GitHub App connection card on the `/dashboard/github` page.
  *
- * Shows whether the user has installed the Chai reviewer GitHub App,
+ * Shows whether the user has installed the ReviewRay reviewer GitHub App,
  * which account it is installed for, and actions to install or disconnect.
  * Server actions handle disconnect; install links out to GitHub's install flow.
  */
@@ -174,7 +174,7 @@ export function GithubConnectCard({ userId, installation }: GithubConnectCardPro
               <div>
                 <CardTitle>GitHub App</CardTitle>
                 <CardDescription>
-                  Install the Chai reviewer app on your GitHub account or organization to access
+                  Install the ReviewRay app on your GitHub account or organization to access
                   public and private repositories.
                 </CardDescription>
               </div>
