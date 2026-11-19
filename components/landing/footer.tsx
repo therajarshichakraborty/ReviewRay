@@ -1,199 +1,82 @@
-import React from 'react';
 import Link from 'next/link';
-import { Sparkles } from 'lucide-react';
-import { GitHubIcon, XIcon, LinkedInIcon } from './icons';
+
+import { Logo } from '@/components/brand/logo';
+import { SIGN_IN_PATH } from '@/features/auth/utils';
+import { DASHBOARD_ROUTES } from '@/features/dashboard/lib/routes';
+import { Section } from './primitives';
+
+const COLUMNS = [
+  {
+    title: 'Product',
+    links: [
+      { href: '/features', label: 'Features' },
+      { href: '/workflow', label: 'Workflow' },
+      { href: '/review', label: 'Sample review' },
+      { href: '/pricing', label: 'Pricing' },
+    ],
+  },
+  {
+    title: 'Account',
+    links: [
+      { href: SIGN_IN_PATH, label: 'Sign in' },
+      { href: DASHBOARD_ROUTES.overview, label: 'Dashboard' },
+      { href: DASHBOARD_ROUTES.github, label: 'GitHub App' },
+      { href: DASHBOARD_ROUTES.settings, label: 'Billing' },
+    ],
+  },
+  {
+    title: 'Resources',
+    links: [
+      { href: '/workflow#how-it-works', label: 'Getting started' },
+      { href: 'https://docs.github.com/en/apps', label: 'GitHub Apps docs', external: true },
+      {
+        href: 'https://github.com/settings/installations',
+        label: 'Manage installations',
+        external: true,
+      },
+    ],
+  },
+];
 
 export function Footer() {
   return (
-    <footer className="border-t border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-950 pt-16 pb-12 text-slate-600 dark:text-slate-400">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Top 4-Column Grid matching Aceternity Image 2 */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-8 lg:gap-12 pb-14 border-b border-slate-100 dark:border-slate-800/80 text-left">
-          {/* Brand Column (spans 2 on md) */}
-          <div className="col-span-2 space-y-4">
-            <Link href="/" className="flex items-center gap-2.5">
-              <div className="flex size-7 items-center justify-center rounded-lg bg-blue-600 text-white shadow-xs">
-                <Sparkles className="size-4" />
-              </div>
-              <span className="font-sans text-base font-bold tracking-tight text-slate-950 dark:text-white">
-                ReviewRay
-              </span>
-            </Link>
-
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-sm leading-relaxed font-normal">
-              The AI code reviewing engine that runs on your codebase.
+    <Section>
+      <footer className="px-5 pt-16 pb-10 sm:px-10 lg:px-12">
+        <div className="grid gap-12 md:grid-cols-[minmax(0,1.3fr)_repeat(3,minmax(0,1fr))]">
+          <div className="max-w-xs">
+            <Logo />
+            <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">
+              The AI reviewer that reads your pull requests in the context of your codebase.
             </p>
+          </div>
 
-            {/* Social Links */}
-            <div className="flex items-center gap-2.5 pt-2">
-              <a
-                href="https://github.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="GitHub"
-                className="size-8 rounded-lg border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-300 dark:hover:border-blue-800 transition-colors"
-              >
-                <GitHubIcon className="size-4" />
-              </a>
-              <a
-                href="https://x.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="X (Twitter)"
-                className="size-8 rounded-lg border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-300 dark:hover:border-blue-800 transition-colors"
-              >
-                <XIcon className="size-4" />
-              </a>
-              <a
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="LinkedIn"
-                className="size-8 rounded-lg border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-300 dark:hover:border-blue-800 transition-colors"
-              >
-                <LinkedInIcon className="size-4" />
-              </a>
+          {COLUMNS.map((column) => (
+            <div key={column.title}>
+              <p className="font-mono text-xs text-muted-foreground">{column.title}</p>
+              <ul className="mt-4 space-y-3">
+                {column.links.map((link) => (
+                  <li key={link.label}>
+                    <Link
+                      href={link.href}
+                      className="link-underline pb-0.5 text-[15px] transition-colors hover:text-primary"
+                      {...('external' in link && link.external
+                        ? { target: '_blank', rel: 'noopener noreferrer' }
+                        : {})}
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </div>
-          </div>
-
-          {/* Product Column */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
-              Product
-            </h4>
-            <ul className="space-y-2.5 text-xs sm:text-sm">
-              <li>
-                <Link
-                  href="/#features"
-                  className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                >
-                  Canvas
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/#how-it-works"
-                  className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                >
-                  Handoff
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/#codebase-review"
-                  className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                >
-                  Review
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/pricing"
-                  className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                >
-                  Pricing
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Developers Column */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
-              Developers
-            </h4>
-            <ul className="space-y-2.5 text-xs sm:text-sm">
-              <li>
-                <a
-                  href="https://github.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                >
-                  Docs
-                </a>
-              </li>
-              <li>
-                <Link
-                  href="/#cli"
-                  className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                >
-                  CLI
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/#github-app"
-                  className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                >
-                  GitHub app
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/#api"
-                  className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                >
-                  API reference
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Company Column */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
-              Company
-            </h4>
-            <ul className="space-y-2.5 text-xs sm:text-sm">
-              <li>
-                <Link
-                  href="/#about"
-                  className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                >
-                  About
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/#careers"
-                  className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                >
-                  Careers
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/#blog"
-                  className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                >
-                  Blog
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/#contact"
-                  className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                >
-                  Contact
-                </Link>
-              </li>
-            </ul>
-          </div>
+          ))}
         </div>
 
-        {/* Bottom Bar */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8 text-xs text-slate-500 dark:text-slate-400">
-          <p>&copy; 2026 ReviewRay. Built with precision for developers.</p>
-
-          <div className="flex items-center gap-2">
-            <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="font-medium text-slate-600 dark:text-slate-300">
-              OpenAI Engine Active
-            </span>
-          </div>
+        <div className="mt-16 flex flex-col gap-3 border-t border-dashed border-rail pt-6 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+          <p>© {new Date().getFullYear()} ReviewRay. Built for developers who ship.</p>
+          <p className="font-mono text-xs">reviews posted, not promised.</p>
         </div>
-      </div>
-    </footer>
+      </footer>
+    </Section>
   );
 }
