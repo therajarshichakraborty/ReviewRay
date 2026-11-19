@@ -1,135 +1,125 @@
-import { createChatCompletion } from '@/features/ai';
+import { createChatCompletion, type AiTier } from '@/features/ai';
+import type { PrFile } from '@/features/reviews/types/review';
+import { buildDiffForReview } from '@/features/reviews/utils/diff-budget';
+import { sanitizeReview, trimIncompleteTail } from '@/features/reviews/utils/sanitize-review';
 
 /**
- * System prompt engineered for high precision, low token consumption,
- * strict emoji/em-dash prohibition, and actionable code fixes.
+ * Kept deliberately compact: it is sent on every review, so every word costs
+ * tokens. Structure and length limits are explicit so output size is stable
+ * across very different models.
  */
-const SYSTEM_PROMPT = `You are an elite Staff Software Engineer and Senior Code Reviewer.
-Your task is to review pull request code changes and deliver a high-signal, professional code review.
-
-CRITICAL FORMATTING RULES:
-1. NEVER use any emojis anywhere in your response. Strictly zero emojis.
-2. NEVER use em dashes ('—') or en dashes ('–'). Use standard hyphens ('-'), commas, or periods instead.
-3. Keep the review balanced and decently sized: not overly verbose, not trivially short. Focus strictly on real engineering value.
-4. For every issue or mistake you identify, ALWAYS provide a concrete "Better Code Snippet" showing the improved replacement implementation.
-5. Highlight what is good and what needs improvement with exact technical reasons.
-
-EVALUATION CRITERIA:
-- Correctness and Logic: Bugs, edge cases, null/undefined handling, race conditions, async flow.
-- Security: Injection, authorization checks, credential exposure, data leaks, input validation.
-- Performance: N+1 queries, memory leaks, blocking operations, redundant computation.
-- Maintainability: Typing precision, clean error handling, boundary validation.
-
-Do not comment on personal style preferences or subjective formatting unless it poses a real maintenance hazard.
-
-OUTPUT STRUCTURE:
-
-# Pull Request Review
+const SYSTEM_PROMPT = `You are ReviewRay, a staff-level code reviewer. Review the pull request diff and reply in GitHub Markdown using exactly this structure:
 
 ## Summary
-A concise 2 to 3 sentence evaluation of the overall change quality and intent.
+2 to 3 sentences: what the change does and its overall quality.
 
-## Critical and High Priority Issues
-(If no critical or high severity issues are found, state: "None detected.")
-For each issue found:
-### [Severity] Title
-- Location: file path and function/line context
-- Mistake: exact explanation of what is wrong or unsafe
-- Impact: realistic production failure mode or security risk
-- Better Code Snippet:
-\`\`\`language
-// Improved implementation
-\`\`\`
+**Verdict:** one of \`Approve\`, \`Approve with suggestions\`, \`Request changes\`
 
-## Suggestions and Improvements
-(If no suggestions are found, state: "None detected.")
-For each suggestion:
-- Title and location
-- Mistake: current limitation or code smell
-- Recommendation: explanation of the better approach
-- Better Code Snippet:
-\`\`\`language
-// Recommended implementation
-\`\`\`
+## Issues
+Numbered list, most severe first, at most 5. Each item:
+1. **[Critical|High|Medium|Low] Short title** in \`path/to/file.ext\`
+   One or two sentences: what is wrong and the concrete impact.
+   A fenced code block, indented under the item, containing only the corrected code (no "before" version, max 15 lines, correct language tag).
+If there are no real issues, write: No blocking issues found.
 
-## Positive Aspects
-- Point out 2 to 3 specific good engineering practices observed in the diff (clean types, good test coverage, sound architecture, proper validation).
+## Suggestions
+At most 3 bullets for non-blocking improvements (readability, performance, tests). Add a short code block only when it makes the suggestion clearer. Omit the section if there are none.
 
-## Verdict
-[APPROVE | APPROVE WITH SUGGESTIONS | REQUEST CHANGES]
-Single sentence technical justification for the verdict.`;
+## What works well
+At most 3 bullets naming specific good decisions in this diff.
 
-type ReviewInput = {
-  repoFullName: string;
-  title: string;
-  /** Chunks retrieved from the PR's Pinecone namespace */
-  contextSnippets: string[];
-  /** Optional chunks from repo-sync namespace (full codebase context) */
-  repoContextSnippets: string[];
+Rules:
+- Report only real problems visible in the diff: bugs, security, data loss, race conditions, error handling, performance, types. No style nitpicks a formatter would fix.
+- Be specific and terse. Reference files and identifiers. Do not repeat the diff back.
+- Never invent code that is not in the diff. If context is missing, say what to verify.
+- Never use emojis. Never use em dashes or en dashes; use commas, periods or hyphens.
+- Whole review under 450 words, excluding code blocks.`;
+
+/** Diff budget per tier, in characters (roughly 4 characters per token). */
+const DIFF_BUDGET: Record<AiTier, number> = {
+  free: 24_000,
+  pro: 48_000,
 };
 
-/**
- * Strips all emojis and replaces em/en dashes from review text to guarantee
- * 100% adherence to formatting requirements.
- */
-export function sanitizeReviewOutput(text: string): string {
-  return text
-    // Strip emojis across standard Unicode ranges
-    .replace(
-      /[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}\u{200D}\u{FE0F}]/gu,
-      '',
-    )
-    // Replace em dashes and en dashes
-    .replace(/—/g, ' - ')
-    .replace(/–/g, '-')
-    // Clean up any double spaces created by emoji removals
-    .replace(/[ \t]{2,}/g, ' ')
-    // Normalize excessive consecutive newlines
-    .replace(/\n{4,}/g, '\n\n\n')
-    .trim();
+const MAX_REPO_SNIPPETS = 4;
+const MAX_SNIPPET_CHARS = 1_200;
+const MAX_DESCRIPTION_CHARS = 600;
+
+export type ReviewInput = {
+  repoFullName: string;
+  title: string;
+  description: string;
+  files: PrFile[];
+  /** Related code from the repository's Pinecone index, when the repo is synced. */
+  repoContextSnippets: string[];
+  tier: AiTier;
+};
+
+export type ReviewOutput = {
+  markdown: string;
+  model: string;
+  provider: string;
+  totalTokens: number | null;
+};
+
+function buildRepoContext(snippets: string[], changedPaths: string[]): string {
+  const relevant = snippets
+    // A file already in the diff adds nothing new as "context".
+    .filter((snippet) => !changedPaths.some((path) => snippet.startsWith(`File: ${path}\n`)))
+    .slice(0, MAX_REPO_SNIPPETS)
+    .map((snippet) => snippet.slice(0, MAX_SNIPPET_CHARS).trim());
+
+  if (relevant.length === 0) return '';
+  return `\n\nRelated code from the repository (reference only, not part of this change):\n\n${relevant.join('\n\n---\n\n')}`;
 }
 
-/**
- * Trims and filters diff content to minimize token consumption while preserving
- * code semantics and patch context.
- */
-function compressSnippets(snippets: string[], maxSnippets = 8): string {
-  return snippets
-    .slice(0, maxSnippets)
-    .map((s) => s.trim())
-    .filter(Boolean)
-    .join('\n\n---\n\n');
-}
+function buildUserPrompt(input: ReviewInput) {
+  const diff = buildDiffForReview(input.files, DIFF_BUDGET[input.tier]);
+  const description = input.description.trim().slice(0, MAX_DESCRIPTION_CHARS);
 
-function buildRepoContextSection(repoContextSnippets: string[]): string {
-  if (repoContextSnippets.length === 0) {
-    return '';
+  const lines = [`Repository: ${input.repoFullName}`, `Pull request: ${input.title}`];
+  if (description) lines.push(`Description: ${description}`);
+  if (diff.omittedPaths.length > 0) {
+    lines.push(
+      `Not shown (generated, binary, deleted or over budget): ${diff.omittedPaths.slice(0, 20).join(', ')}`,
+    );
   }
 
-  const compressed = compressSnippets(repoContextSnippets, 4);
-  if (!compressed) return '';
-
-  return `\n\nRelated codebase context for reference only:\n\n${compressed}`;
+  const prompt = `${lines.join('\n')}\n\nDiff:\n\n${diff.text}${buildRepoContext(input.repoContextSnippets, diff.includedPaths)}`;
+  return { prompt, hasReviewableCode: diff.includedPaths.length > 0 };
 }
 
-export async function generateReview(input: ReviewInput): Promise<string> {
-  const context = compressSnippets(input.contextSnippets, 10);
-  const repoContextSection = buildRepoContextSection(input.repoContextSnippets);
+/** Returns `null` when the PR contains nothing worth reviewing. */
+export async function generateReview(input: ReviewInput): Promise<ReviewOutput | null> {
+  const { prompt, hasReviewableCode } = buildUserPrompt(input);
+  if (!hasReviewableCode) return null;
 
-  const prompt = `Repository: ${input.repoFullName}
-Pull Request: ${input.title}
-
-Code Changes:
-${context || 'No diff snippets available.'}${repoContextSection}`;
-
-  const { text } = await createChatCompletion({
+  const completion = await createChatCompletion({
+    tier: input.tier,
     messages: [
       { role: 'system', content: SYSTEM_PROMPT },
       { role: 'user', content: prompt },
     ],
     temperature: 0.2,
-    maxTokens: 1600,
+    maxTokens: 1500,
   });
 
-  return sanitizeReviewOutput(text);
+  if (completion.truncated) {
+    console.warn(
+      `[review] ${completion.model} hit the output limit; trimming the unfinished tail.`,
+    );
+  }
+
+  const text = completion.truncated ? trimIncompleteTail(completion.text) : completion.text;
+  const markdown = sanitizeReview(text);
+  if (!markdown) {
+    throw new Error('The model returned an empty review after sanitization.');
+  }
+
+  return {
+    markdown,
+    model: completion.model,
+    provider: completion.provider,
+    totalTokens: completion.usage?.totalTokens ?? null,
+  };
 }
