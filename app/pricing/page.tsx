@@ -183,7 +183,7 @@ export default async function PricingPage() {
             {[
               {
                 q: 'What counts as one PR review?',
-                a: 'Each pull request that triggers an AI review counts as one review — regardless of how many commits or files it contains.',
+                a: 'Each pull request that triggers an AI review counts as one review, regardless of how many commits or files it contains.',
               },
               {
                 q: 'What happens when I hit the free limit?',
