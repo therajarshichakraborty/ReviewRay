@@ -1,196 +1,106 @@
-/**
- * Pull requests list UI grouped by repository.
- * Aesthetic, minimalist styling matching the landing page.
- */
-
-import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
-import {
-  BotIcon,
-  ExternalLinkIcon,
-  FolderGit2Icon,
-  GitBranchIcon,
-  GitPullRequestIcon,
-  UserIcon,
-} from 'lucide-react';
+import { ArrowUpRight, ChevronRight, FolderGit2, GitBranch, GitPullRequest } from 'lucide-react';
+import Link from 'next/link';
 
+import { EmptyState, PANEL_ROW_HOVER, PANEL_ROWS } from '@/features/dashboard/components/ui';
+import { DASHBOARD_ROUTES } from '@/features/dashboard/lib/routes';
+import { statusBadge, statusDotClass } from '@/features/dashboard/lib/status-styles';
 import type {
   PullRequestItem,
   RepoPullRequests,
 } from '@/features/pull-requests/types/pull-request';
-import { statusBadge } from '@/features/dashboard/lib/status-styles';
-import { AiReviewMarkdown } from '@/features/pull-requests/components/ai-review-markdown';
-import { PR_STATUS_LABELS, getPrStatusTone } from '@/features/pull-requests/utils/status';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
-import { DASHBOARD_ROUTES } from '@/features/dashboard/lib/routes';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { getPrStatusTone, PR_STATUS_LABELS } from '@/features/pull-requests/utils/status';
+import { cn } from '@/lib/utils';
 
-function buildPrUrl(repoFullName: string, prNumber: number) {
-  return `https://github.com/${repoFullName}/pull/${prNumber}`;
-}
-
-function buildRepoUrl(repoFullName: string) {
-  return `https://github.com/${repoFullName}`;
-}
-
-function PullRequestMeta({ pullRequest }: { pullRequest: PullRequestItem }) {
-  const openedAgo = formatDistanceToNow(new Date(pullRequest.createdAt), { addSuffix: true });
-
-  return (
-    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground/80 font-light">
-      <span className="inline-flex items-center gap-1.5">
-        <UserIcon className="size-3.5 text-muted-foreground/60" />
-        {pullRequest.authorLogin ?? 'unknown'}
-      </span>
-      <span className="inline-flex items-center gap-1.5">
-        <GitBranchIcon className="size-3.5 text-muted-foreground/60" />
-        <span className="font-mono text-[10px] bg-muted border border-border px-1.5 py-0.5 rounded text-foreground/85">
-          {pullRequest.baseBranch}
-        </span>
-      </span>
-      <span>opened {openedAgo}</span>
-    </div>
-  );
-}
-
-function AiReviewAccordion({ pullRequest }: { pullRequest: PullRequestItem }) {
-  if (pullRequest.status === 'rate_limited') {
-    return (
-      <p className="text-[11px] text-amber-700 dark:text-amber-400 font-light italic border border-amber-300/40 bg-amber-50/50 dark:bg-amber-950/10 px-3 py-1.5 rounded-lg w-fit">
-        Monthly review limit reached - upgrade to Pro for unlimited reviews.
-      </p>
-    );
-  }
-
-  if (!pullRequest.reviewComment) {
-    return (
-      <p className="text-[11px] text-muted-foreground/70 font-light italic">
-        The AI review will appear here once it is ready.
-      </p>
-    );
-  }
-
-  return (
-    <Accordion type="single" collapsible className="w-full">
-      <AccordionItem value="review" className="border-none">
-        <AccordionTrigger className="py-1.5 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 no-underline hover:no-underline font-medium">
-          <span className="inline-flex items-center gap-1.5">
-            <BotIcon className="size-3.5" />
-            View AI review
-          </span>
-        </AccordionTrigger>
-        <AccordionContent className="pt-2 pb-0">
-          <div className="rounded-xl border border-border bg-card p-4 overflow-x-auto text-xs shadow-inner">
-            <AiReviewMarkdown review={pullRequest.reviewComment} />
-          </div>
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
-  );
-}
-
-function PullRequestRow({
-  repoFullName,
-  pullRequest,
-}: {
-  repoFullName: string;
-  pullRequest: PullRequestItem;
-}) {
+function PullRequestRow({ pullRequest, index }: { pullRequest: PullRequestItem; index: number }) {
   const tone = getPrStatusTone(pullRequest.status);
 
   return (
-    <div className="flex flex-col gap-3 border-b border-border/40 py-4 last:border-b-0 last:pb-0 first:pt-0 group">
-      <div className="flex flex-wrap items-center gap-2">
-        <GitPullRequestIcon className="size-4 shrink-0 text-muted-foreground/75 group-hover:text-blue-500 transition-colors" />
-        <Link
-          href={`${DASHBOARD_ROUTES.pullRequest}/${pullRequest.id}`}
-          className="font-semibold text-sm hover:underline text-foreground/90 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+    <li className="animate-fade-up" style={{ animationDelay: `${Math.min(index, 8) * 50}ms` }}>
+      <Link
+        href={`${DASHBOARD_ROUTES.pullRequest}/${pullRequest.id}`}
+        className={cn('group flex items-center gap-4 rounded-xl px-3 py-3.5', PANEL_ROW_HOVER)}
+      >
+        <span
+          className={cn(
+            'flex size-8 shrink-0 items-center justify-center rounded-lg bg-background transition-transform duration-300 group-hover:scale-105',
+            pullRequest.status === 'reviewed' ? 'text-primary' : 'text-muted-foreground',
+          )}
         >
-          {pullRequest.title}
-        </Link>
-        <Link
-          href={buildPrUrl(repoFullName, pullRequest.prNumber)}
-          target="_blank"
-          className="text-xs text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 hover:underline font-mono font-light transition-colors"
-        >
-          #{pullRequest.prNumber}
-        </Link>
-        <span className={statusBadge(tone, 'ml-auto text-[10px] font-medium')}>
+          <GitPullRequest className="size-4" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-[15px] font-medium transition-colors group-hover:text-primary">
+            {pullRequest.title}
+          </p>
+          <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+            <span className="font-mono text-xs">#{pullRequest.prNumber}</span>
+            <span>{pullRequest.authorLogin ?? 'unknown'}</span>
+            <span className="inline-flex items-center gap-1">
+              <GitBranch className="size-3.5" />
+              <span className="font-mono text-xs">{pullRequest.baseBranch}</span>
+            </span>
+            <span>{formatDistanceToNow(new Date(pullRequest.createdAt), { addSuffix: true })}</span>
+          </p>
+        </div>
+        <span className={statusBadge(tone, 'hidden sm:inline-flex')}>
+          <span className={cn('size-1.5 rounded-full', statusDotClass[tone])} />
           {PR_STATUS_LABELS[pullRequest.status]}
         </span>
-      </div>
-
-      <PullRequestMeta pullRequest={pullRequest} />
-      <AiReviewAccordion pullRequest={pullRequest} />
-    </div>
+        <ChevronRight className="size-4 shrink-0 text-muted-foreground transition-transform duration-300 group-hover:translate-x-1" />
+      </Link>
+    </li>
   );
 }
 
-function RepoCard({ repo }: { repo: RepoPullRequests }) {
-  const prCount = repo.pullRequests.length;
-  const prLabel = prCount === 1 ? 'pull request' : 'pull requests';
+function RepoGroup({ repo, index }: { repo: RepoPullRequests; index: number }) {
+  const count = repo.pullRequests.length;
 
   return (
-    <Card className="rounded-xl border border-border/50 bg-card overflow-hidden hover:border-blue-500/30 dark:hover:border-blue-500/10 transition-colors duration-200 shadow-sm">
-      <CardHeader className="border-b border-border/40 bg-muted/40">
-        <CardTitle className="flex flex-wrap items-center gap-2 text-sm">
-          <FolderGit2Icon className="size-4 text-muted-foreground/75" />
-          <span className="font-semibold">{repo.repoFullName}</span>
-          <span className="font-normal text-xs text-muted-foreground">
-            {prCount} {prLabel}
-          </span>
-          <Link
-            href={buildRepoUrl(repo.repoFullName)}
-            target="_blank"
-            className="ml-auto inline-flex items-center gap-1 text-xs font-normal text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 hover:underline transition-colors"
-          >
-            View on GitHub
-            <ExternalLinkIcon className="size-3" />
-          </Link>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="pt-4">
-        {repo.pullRequests.map((pullRequest) => (
-          <PullRequestRow
-            key={pullRequest.id}
-            repoFullName={repo.repoFullName}
-            pullRequest={pullRequest}
-          />
+    <section
+      className="animate-fade-up overflow-hidden rounded-2xl bg-surface"
+      style={{ animationDelay: `${index * 90}ms` }}
+    >
+      <header className="flex items-center gap-3 px-5 pt-4 pb-2">
+        <FolderGit2 className="size-4 text-muted-foreground" />
+        <h3 className="truncate text-sm font-medium">{repo.repoFullName}</h3>
+        <span className="rounded-full bg-background px-2 py-px font-mono text-[11px] text-muted-foreground">
+          {count}
+        </span>
+        <a
+          href={`https://github.com/${repo.repoFullName}/pulls`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group ml-auto inline-flex shrink-0 items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          GitHub
+          <ArrowUpRight className="size-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+        </a>
+      </header>
+      <ul className={cn('p-2', PANEL_ROWS)}>
+        {repo.pullRequests.map((pullRequest, rowIndex) => (
+          <PullRequestRow key={pullRequest.id} pullRequest={pullRequest} index={rowIndex} />
         ))}
-      </CardContent>
-    </Card>
-  );
-}
-
-function NoPullRequestsYet() {
-  return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-3 p-12 text-center max-w-lg mx-auto">
-      <div className="flex size-12 items-center justify-center rounded-2xl bg-muted border border-border/50">
-        <GitPullRequestIcon className="size-6 text-muted-foreground" />
-      </div>
-      <p className="text-sm font-semibold text-foreground/80">No pull requests yet</p>
-      <p className="text-xs text-muted-foreground font-light leading-relaxed">
-        Open a pull request on a connected repository and the AI reviewer will pick it up
-        automatically. Reviews show up here and as comments on GitHub.
-      </p>
-    </div>
+      </ul>
+    </section>
   );
 }
 
 export function PullRequestsList({ repos }: { repos: RepoPullRequests[] }) {
   if (repos.length === 0) {
-    return <NoPullRequestsYet />;
+    return (
+      <EmptyState
+        icon={GitPullRequest}
+        title="No pull requests yet"
+        description="Open a pull request on a repository the GitHub App can access. ReviewRay picks it up automatically and the review appears here and on GitHub."
+      />
+    );
   }
 
   return (
-    <div className="flex flex-col gap-4 p-6 max-w-6xl mx-auto w-full">
-      {repos.map((repo) => (
-        <RepoCard key={repo.repoFullName} repo={repo} />
+    <div className="flex flex-col gap-5">
+      {repos.map((repo, index) => (
+        <RepoGroup key={repo.repoFullName} repo={repo} index={index} />
       ))}
     </div>
   );
