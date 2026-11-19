@@ -1,237 +1,320 @@
-/**
- * Dashboard Overview page body — stat cards, connect banner, and activity feed.
- * Clean, premium aesthetic with subtle borders and high-contrast accents.
- */
-
-import type { ComponentType } from 'react';
+import { addMonths, format, formatDistanceToNow, startOfMonth } from 'date-fns';
+import {
+  ArrowRight,
+  ArrowUpRight,
+  Check,
+  ChevronRight,
+  Database,
+  FolderGit2,
+  GitPullRequest,
+  Sparkles,
+} from 'lucide-react';
 import Link from 'next/link';
-import { formatDistanceToNow } from 'date-fns';
-import { FolderGit2Icon, GitPullRequestIcon, SparklesIcon, TrendingUpIcon } from 'lucide-react';
 
-import { GithubIcon } from '@/features/dashboard/components/icons/github-icon';
-import { DASHBOARD_ROUTES } from '@/features/dashboard/lib/routes';
-import { statusBadge } from '@/features/dashboard/lib/status-styles';
-import type {
-  OverviewActivityItem,
-  OverviewData,
-  OverviewRepoSummary,
-} from '@/features/overview/types/overview';
-import { PLAN_DETAILS } from '@/features/settings/lib/plan-details';
-import { cn } from '@/lib/utils';
+import { GitHubIcon } from '@/components/landing/icons';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { DASHBOARD_ROUTES } from '@/features/dashboard/lib/routes';
+import { statusBadge, statusDotClass } from '@/features/dashboard/lib/status-styles';
+import type { OverviewActivityItem, OverviewData } from '@/features/overview/types/overview';
+import { getPrStatusTone, PR_STATUS_LABELS } from '@/features/pull-requests/utils/status';
+import { cn } from '@/lib/utils';
+import { EmptyState, PANEL_ROW_HOVER, PANEL_ROWS, Panel, StatCard } from './ui';
 
-const ACTIVITY_STATUS = {
-  approved: { label: 'Approved', tone: 'success' as const },
-  changes_requested: { label: 'Changes requested', tone: 'warning' as const },
-  rate_limited: { label: 'Rate limited', tone: 'danger' as const },
-};
+function StatsGrid({ overview }: { overview: OverviewData }) {
+  const repos = overview.repos;
+  const resetDate = format(startOfMonth(addMonths(new Date(), 1)), 'MMM d');
+  const limited = overview.reviewsLimit !== null;
+  const exhausted = limited && overview.reviewsUsed >= (overview.reviewsLimit ?? 0);
 
-function getRepoDescription(repos: OverviewRepoSummary): string {
-  if (repos.totalCount === 0) return 'No repositories selected';
-  if (repos.hasMorePages) return `${repos.totalCount} connected`;
-  return `${repos.publicCount} public · ${repos.privateCount} private`;
-}
-
-function getGithubStat(installation: OverviewData['installation']) {
-  if (!installation.connected) {
-    return {
-      value: 'Not connected',
-      description: 'Install the GitHub App to start',
-      accent: undefined,
-    };
+  let repoCaption = 'Connect the GitHub App';
+  if (repos) {
+    repoCaption = repos.hasMorePages
+      ? 'Connected through the app'
+      : `${repos.publicCount} public · ${repos.privateCount} private`;
   }
-  const account = installation.accountLogin
-    ? `@${installation.accountLogin}`
-    : 'Installation active';
-  return { value: 'Connected', description: account, accent: 'success' as const };
+
+  return (
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <StatCard
+        index={0}
+        label="Reviews this month"
+        value={overview.reviewsUsed}
+        suffix={
+          limited ? (
+            <span className="text-xl text-muted-foreground"> / {overview.reviewsLimit}</span>
+          ) : null
+        }
+        caption={
+          !limited
+            ? 'Unlimited on Pro'
+            : exhausted
+              ? `Limit reached · resets ${resetDate}`
+              : `Free plan · resets ${resetDate}`
+        }
+        icon={Sparkles}
+        tone={exhausted ? 'warning' : 'default'}
+      />
+      <StatCard
+        index={1}
+        label="Pull requests"
+        value={overview.breakdown.total}
+        caption={`${overview.breakdown.reviewed} reviewed all time`}
+        icon={GitPullRequest}
+      />
+      <StatCard
+        index={2}
+        label="Repositories"
+        value={repos ? repos.totalCount : '-'}
+        caption={repoCaption}
+        icon={FolderGit2}
+      />
+      <StatCard
+        index={3}
+        label="Codebase context"
+        value={overview.syncedRepoCount}
+        caption={overview.syncedRepoCount === 1 ? 'Repository synced' : 'Repositories synced'}
+        icon={Database}
+      />
+    </div>
+  );
 }
 
-function getRepositoriesStat(repos: OverviewRepoSummary | null) {
-  if (!repos) return { value: '-', description: 'Connect GitHub App first', accent: undefined };
-  return {
-    value: String(repos.totalCount),
-    description: getRepoDescription(repos),
-    accent: 'info' as const,
-  };
+function OutcomesPanel({ overview }: { overview: OverviewData }) {
+  const { breakdown } = overview;
+  const rows = [
+    { label: 'Reviewed', value: breakdown.reviewed, color: 'bg-primary' },
+    { label: 'In progress', value: breakdown.inFlight, color: 'bg-sky-400' },
+    { label: 'Limit reached', value: breakdown.rateLimited, color: 'bg-amber-500' },
+    { label: 'Failed', value: breakdown.failed, color: 'bg-red-500' },
+    { label: 'Nothing to review', value: breakdown.skipped, color: 'bg-muted-foreground/40' },
+  ];
+
+  return (
+    <Panel title="Review outcomes" description="Every pull request ReviewRay has picked up">
+      <div className="animate-grow-x flex h-2.5 w-full origin-left gap-0.5 overflow-hidden rounded-full bg-background">
+        {rows
+          .filter((row) => row.value > 0)
+          .map((row) => (
+            <span
+              key={row.label}
+              className={cn('h-full first:rounded-l-full last:rounded-r-full', row.color)}
+              style={{ width: `${(row.value / breakdown.total) * 100}%` }}
+            />
+          ))}
+      </div>
+      <ul className="mt-5 space-y-1">
+        {rows.map((row, index) => (
+          <li
+            key={row.label}
+            className="animate-fade-up flex items-center gap-3 rounded-lg px-2 py-1.5 text-[15px] transition-colors hover:bg-background/70"
+            style={{ animationDelay: `${150 + index * 60}ms` }}
+          >
+            <span className={cn('size-2.5 rounded-full', row.color)} />
+            <span className="flex-1">{row.label}</span>
+            <span className="w-10 text-right font-mono text-sm text-muted-foreground tabular-nums">
+              {row.value}
+            </span>
+            <span className="w-12 text-right font-mono text-sm tabular-nums">
+              {Math.round((row.value / breakdown.total) * 100)}%
+            </span>
+          </li>
+        ))}
+      </ul>
+    </Panel>
+  );
 }
 
-type StatCard = {
-  title: string;
-  value: string;
-  description: string;
-  icon: ComponentType<{ className?: string }>;
-  accent?: 'success' | 'info';
-};
-
-function getReviewsStat(overview: OverviewData) {
-  if (overview.reviewsLimit === null) {
-    return { value: String(overview.reviewsUsed), description: 'Unlimited reviews on Pro' };
-  }
-  return {
-    value: `${overview.reviewsUsed} / ${overview.reviewsLimit}`,
-    description: 'AI reviews used this month',
-  };
-}
-
-function buildStats(overview: OverviewData): StatCard[] {
-  const repoStat = getRepositoriesStat(overview.repos);
-  const githubStat = getGithubStat(overview.installation);
-  const planLabel = PLAN_DETAILS[overview.plan].label;
-  const reviewsStat = getReviewsStat(overview);
-
-  return [
+function SetupChecklist({ overview }: { overview: OverviewData }) {
+  const steps = [
     {
-      title: 'Repositories',
-      value: repoStat.value,
-      description: repoStat.description,
-      icon: FolderGit2Icon,
-      accent: repoStat.accent,
+      title: 'Install the GitHub App',
+      description: 'Give ReviewRay access to the repositories you choose.',
+      done: overview.installation.connected,
+      href: DASHBOARD_ROUTES.github,
+      cta: 'Connect',
     },
     {
-      title: 'Reviews this month',
-      value: reviewsStat.value,
-      description: reviewsStat.description,
-      icon: GitPullRequestIcon,
+      title: 'Sync a repository',
+      description: 'Optional. Lets reviews reference related code in your project.',
+      done: overview.syncedRepoCount > 0,
+      href: DASHBOARD_ROUTES.repos,
+      cta: 'Sync',
     },
     {
-      title: 'GitHub App',
-      value: githubStat.value,
-      description: githubStat.description,
-      icon: GithubIcon,
-      accent: githubStat.accent,
-    },
-    {
-      title: 'Current plan',
-      value: planLabel,
-      description: 'Manage in settings',
-      icon: SparklesIcon,
-      accent: overview.plan === 'free' ? undefined : 'success',
+      title: 'Open a pull request',
+      description: 'ReviewRay reviews it automatically and comments on GitHub.',
+      done: overview.breakdown.total > 0,
+      href: undefined,
+      cta: undefined,
     },
   ];
+  const completed = steps.filter((step) => step.done).length;
+
+  return (
+    <Panel
+      title="Get set up"
+      description={`${completed} of ${steps.length} steps complete`}
+      bodyClassName="p-2"
+    >
+      <ol className={PANEL_ROWS}>
+        {steps.map((step, index) => (
+          <li
+            key={step.title}
+            className={cn(
+              'animate-fade-up flex items-center gap-4 rounded-xl px-3 py-3.5',
+              PANEL_ROW_HOVER,
+            )}
+            style={{ animationDelay: `${index * 80}ms` }}
+          >
+            <span
+              className={cn(
+                'flex size-7 shrink-0 items-center justify-center rounded-full font-mono text-xs transition-colors',
+                step.done
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-background text-muted-foreground',
+              )}
+            >
+              {step.done ? <Check className="size-3.5" strokeWidth={3} /> : index + 1}
+            </span>
+            <div className="min-w-0 flex-1">
+              <p
+                className={cn(
+                  'text-[15px] font-medium',
+                  step.done && 'text-muted-foreground line-through',
+                )}
+              >
+                {step.title}
+              </p>
+              <p className="text-sm text-muted-foreground">{step.description}</p>
+            </div>
+            {!step.done && step.href ? (
+              <Button asChild size="sm" variant="secondary" className="shrink-0 bg-background">
+                <Link href={step.href}>{step.cta}</Link>
+              </Button>
+            ) : null}
+          </li>
+        ))}
+      </ol>
+    </Panel>
+  );
 }
 
-function ConnectGithubBanner() {
+function ActivityRow({ item, index }: { item: OverviewActivityItem; index: number }) {
+  const tone = getPrStatusTone(item.status);
+
   return (
-    <div className="relative overflow-hidden rounded-xl border border-border/80 bg-card p-6 shadow-sm">
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-500/[0.03] to-transparent dark:from-blue-500/[0.01] pointer-events-none" />
-      <div className="relative flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className="flex size-10 items-center justify-center rounded-lg bg-muted text-foreground border border-border/50">
-            <GithubIcon className="size-5" />
-          </div>
-          <div className="space-y-0.5">
-            <p className="text-sm font-semibold tracking-tight text-foreground">
-              Connect GitHub to get started
-            </p>
-            <p className="text-xs text-muted-foreground font-light">
-              Install the GitHub App to list repositories and enable AI reviews on pull requests.
+    <li className="animate-fade-up" style={{ animationDelay: `${index * 60}ms` }}>
+      <Link
+        href={`${DASHBOARD_ROUTES.pullRequest}/${item.id}`}
+        className={cn('group flex items-center gap-4 rounded-xl px-3 py-3.5', PANEL_ROW_HOVER)}
+      >
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-[15px] font-medium transition-colors group-hover:text-primary">
+            {item.title}
+          </p>
+          <p className="mt-1 flex items-center gap-1.5 truncate text-sm text-muted-foreground">
+            <GitPullRequest className="size-3.5 shrink-0" />
+            {item.repoFullName}
+            <span className="font-mono text-xs">#{item.prNumber}</span>
+          </p>
+        </div>
+        <div className="flex shrink-0 flex-col items-end gap-1.5">
+          <span className={statusBadge(tone)}>
+            <span className={cn('size-1.5 rounded-full', statusDotClass[tone])} />
+            {PR_STATUS_LABELS[item.status]}
+          </span>
+          <span className="text-xs text-muted-foreground">
+            {formatDistanceToNow(new Date(item.updatedAt), { addSuffix: true })}
+          </span>
+        </div>
+        <ChevronRight className="size-4 shrink-0 text-muted-foreground opacity-0 transition-all duration-300 group-hover:translate-x-0.5 group-hover:opacity-100" />
+      </Link>
+    </li>
+  );
+}
+
+function ActivityPanel({ overview }: { overview: OverviewData }) {
+  return (
+    <Panel
+      title="Recent pull requests"
+      description="Latest reviews across your repositories"
+      bodyClassName="p-2"
+      action={
+        overview.recentActivity.length > 0 ? (
+          <Link
+            href={DASHBOARD_ROUTES.pullRequest}
+            className="group inline-flex shrink-0 items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            View all
+            <ArrowUpRight className="size-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          </Link>
+        ) : null
+      }
+    >
+      {overview.recentActivity.length > 0 ? (
+        <ul className={PANEL_ROWS}>
+          {overview.recentActivity.map((item, index) => (
+            <ActivityRow key={item.id} item={item} index={index} />
+          ))}
+        </ul>
+      ) : (
+        <EmptyState
+          icon={GitPullRequest}
+          title="No pull requests yet"
+          description="Open a pull request on a connected repository. The review shows up here and on GitHub."
+          className="bg-background/60 py-10"
+        />
+      )}
+    </Panel>
+  );
+}
+
+function ConnectBanner() {
+  return (
+    <div className="animate-fade-up relative overflow-hidden rounded-2xl bg-accent/70 p-6 sm:p-8">
+      <div className="bg-dots mask-fade-b pointer-events-none absolute inset-y-0 right-0 w-1/2 opacity-60" />
+      <div className="relative flex flex-wrap items-center justify-between gap-6">
+        <div className="flex items-start gap-4">
+          <span className="animate-float flex size-11 shrink-0 items-center justify-center rounded-xl bg-foreground text-background">
+            <GitHubIcon className="size-5" />
+          </span>
+          <div>
+            <h3 className="text-lg font-medium">Connect GitHub to start reviewing</h3>
+            <p className="mt-1 max-w-lg text-[15px] text-muted-foreground">
+              Install the ReviewRay app on your account or organization. Every new pull request is
+              reviewed automatically.
             </p>
           </div>
         </div>
         <Button
           asChild
-          size="sm"
-          className="shrink-0 rounded-full h-8 px-4 text-xs font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-colors"
+          className="group h-10 rounded-lg px-5 shadow-sm shadow-primary/25 transition-all hover:-translate-y-0.5"
         >
-          <Link href={DASHBOARD_ROUTES.github}>Connect GitHub</Link>
+          <Link href={DASHBOARD_ROUTES.github}>
+            Connect GitHub
+            <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+          </Link>
         </Button>
       </div>
     </div>
   );
 }
 
-function ActivityList({ items }: { items: OverviewActivityItem[] }) {
-  if (items.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-12 text-center gap-3">
-        <div className="flex size-10 items-center justify-center rounded-full bg-muted border border-border/50">
-          <TrendingUpIcon className="size-4 text-muted-foreground" />
-        </div>
-        <p className="text-xs font-medium text-foreground/70">No activity yet</p>
-        <p className="text-[11px] text-muted-foreground font-light max-w-xs">
-          Once AI PR reviews are enabled, summaries will appear here.
-        </p>
-      </div>
-    );
-  }
+export function OverviewContent({ overview }: { overview: OverviewData }) {
+  const needsSetup = !overview.installation.connected || overview.breakdown.total === 0;
 
   return (
-    <div className="divide-y divide-border/40">
-      {items.map((item) => {
-        const config = ACTIVITY_STATUS[item.status];
-        return (
-          <div
-            key={item.id}
-            className="flex flex-wrap items-center justify-between gap-2 py-3.5 last:pb-0 first:pt-0 group"
-          >
-            <div className="flex items-center gap-3">
-              <div className="size-1.5 rounded-full bg-blue-500 shrink-0" />
-              <div className="space-y-0.5">
-                <p className="text-xs font-semibold tracking-tight text-foreground/90 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                  {item.repoFullName}{' '}
-                  <span className="text-muted-foreground font-mono font-normal">
-                    #{item.prNumber}
-                  </span>
-                </p>
-                <p className="text-[10px] text-muted-foreground font-light">
-                  {formatDistanceToNow(new Date(item.reviewedAt), { addSuffix: true })}
-                </p>
-              </div>
-            </div>
-            <span className={statusBadge(config.tone)}>{config.label}</span>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-type OverviewContentProps = { overview: OverviewData };
-
-export function OverviewContent({ overview }: OverviewContentProps) {
-  const stats = buildStats(overview);
-  const showConnectBanner = !overview.installation.connected;
-
-  return (
-    <div className="flex flex-1 flex-col gap-6 p-6 max-w-6xl mx-auto w-full">
-      {/* Stat cards */}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {stats.map((stat) => (
-          <Card
-            key={stat.title}
-            className="border-border/50 bg-card hover:border-blue-500/40 dark:hover:border-blue-500/20 transition-all duration-200 hover:-translate-y-0.5 shadow-sm"
-          >
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-[10px] font-semibold tracking-widest text-muted-foreground uppercase">
-                {stat.title}
-              </CardTitle>
-              <div className="flex size-7 items-center justify-center rounded-lg bg-muted text-muted-foreground border border-border/50">
-                <stat.icon className="size-3.5" />
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-0.5">
-              <p className="text-2xl font-bold tracking-tight text-foreground">{stat.value}</p>
-              <p className="text-xs text-muted-foreground font-light">{stat.description}</p>
-            </CardContent>
-          </Card>
-        ))}
+    <>
+      {!overview.installation.connected ? <ConnectBanner /> : null}
+      <StatsGrid overview={overview} />
+      <div className="animate-fade-up grid gap-4 [animation-delay:200ms] lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+        {needsSetup ? (
+          <SetupChecklist overview={overview} />
+        ) : (
+          <OutcomesPanel overview={overview} />
+        )}
+        <ActivityPanel overview={overview} />
       </div>
-
-      {showConnectBanner ? <ConnectGithubBanner /> : null}
-
-      {/* Activity feed */}
-      <Card className="border-border/50 bg-card shadow-sm">
-        <CardHeader className="border-b border-border/40 pb-4">
-          <CardTitle className="text-sm font-semibold tracking-tight">Recent activity</CardTitle>
-          <CardDescription className="text-xs text-muted-foreground font-light">
-            Latest AI review summaries from your repositories.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="pt-4">
-          <ActivityList items={overview.recentActivity} />
-        </CardContent>
-      </Card>
-    </div>
+    </>
   );
 }
