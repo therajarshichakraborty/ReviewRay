@@ -1,40 +1,56 @@
 import { getGithubApp } from '@/features/github/utils/github-app';
-import { PrFile } from '../types/review';
+import type { PrFile, PrFileStatus, PrSnapshot } from '../types/review';
 
 const FILES_PER_PAGE = 100;
+/** GitHub caps the files endpoint at 3000 files; 300 is plenty for a review. */
+const MAX_PAGES = 3;
 
-/** Formats PR file patches into a markdown diff section for the review prompt. */
-export function formatPrFilesForReview(files: PrFile[]): string {
-  return files
-    .map((file) => `### ${file.filePath}\n\`\`\`diff\n${file.patch}\n\`\`\``)
-    .join('\n\n');
+function splitRepo(repoFullName: string) {
+  const [owner, repo] = repoFullName.split('/');
+  return { owner, repo };
 }
 
-export async function getPullRequestFiles(
+/** Fetches the PR description and every changed file in one place. */
+export async function getPullRequestSnapshot(
   installationId: number,
   repoFullName: string,
   prNumber: number,
-): Promise<PrFile[]> {
-  const app = getGithubApp();
-  const octokit = await app.getInstallationOctokit(installationId);
-  const [owner, repo] = repoFullName.split('/');
+): Promise<PrSnapshot> {
+  const octokit = await getGithubApp().getInstallationOctokit(installationId);
+  const { owner, repo } = splitRepo(repoFullName);
 
-  const { data } = await octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}/files', {
-    owner,
-    repo,
-    pull_number: prNumber,
-    per_page: FILES_PER_PAGE,
-  });
+  const { data: pullRequest } = await octokit.request(
+    'GET /repos/{owner}/{repo}/pulls/{pull_number}',
+    {
+      owner,
+      repo,
+      pull_number: prNumber,
+    },
+  );
 
   const files: PrFile[] = [];
 
-  for (const file of data) {
-    if (!file.patch) {
-      continue;
+  for (let page = 1; page <= MAX_PAGES; page++) {
+    const { data } = await octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}/files', {
+      owner,
+      repo,
+      pull_number: prNumber,
+      per_page: FILES_PER_PAGE,
+      page,
+    });
+
+    for (const file of data) {
+      files.push({
+        filePath: file.filename,
+        status: file.status as PrFileStatus,
+        additions: file.additions,
+        deletions: file.deletions,
+        patch: file.patch ?? null,
+      });
     }
 
-    files.push({ filePath: file.filename, patch: file.patch });
+    if (data.length < FILES_PER_PAGE) break;
   }
 
-  return files;
+  return { description: pullRequest.body ?? '', files };
 }
