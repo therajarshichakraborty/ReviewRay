@@ -1,14 +1,26 @@
 /**
  * Type definitions for pull request list and detail views.
- *
- * Status values mirror the `pullRequest.status` column in the database.
- * Dates are ISO strings when passed to client components for serialization.
+ * Dates are ISO strings so the objects can cross the server/client boundary.
  */
 
-/** Lifecycle of an AI review from webhook receipt to completion. */
-export type PullRequestStatus = 'pending' | 'processing' | 'reviewed' | 'rate_limited';
+/** Lifecycle of an AI review, mirroring the `pull_request.status` column. */
+export const PULL_REQUEST_STATUSES = [
+  'pending',
+  'processing',
+  'reviewed',
+  'rate_limited',
+  'failed',
+  'skipped',
+] as const;
 
-/** A single pull request row shown in lists and detail pages. */
+export type PullRequestStatus = (typeof PULL_REQUEST_STATUSES)[number];
+
+export function toPullRequestStatus(value: string): PullRequestStatus {
+  return (PULL_REQUEST_STATUSES as readonly string[]).includes(value)
+    ? (value as PullRequestStatus)
+    : 'pending';
+}
+
 export type PullRequestItem = {
   id: string;
   prNumber: number;
@@ -21,7 +33,6 @@ export type PullRequestItem = {
   createdAt: string;
 };
 
-/** Pull requests grouped under one repository for the list UI. */
 export type RepoPullRequests = {
   repoFullName: string;
   pullRequests: PullRequestItem[];

@@ -1,16 +1,6 @@
-/**
- * Type definitions for the dashboard Overview page data model.
- *
- * `OverviewData` is assembled server-side by `get-overview.ts` and passed
- * as props to `OverviewContent`. Types here describe that contract.
- */
-
 import type { GithubInstallationStatus, SubscriptionPlan } from '@/features/dashboard/lib/types';
+import type { PullRequestStatus } from '@/features/pull-requests/types/pull-request';
 
-/**
- * Repository counts shown on the Overview stat card.
- * `hasMorePages` is true when GitHub returns more repos than the first page.
- */
 export type OverviewRepoSummary = {
   totalCount: number;
   publicCount: number;
@@ -18,27 +8,32 @@ export type OverviewRepoSummary = {
   hasMorePages: boolean;
 };
 
-/** Simplified review outcome labels for the activity feed. */
-export type OverviewActivityStatus = 'approved' | 'changes_requested' | 'rate_limited';
-
-/** One row in the "Recent activity" list on the Overview page. */
 export type OverviewActivityItem = {
   id: string;
   repoFullName: string;
-  prNumber: string;
-  status: OverviewActivityStatus;
-  reviewedAt: string;
+  prNumber: number;
+  title: string;
+  status: PullRequestStatus;
+  updatedAt: string;
 };
 
-/**
- * Everything the Overview page needs in a single object.
- * `repos` is null when the GitHub App is not connected yet.
- */
+/** How every tracked pull request is distributed across review outcomes. */
+export type OverviewStatusBreakdown = {
+  reviewed: number;
+  inFlight: number;
+  rateLimited: number;
+  failed: number;
+  skipped: number;
+  total: number;
+};
+
 export type OverviewData = {
   installation: GithubInstallationStatus;
   repos: OverviewRepoSummary | null;
+  syncedRepoCount: number;
   reviewsUsed: number;
   reviewsLimit: number | null;
   plan: SubscriptionPlan;
+  breakdown: OverviewStatusBreakdown;
   recentActivity: OverviewActivityItem[];
 };

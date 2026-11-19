@@ -1,10 +1,10 @@
 'use client';
+
+import { ChevronsUpDown, CreditCard, LogOut, Settings } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { authClient } from '@/lib/auth-client';
-import { cn } from '@/lib/utils';
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,63 +14,25 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { SidebarMenuButton } from '@/components/ui/sidebar';
+import { DASHBOARD_ROUTES } from '@/features/dashboard/lib/routes';
+import { authClient } from '@/lib/auth-client';
+import { getDisplayName, getInitials, type UserMenuUser } from '../utils/display';
 import { SIGN_IN_PATH } from '../utils';
-import { ChevronUp, LogOut } from 'lucide-react';
 
-const DEFAULT_PLAN = 'Free';
+export type { UserMenuUser } from '../utils/display';
 
-export type UserMenuUser = {
-  name?: string | null;
-  email?: string | null;
-  image?: string | null;
-};
-
-export type UserMenuTriggerVariant = 'compact' | 'profile';
-
-type UserMenuProps = {
-  user: UserMenuUser;
-  /** `compact` — avatar-only trigger; `profile` — avatar + name in the trigger. */
-  variant?: UserMenuTriggerVariant;
-  plan?: string;
-  className?: string;
-};
-
-export function getDisplayName(user: UserMenuUser) {
-  return user.name?.trim() || user.email?.split('@')[0] || 'User';
-}
-
-export function getInitials(user: UserMenuUser) {
-  const source = user.name?.trim() || user.email || 'U';
-  const parts = source.split(/\s+/).filter(Boolean);
-
-  if (parts.length >= 2) {
-    return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
-  }
-
-  return source.slice(0, 2).toUpperCase();
-}
-
-function UserAvatar({
-  user,
-  size = 'default',
-}: {
-  user: UserMenuUser;
-  size?: 'default' | 'sm' | 'lg';
-}) {
+function UserAvatar({ user, className }: { user: UserMenuUser; className?: string }) {
   return (
-    <Avatar size={size}>
+    <Avatar className={className}>
       {user.image ? <AvatarImage src={user.image} alt={getDisplayName(user)} /> : null}
-      <AvatarFallback>{getInitials(user)}</AvatarFallback>
+      <AvatarFallback className="text-xs font-medium">{getInitials(user)}</AvatarFallback>
     </Avatar>
   );
 }
 
-export function UserMenu({
-  user,
-  variant = 'profile',
-  plan = DEFAULT_PLAN,
-  className,
-}: UserMenuProps) {
+/** Account menu shown at the bottom of the dashboard sidebar. */
+export function SidebarUserMenu({ user, planLabel }: { user: UserMenuUser; planLabel: string }) {
   const router = useRouter();
   const displayName = getDisplayName(user);
 
@@ -79,6 +41,7 @@ export function UserMenu({
       fetchOptions: {
         onSuccess: () => {
           router.push(SIGN_IN_PATH);
+          router.refresh();
         },
       },
     });
@@ -86,61 +49,62 @@ export function UserMenu({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild className={cn(className)}>
-        {variant === 'compact' ? (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-full"
-            aria-label="Open account menu"
-          >
-            <UserAvatar user={user} size="default" />
-          </Button>
-        ) : (
-          <Button variant="ghost" className="h-9 gap-2 px-2" aria-label="Open account menu">
-            <UserAvatar user={user} size="sm" />
-            <span className="max-w-32 truncate text-left text-xs font-medium">{displayName}</span>
-            <ChevronUp className="size-4 text-muted-foreground" />
-          </Button>
-        )}
+      <DropdownMenuTrigger asChild>
+        <SidebarMenuButton
+          size="lg"
+          tooltip={displayName}
+          className="data-[state=open]:bg-sidebar-accent"
+          aria-label="Open account menu"
+        >
+          <UserAvatar
+            user={user}
+            className="size-8 rounded-lg after:rounded-lg [&_img]:rounded-lg"
+          />
+          <div className="grid min-w-0 flex-1 text-left leading-tight">
+            <span className="truncate text-sm font-medium">{displayName}</span>
+            {user.email ? (
+              <span className="truncate text-xs text-muted-foreground">{user.email}</span>
+            ) : null}
+          </div>
+          <ChevronsUpDown className="ml-auto size-4 text-muted-foreground" />
+        </SidebarMenuButton>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuGroup>
-          <DropdownMenuLabel className="p-0 font-normal">
-            <div className="flex items-start gap-2 px-2 py-2">
-              <UserAvatar user={user} />
-              <div className="flex min-w-0 flex-1 flex-col gap-1">
-                <p className="truncate text-xs font-medium">{displayName}</p>
-                {user.email ? (
-                  <p className="truncate text-xs text-muted-foreground">{user.email}</p>
-                ) : null}
-                <Badge variant="secondary" className="w-fit">
-                  {plan} plan
-                </Badge>
-              </div>
+
+      <DropdownMenuContent
+        side="top"
+        align="start"
+        className="w-(--radix-dropdown-menu-trigger-width) min-w-60"
+      >
+        <DropdownMenuLabel className="font-normal">
+          <div className="flex items-center gap-2.5">
+            <UserAvatar user={user} className="size-8" />
+            <div className="grid min-w-0 leading-tight">
+              <span className="truncate text-sm font-medium text-foreground">{displayName}</span>
+              <span className="truncate text-xs text-muted-foreground">{planLabel} plan</span>
             </div>
-          </DropdownMenuLabel>
-        </DropdownMenuGroup>
+          </div>
+        </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem variant="destructive" onClick={handleSignOut}>
-            <LogOut />
-            Log out
+          <DropdownMenuItem asChild>
+            <Link href={DASHBOARD_ROUTES.settings}>
+              <Settings />
+              Settings
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href={`${DASHBOARD_ROUTES.settings}?tab=billing`}>
+              <CreditCard />
+              Billing
+            </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem variant="destructive" onClick={handleSignOut}>
+          <LogOut />
+          Log out
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
-}
-
-type UserMenuWithSessionProps = Omit<UserMenuProps, 'user'>;
-
-export function UserMenuWithSession(props: UserMenuWithSessionProps) {
-  const { data: session, isPending } = authClient.useSession();
-
-  if (isPending || !session?.user) {
-    return null;
-  }
-
-  return <UserMenu user={session.user} {...props} />;
 }

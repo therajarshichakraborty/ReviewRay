@@ -1,65 +1,61 @@
 /**
- * Aggregates all data needed for the dashboard Overview page.
- *
- * Pulls installation status, billing usage, subscription plan, recent activity,
- * and (when connected) a repository summary into one `OverviewData` object.
+ * Aggregates everything the dashboard Overview page needs in one call.
+ * Independent queries run in parallel.
  */
 
-import type { OverviewData } from '@/features/overview/types/overview';
 import { getUsageSummary } from '@/features/billing/server/usage';
+import { getUserSubscription } from '@/features/billing/server/subscription';
 import {
   getInstallationStatus,
   getUserInstallationId,
 } from '@/features/github/server/installation';
-import { getUserSubscription } from '@/features/settings/server/subcription';
+import type { OverviewData, OverviewRepoSummary } from '@/features/overview/types/overview';
+import { prisma } from '@/lib/db.config';
 
-import { getRecentReviewActivity } from './activity';
-import { getInstallationRepoSummary } from './repo-summery';
+import { EMPTY_BREAKDOWN, getRecentReviewActivity, getStatusBreakdown } from './activity';
+import { getInstallationRepoSummary } from './repo-summary';
 
-/**
- * Loads the complete overview payload for a signed-in user.
- *
- * Repo stats are skipped (`repos: null`) when GitHub is not connected,
- * so the UI can show a "Connect GitHub" banner instead of empty numbers.
- *
- * @param userId - Authenticated user's database ID.
- * @returns Structured data consumed by `OverviewContent`.
- */
+async function safeRepoSummary(installationId: number): Promise<OverviewRepoSummary | null> {
+  try {
+    return await getInstallationRepoSummary(installationId);
+  } catch (error) {
+    // GitHub being slow or down should not take the whole dashboard with it.
+    console.warn('[overview] repo summary unavailable:', error);
+    return null;
+  }
+}
+
 export async function getOverview(userId: string): Promise<OverviewData> {
-  // These three queries run regardless of GitHub connection state
-  const installation = await getInstallationStatus(userId);
-  const subscription = await getUserSubscription(userId);
-  const usage = await getUsageSummary(userId);
-  const recentActivity = await getRecentReviewActivity(userId);
+  const [installation, installationId, subscription, usage] = await Promise.all([
+    getInstallationStatus(userId),
+    getUserInstallationId(userId),
+    getUserSubscription(userId),
+    getUsageSummary(userId),
+  ]);
 
   const base = {
     installation,
     reviewsUsed: usage.used,
     reviewsLimit: usage.limit,
     plan: subscription.plan,
-    recentActivity,
   };
-
-  if (!installation.connected) {
-    return {
-      ...base,
-      repos: null,
-    };
-  }
-
-  const installationId = await getUserInstallationId(userId);
 
   if (!installationId) {
     return {
       ...base,
       repos: null,
+      syncedRepoCount: 0,
+      breakdown: EMPTY_BREAKDOWN,
+      recentActivity: [],
     };
   }
 
-  const repos = await getInstallationRepoSummary(installationId);
+  const [repos, breakdown, recentActivity, syncedRepoCount] = await Promise.all([
+    safeRepoSummary(installationId),
+    getStatusBreakdown(installationId),
+    getRecentReviewActivity(installationId),
+    prisma.repoSync.count({ where: { installationId, status: 'synced' } }),
+  ]);
 
-  return {
-    ...base,
-    repos,
-  };
+  return { ...base, repos, syncedRepoCount, breakdown, recentActivity };
 }

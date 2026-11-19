@@ -1,5 +1,5 @@
-import { UsageSummary } from '@/features/billing/server/usage';
-import { UserSubscription } from '@/features/dashboard/lib/types';
+import type { UsageSummary } from '@/features/billing/server/usage';
+import type { UserSubscription } from '@/features/dashboard/lib/types';
 
 export type SettingsProfile = {
   name: string;

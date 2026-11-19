@@ -1,25 +1,24 @@
-import { TooltipProvider } from '@/components/ui/tooltip';
-import { DashboardSidebar } from '@/features/dashboard/components/dashboard-sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { UserMenuUser } from '@/features/auth/components/user-menu';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import type { UserMenuUser } from '@/features/auth/components/user-menu';
+import type { UsageSummary } from '@/features/billing/server/usage';
+import { DashboardSidebar } from '@/features/dashboard/components/dashboard-sidebar';
+import type { SubscriptionPlan } from '@/features/dashboard/lib/types';
 
 type DashboardShellProps = {
   children: React.ReactNode;
   user: UserMenuUser;
-  plan?: string;
+  plan: SubscriptionPlan;
+  usage: UsageSummary;
 };
 
-export function DashboardShell({ children, user, plan }: DashboardShellProps) {
+export function DashboardShell({ children, user, plan, usage }: DashboardShellProps) {
   return (
-    <TooltipProvider>
+    <TooltipProvider delayDuration={200}>
       <SidebarProvider>
-        <DashboardSidebar user={user} plan={plan} />
-        <SidebarInset className="min-h-svh bg-background">
-          {/* Subtle grid texture across all dashboard pages */}
-          <div className="relative min-h-full flex flex-col">
-            <div className="pointer-events-none fixed inset-0 hero-grid-bg opacity-[0.15] dark:opacity-[0.04]" />
-            <div className="relative flex flex-1 flex-col">{children}</div>
-          </div>
+        <DashboardSidebar user={user} plan={plan} usage={usage} />
+        <SidebarInset className="min-w-0 md:shadow-[0_1px_3px_rgb(0_0_0/0.04),0_8px_24px_-12px_rgb(0_0_0/0.08)]">
+          {children}
         </SidebarInset>
       </SidebarProvider>
     </TooltipProvider>

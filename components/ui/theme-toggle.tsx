@@ -1,57 +1,41 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { AnimatedThemeToggler } from './animated-theme-toggler';
+import { flushSync } from 'react-dom';
+
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 /**
- * A floating theme toggle button fixed to the bottom-right of the viewport.
- * Bridges next-themes with AnimatedThemeToggler's controlled API.
- * Renders only after hydration to avoid server/client mismatch.
+ * Light/dark switch. Both icons are rendered and CSS picks the visible one, so
+ * the server and client markup always match and no mount effect is needed.
  */
-export function ThemeToggle() {
-  const { resolvedTheme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+export function ThemeToggle({ className }: { className?: string }) {
+  const { setTheme } = useTheme();
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const toggle = () => {
+    const next = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+    const apply = () => flushSync(() => setTheme(next));
 
-  // Don't render on server — next-themes resolves theme only on client
-  if (!mounted) return null;
-
-  const isDark = resolvedTheme === 'dark';
+    if (typeof document.startViewTransition === 'function') {
+      document.startViewTransition(apply);
+    } else {
+      apply();
+    }
+  };
 
   return (
-    <AnimatedThemeToggler
-      // Controlled mode: AnimatedThemeToggler reads theme from here
-      // and calls onThemeChange instead of managing localStorage itself
-      theme={isDark ? 'dark' : 'light'}
-      onThemeChange={setTheme}
-      // Variant controls the animation shape when toggling
-      variant="circle"
-      aria-label="Toggle theme"
-      style={{
-        position: 'fixed',
-        bottom: '24px',
-        right: '24px',
-        zIndex: 9999,
-        width: '44px',
-        height: '44px',
-        borderRadius: '50%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        // Inverted bg so it always contrasts with the page
-        backgroundColor: isDark ? '#fafafa' : '#09090b',
-        color: isDark ? '#09090b' : '#fafafa',
-        boxShadow: isDark
-          ? '0 4px 16px rgba(255,255,255,0.12), 0 2px 6px rgba(0,0,0,0.2)'
-          : '0 4px 16px rgba(0,0,0,0.25), 0 2px 6px rgba(0,0,0,0.15)',
-        border: `1.5px solid ${isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)'}`,
-        cursor: 'pointer',
-        transition: 'background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease',
-      }}
-    />
+    <Button
+      type="button"
+      variant="ghost"
+      size="icon"
+      onClick={toggle}
+      aria-label="Toggle color theme"
+      className={cn('text-muted-foreground hover:text-foreground', className)}
+    >
+      <Moon className="size-4 dark:hidden" />
+      <Sun className="hidden size-4 dark:block" />
+    </Button>
   );
 }

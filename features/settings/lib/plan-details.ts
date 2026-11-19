@@ -1,19 +1,38 @@
+import { FREE_MONTHLY_LIMIT } from '@/features/billing/constants';
 import type { SubscriptionPlan } from '@/features/dashboard/lib/types';
 
-export const PLAN_DETAILS: Record<SubscriptionPlan, { label: string; features: string[] }> = {
+export type PlanDetails = {
+  label: string;
+  price: string;
+  cadence: string;
+  tagline: string;
+  features: string[];
+};
+
+/** Single source of truth for plan copy across pricing, settings and the dashboard. */
+export const PLAN_DETAILS: Record<SubscriptionPlan, PlanDetails> = {
   free: {
     label: 'Free',
+    price: '₹0',
+    cadence: 'free forever',
+    tagline: 'For side projects and trying ReviewRay on real pull requests.',
     features: [
-      'Up to 5 AI reviews per month',
-      'Public and private repositories only',
-      'Community support',
+      `${FREE_MONTHLY_LIMIT} AI reviews per month`,
+      'Public and private repositories',
+      'Severity-ranked findings with fixes',
+      'Reviews run on free open models',
     ],
   },
   pro: {
     label: 'Pro',
+    price: '₹199',
+    cadence: 'per month',
+    tagline: 'For developers who open pull requests every day.',
     features: [
-      'Unlimited AI reviews on connected repos',
-      'Public and private repository support',
+      'Unlimited AI reviews',
+      'Reviews run on OpenAI models',
+      'Larger diff budget per review',
+      'Codebase-aware context from synced repos',
       'Priority support',
     ],
   },

@@ -1,83 +1,50 @@
-import Link from 'next/link';
-import { getServerSession } from '@/lib/auth-session';
-import { Button } from '@/components/ui/button';
-import { GithubLogo } from '@phosphor-icons/react/dist/ssr';
-import { UserMenuWithSession } from '@/features/auth/components/user-menu';
 import { ArrowRight } from 'lucide-react';
+import Link from 'next/link';
+
+import { Logo } from '@/components/brand/logo';
+import { DesktopNav, HeaderShell, MobileNav } from '@/components/marketing-nav';
+import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { getServerSession } from '@/features/auth/server/session';
+import { SIGN_IN_PATH } from '@/features/auth/utils';
+import { DASHBOARD_ROUTES } from '@/features/dashboard/lib/routes';
 
 export async function PublicHeader() {
   const session = await getServerSession();
-  const isLoggedIn = !!session?.user;
+  const isLoggedIn = Boolean(session?.user);
+  const ctaHref = isLoggedIn ? DASHBOARD_ROUTES.overview : SIGN_IN_PATH;
+  const ctaLabel = isLoggedIn ? 'Open dashboard' : 'Start reviewing';
 
   return (
-    <div className="sticky top-0 z-50 w-full flex justify-center px-4 py-4 pointer-events-none">
-      <header className="pointer-events-auto w-full md:w-[75%] max-w-5xl h-12 rounded-xl border border-border/30 bg-background/50 backdrop-blur-md shadow-lg shadow-black/[0.02] dark:shadow-black/[0.2] transition-all flex items-center justify-between px-6">
-        <Link href="/" className="flex items-center gap-2.5 hover:opacity-90 transition-opacity">
-          <div className="flex size-6 items-center justify-center rounded-full bg-foreground text-background shadow-sm">
-            <span className="font-mono text-[10px] font-black">R</span>
-          </div>
-          <span className="font-sans text-xs font-semibold tracking-tight">ReviewRay</span>
-        </Link>
-
-        <nav className="hidden md:flex items-center gap-6 text-[11px] text-muted-foreground">
-          <Link href="/#features" className="transition-colors hover:text-foreground">
-            Features
-          </Link>
-          <Link href="/#how-it-works" className="transition-colors hover:text-foreground">
-            How it works
-          </Link>
-          <Link
-            href="/pricing"
-            className="transition-colors hover:text-foreground font-medium text-blue-600 dark:text-blue-400"
-          >
-            Pricing
-          </Link>
-          <Link
-            href="https://github.com"
-            target="_blank"
-            className="transition-colors hover:text-foreground"
-          >
-            Docs
-          </Link>
-        </nav>
-
-        <div className="flex items-center gap-2">
-          {isLoggedIn ? (
-            <>
-              <Button
-                asChild
-                size="sm"
-                variant="ghost"
-                className="h-7 px-3 text-[11px] rounded-full hidden sm:flex"
-              >
-                <Link href="/dashboard">Dashboard</Link>
-              </Button>
-              <UserMenuWithSession variant="compact" />
-            </>
-          ) : (
-            <>
-              <Button
-                asChild
-                size="sm"
-                variant="ghost"
-                className="h-7 px-3 text-[11px] rounded-full hidden sm:flex"
-              >
-                <Link href="/sign-in">Sign in</Link>
-              </Button>
-              <Button
-                asChild
-                size="sm"
-                className="h-7 px-3 text-[11px] rounded-full bg-blue-600 hover:bg-blue-700 text-white border-none shadow-sm"
-              >
-                <Link href="/sign-in">
-                  <GithubLogo className="mr-1.5 size-3" />
-                  Get started
-                </Link>
-              </Button>
-            </>
-          )}
+    <HeaderShell>
+      <div className="mx-auto flex h-16 w-full max-w-[1200px] items-center justify-between gap-6 px-5 sm:border-x sm:border-rail sm:px-10 lg:px-12">
+        <div className="flex items-center gap-10">
+          <Logo />
+          <DesktopNav />
         </div>
-      </header>
-    </div>
+
+        <div className="flex items-center gap-1.5 sm:gap-3">
+          <ThemeToggle />
+          {isLoggedIn ? null : (
+            <Link
+              href={SIGN_IN_PATH}
+              className="link-underline hidden pb-0.5 text-sm text-muted-foreground transition-colors hover:text-foreground sm:inline"
+            >
+              Sign in
+            </Link>
+          )}
+          <Button
+            asChild
+            className="group hidden h-9 rounded-lg px-4 shadow-sm shadow-primary/25 transition-all hover:shadow-md hover:shadow-primary/30 sm:inline-flex"
+          >
+            <Link href={ctaHref}>
+              {ctaLabel}
+              <ArrowRight className="size-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
+            </Link>
+          </Button>
+          <MobileNav ctaHref={ctaHref} ctaLabel={ctaLabel} />
+        </div>
+      </div>
+    </HeaderShell>
   );
 }

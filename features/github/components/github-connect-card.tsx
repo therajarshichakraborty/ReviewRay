@@ -1,157 +1,137 @@
-// Server component — no directive needed
+import { format } from 'date-fns';
+import { AlertTriangle, ArrowUpRight, Check, CheckCircle2, Unplug } from 'lucide-react';
 
+import { GitHubIcon } from '@/components/landing/icons';
+import { Button } from '@/components/ui/button';
+import type { GithubInstallationStatus } from '@/features/dashboard/lib/types';
+import { statusBadge, statusDotClass } from '@/features/dashboard/lib/status-styles';
 import { disconnectGithubApp } from '@/features/github/actions';
 import { getGithubInstallUrl } from '@/features/github/utils/github-app';
-import { statusBadge } from '@/features/dashboard/lib/status-styles';
-import { GithubLogo, ArrowSquareOut, Plugs } from '@phosphor-icons/react/dist/ssr';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
 type GithubConnectCardProps = {
   userId: string;
-  installation: {
-    connected: boolean;
-    accountLogin: string | null;
-  };
+  installation: GithubInstallationStatus;
+  callbackStatus?: 'connected' | 'error';
 };
 
-function ConnectedDetails({ accountLogin }: { accountLogin: string | null }) {
-  return (
-    <div className="rounded-xl border border-border bg-muted/40 p-4">
-      <div className="flex items-start gap-3">
-        <div className="mt-1.5 size-2 rounded-full bg-emerald-500 shrink-0 shadow-sm" />
-        <p className="text-xs text-muted-foreground leading-relaxed">
-          Currently installed for{' '}
-          <span className="font-semibold text-foreground">@{accountLogin}</span>. ReviewRay has
-          active permissions to read repository metadata and post review comments on pull requests.
-        </p>
-      </div>
-    </div>
-  );
-}
+const PERMISSIONS = [
+  { title: 'Pull requests', detail: 'Read diffs and post one review comment per pull request' },
+  { title: 'Contents', detail: 'Read files when you sync a repository for codebase context' },
+  { title: 'Metadata', detail: 'List the repositories you granted access to' },
+];
 
-function DisconnectedDetails() {
-  return (
-    <div className="space-y-3">
-      <p className="text-xs text-muted-foreground font-light">
-        By connecting the GitHub App, ReviewRay will be authorized to:
-      </p>
-      <ul className="space-y-2.5 text-xs text-muted-foreground font-light">
-        <li className="flex items-center gap-2.5">
-          <span className="flex size-1.5 rounded-full bg-muted-foreground/60" />
-          Access public and private repositories you explicitly select
-        </li>
-        <li className="flex items-center gap-2.5">
-          <span className="flex size-1.5 rounded-full bg-muted-foreground/60" />
-          Receive automated webhooks for pull request lifecycle events
-        </li>
-        <li className="flex items-center gap-2.5">
-          <span className="flex size-1.5 rounded-full bg-muted-foreground/60" />
-          Post AI-generated codebase-aware review comments on PRs
-        </li>
-      </ul>
-    </div>
-  );
-}
+function CallbackNotice({ status }: { status: 'connected' | 'error' }) {
+  const ok = status === 'connected';
+  const Icon = ok ? CheckCircle2 : AlertTriangle;
 
-function ConnectedActions() {
   return (
-    <form action={disconnectGithubApp}>
-      <Button
-        type="submit"
-        variant="outline"
-        size="sm"
-        className="rounded-lg border-border/60 hover:bg-red-500/10 hover:text-red-600 hover:border-red-500/25 dark:hover:bg-red-950/20 dark:hover:text-red-400 dark:hover:border-red-900/40 transition-colors"
-      >
-        <Plugs className="size-4 mr-1.5" />
-        Disconnect GitHub App
-      </Button>
-    </form>
-  );
-}
-
-function DisconnectedActions({ installUrl }: { installUrl: string }) {
-  return (
-    <Button
-      asChild
-      size="sm"
-      className="rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm transition-colors"
+    <div
+      role="status"
+      className={cn(
+        'animate-pop-in flex items-start gap-3 rounded-2xl p-4 text-sm',
+        ok
+          ? 'bg-emerald-500/10 text-emerald-800 dark:text-emerald-300'
+          : 'bg-amber-500/10 text-amber-800 dark:text-amber-300',
+      )}
     >
-      <a href={installUrl}>
-        <GithubLogo className="size-4 mr-1.5" />
-        Install GitHub App
-        <ArrowSquareOut className="size-3.5 ml-1.5 opacity-80" />
-      </a>
-    </Button>
+      <Icon className="mt-0.5 size-4 shrink-0" />
+      {ok
+        ? 'GitHub App connected. New pull requests on the selected repositories will be reviewed automatically.'
+        : 'That installation could not be linked to your account. Install the app from your own GitHub account or an organization you belong to.'}
+    </div>
   );
 }
 
-export function GithubConnectCard({ userId, installation }: GithubConnectCardProps) {
-  const { connected, accountLogin } = installation;
-  const installUrl = getGithubInstallUrl(userId);
-
-  const cardBorderClass = connected
-    ? 'border-emerald-500/20 dark:border-emerald-500/10 shadow-sm'
-    : 'border-border/50';
-
-  const iconWrapperClass = connected
-    ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-    : 'border-border bg-muted text-muted-foreground';
-
-  const statusTone = connected ? ('success' as const) : ('neutral' as const);
-  const statusLabel = connected ? 'Connected' : 'Not connected';
+export function GithubConnectCard({
+  userId,
+  installation,
+  callbackStatus,
+}: GithubConnectCardProps) {
+  const { connected, accountLogin, installedAt } = installation;
+  const tone = connected ? 'success' : 'neutral';
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-6 max-w-3xl mx-auto w-full">
-      <Card
-        className={cn(
-          'transition-all duration-200 rounded-xl shadow-sm bg-card overflow-hidden',
-          cardBorderClass,
-        )}
-      >
-        <CardHeader className="border-b border-border/40 pb-5">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <span
-                className={cn(
-                  'flex size-12 items-center justify-center rounded-xl border',
-                  iconWrapperClass,
-                )}
-              >
-                <GithubLogo className="size-6" />
-              </span>
-              <div className="space-y-1">
-                <CardTitle className="text-base font-semibold tracking-tight">
-                  GitHub App Integration
-                </CardTitle>
-                <CardDescription className="text-xs text-muted-foreground font-light max-w-xl">
-                  Install the ReviewRay app on your GitHub user account or organization to enable
-                  codebase-aware AI code reviews.
-                </CardDescription>
-              </div>
-            </div>
-            <span className={statusBadge(statusTone, 'text-[10px] font-medium shrink-0')}>
-              {statusLabel}
+    <div className="flex flex-col gap-5">
+      {callbackStatus ? <CallbackNotice status={callbackStatus} /> : null}
+
+      <section className="animate-fade-up overflow-hidden rounded-2xl bg-surface">
+        <div className="flex flex-wrap items-start justify-between gap-4 p-6">
+          <div className="flex items-start gap-4">
+            <span className="animate-float flex size-12 shrink-0 items-center justify-center rounded-xl bg-foreground text-background">
+              <GitHubIcon className="size-6" />
             </span>
+            <div>
+              <h3 className="text-lg font-medium">ReviewRay GitHub App</h3>
+              <p className="mt-1 max-w-lg text-[15px] text-muted-foreground">
+                {connected
+                  ? `Installed on @${accountLogin ?? 'your account'}${installedAt ? ` since ${format(new Date(installedAt), 'MMM d, yyyy')}` : ''}.`
+                  : 'Install the app on your account or organization so ReviewRay can review pull requests.'}
+              </p>
+            </div>
           </div>
-        </CardHeader>
+          <span className={statusBadge(tone)}>
+            <span className={cn('size-1.5 rounded-full', statusDotClass[tone])} />
+            {connected ? 'Connected' : 'Not connected'}
+          </span>
+        </div>
 
-        <CardContent className="py-5">
-          {connected ? <ConnectedDetails accountLogin={accountLogin} /> : <DisconnectedDetails />}
-        </CardContent>
+        <div className="px-6 pb-5">
+          <p className="font-mono text-[11px] tracking-wider text-muted-foreground uppercase">
+            Permissions
+          </p>
+          <ul className="mt-3 grid gap-3 sm:grid-cols-3">
+            {PERMISSIONS.map((permission) => (
+              <li
+                key={permission.title}
+                className="rounded-xl bg-background p-3.5 transition-transform duration-300 hover:-translate-y-0.5"
+              >
+                <p className="flex items-center gap-1.5 text-sm font-medium">
+                  <Check className="size-3.5 text-primary" strokeWidth={3} />
+                  {permission.title}
+                </p>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                  {permission.detail}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </div>
 
-        <CardFooter className="flex flex-wrap gap-2 border-t border-border/40 pt-4 bg-muted/20">
-          {connected ? <ConnectedActions /> : <DisconnectedActions installUrl={installUrl} />}
-        </CardFooter>
-      </Card>
+        <div className="flex flex-wrap items-center gap-2 bg-background/50 px-6 py-4">
+          {connected ? (
+            <>
+              <Button asChild variant="secondary" className="group bg-background">
+                <a
+                  href="https://github.com/settings/installations"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Choose repositories
+                  <ArrowUpRight className="size-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                </a>
+              </Button>
+              <form action={disconnectGithubApp}>
+                <Button
+                  type="submit"
+                  variant="ghost"
+                  className="text-muted-foreground hover:text-destructive"
+                >
+                  <Unplug className="size-4" />
+                  Disconnect
+                </Button>
+              </form>
+            </>
+          ) : (
+            <Button asChild className="shadow-sm shadow-primary/25">
+              <a href={getGithubInstallUrl(userId)}>
+                <GitHubIcon className="size-4" />
+                Install GitHub App
+              </a>
+            </Button>
+          )}
+        </div>
+      </section>
     </div>
   );
 }

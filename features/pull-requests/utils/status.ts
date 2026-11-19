@@ -1,39 +1,28 @@
-/**
- * Human-readable labels and badge colors for pull request review status.
- *
- * Centralizing status → UI mapping keeps list and detail pages consistent.
- */
-
 import type { PullRequestStatus } from '@/features/pull-requests/types/pull-request';
+import type { StatusTone } from '@/features/dashboard/lib/status-styles';
 
-/** Display text for each `PullRequestStatus` value. */
 export const PR_STATUS_LABELS: Record<PullRequestStatus, string> = {
-  pending: 'Pending',
-  processing: 'Reviewing…',
+  pending: 'Queued',
+  processing: 'Reviewing',
   reviewed: 'Reviewed',
-  rate_limited: 'Rate limited',
+  rate_limited: 'Limit reached',
+  failed: 'Failed',
+  skipped: 'Nothing to review',
 };
 
-/**
- * Maps a PR status to a dashboard badge tone for visual emphasis.
- *
- * @param status - Current review lifecycle status.
- * @returns A key accepted by `statusBadge()` from status-styles.
- */
-export function getPrStatusTone(
-  status: PullRequestStatus,
-): 'neutral' | 'info' | 'success' | 'danger' {
-  if (status === 'reviewed') {
-    return 'success';
-  }
+const PR_STATUS_TONES: Record<PullRequestStatus, StatusTone> = {
+  pending: 'neutral',
+  processing: 'info',
+  reviewed: 'success',
+  rate_limited: 'warning',
+  failed: 'danger',
+  skipped: 'neutral',
+};
 
-  if (status === 'processing') {
-    return 'info';
-  }
+export function getPrStatusTone(status: PullRequestStatus): StatusTone {
+  return PR_STATUS_TONES[status];
+}
 
-  if (status === 'rate_limited') {
-    return 'danger';
-  }
-
-  return 'neutral';
+export function isReviewInFlight(status: PullRequestStatus) {
+  return status === 'pending' || status === 'processing';
 }

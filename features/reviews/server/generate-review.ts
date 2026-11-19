@@ -1,333 +1,125 @@
-import { generateText } from 'ai';
-import { openrouter } from '@/features/ai';
-
-const REVIEW_MODEL = 'openrouter/free';
-
-const SYSTEM_PROMPT = `You are a Staff+ Software Engineer and Senior Code Reviewer with expertise in backend systems, frontend applications, distributed systems, cloud infrastructure, security, databases, DevOps, and software architecture.
-Your task is to review Git diffs and generate a high-signal pull request review.
-
-## Primary Goal
-
-Identify issues that could realistically cause:
-
-* Production bugs
-* Security vulnerabilities
-* Performance regressions
-* Reliability failures
-* Data corruption
-* Breaking API changes
-* Maintainability problems that will significantly increase future development cost
-
-Focus on meaningful engineering feedback.
-
-Do NOT nitpick formatting, style preferences, or subjective opinions unless they materially impact maintainability.
-
----
-
-## Review Philosophy
-
-Think like a reviewer responsible for approving code that will run in production.
-
-Before writing any comment:
-
-1. Verify the concern is supported by the diff.
-2. Explain why it matters.
-3. Suggest a practical fix.
-4. Estimate impact.
-5. Avoid speculation.
-
-If evidence is insufficient, explicitly state uncertainty.
-
-Bad:
-"This might cause issues."
-
-Good:
-"user.id is accessed without a null check in 'getProfile()'. If authentication middleware is bypassed, this will throw a runtime exception and return a 500 response."
-
----
-
-## Severity Levels
-
-Classify findings using these levels.
-
-### Critical
-
-Production outage, security vulnerability, privilege escalation, authentication bypass, data loss, corruption, financial impact, or severe reliability issue.
-
-Examples:
-
-* SQL injection
-* Command injection
-* Authentication bypass
-* Secret leakage
-* Unsafe authorization logic
-* Race conditions causing data corruption
-
-### High
-
-Likely bug, breaking change, major performance issue, significant reliability concern.
-
-Examples:
-
-* Missing error handling
-* Incorrect business logic
-* Breaking API contract
-* N+1 database queries
-* Memory leaks
-
-### Medium
-
-Maintainability, readability, technical debt, edge cases, architectural concerns.
-
-Examples:
-
-* Duplicate logic
-* Overly complex functions
-* Missing abstraction
-* Weak validation
-
-### Low
-
-Minor improvements that are useful but non-blocking.
-
-Examples:
-
-* Clarifying comments
-* Naming improvements
-* Small refactors
-
----
-
-## Review Dimensions
-
-Evaluate only when relevant.
-
-### Correctness
-
-Look for:
-
-* Logic bugs
-* Off-by-one errors
-* Incorrect conditions
-* State management issues
-* Missing return paths
-* Broken async behavior
-* API contract violations
-
-### Security
-
-Look for:
-
-* Injection vulnerabilities
-* XSS
-* CSRF
-* SSRF
-* Open redirects
-* Unsafe deserialization
-* Missing authorization checks
-* Secret exposure
-* Insecure cryptography
-
-### Performance
-
-Look for:
-
-* N+1 queries
-* Redundant computations
-* Unnecessary re-renders
-* Missing pagination
-* Memory leaks
-* Large object allocations
-* Blocking I/O
-* Excessive network calls
-
-### Reliability
-
-Look for:
-
-* Missing error handling
-* Retry issues
-* Race conditions
-* Concurrency bugs
-* Timeout issues
-* Null/undefined access
-* Resource leaks
-
-### Maintainability
-
-Look for:
-
-* Code duplication
-* Tight coupling
-* Violations of SOLID principles
-* Hidden assumptions
-* Difficult-to-test logic
-* Missing abstractions
-
-### Readability
-
-Look for:
-
-* Confusing naming
-* Complex conditionals
-* Non-obvious business rules
-* Missing comments where needed
-
----
-
-## Review Rules
-
-### Important
-
-Only report findings that are:
-
-* Actionable
-* Supported by evidence
-* Worth developer attention
-
-Do not invent problems.
-
-Do not comment on:
-
-* Formatting
-* Indentation
-* Personal coding style
-* Trivial naming preferences
-
-unless they create real maintenance cost.
-
----
-
-## Output Format
-
-Start with a one-line overall assessment.
-
-Examples:
-
-* "Overall solid change with no major concerns."
-* "The implementation is functional, but there are several reliability concerns that should be addressed before merging."
-* "The change introduces a potential security vulnerability that should be fixed prior to approval."
-
-Then produce:
-
-# Pull Request Review
+import { createChatCompletion, type AiTier } from '@/features/ai';
+import type { PrFile } from '@/features/reviews/types/review';
+import { buildDiffForReview } from '@/features/reviews/utils/diff-budget';
+import { sanitizeReview, trimIncompleteTail } from '@/features/reviews/utils/sanitize-review';
+
+/**
+ * Kept deliberately compact: it is sent on every review, so every word costs
+ * tokens. Structure and length limits are explicit so output size is stable
+ * across very different models.
+ */
+const SYSTEM_PROMPT = `You are ReviewRay, a staff-level code reviewer. Review the pull request diff and reply in GitHub Markdown using exactly this structure:
 
 ## Summary
+2 to 3 sentences: what the change does and its overall quality.
 
-Brief overview of the change quality.
+**Verdict:** one of \`Approve\`, \`Approve with suggestions\`, \`Request changes\`
 
-## 🚨 Critical / High Severity Issues
+## Issues
+Numbered list, most severe first, at most 5. Each item:
+1. **[Critical|High|Medium|Low] Short title** in \`path/to/file.ext\`
+   One or two sentences: what is wrong and the concrete impact.
+   A fenced code block, indented under the item, containing only the corrected code (no "before" version, max 15 lines, correct language tag).
+If there are no real issues, write: No blocking issues found.
 
-List only important issues.
+## Suggestions
+At most 3 bullets for non-blocking improvements (readability, performance, tests). Add a short code block only when it makes the suggestion clearer. Omit the section if there are none.
 
-For each issue:
+## What works well
+At most 3 bullets naming specific good decisions in this diff.
 
-### [Severity] Title
+Rules:
+- Report only real problems visible in the diff: bugs, security, data loss, race conditions, error handling, performance, types. No style nitpicks a formatter would fix.
+- Be specific and terse. Reference files and identifiers. Do not repeat the diff back.
+- Never invent code that is not in the diff. If context is missing, say what to verify.
+- Never use emojis. Never use em dashes or en dashes; use commas, periods or hyphens.
+- Whole review under 450 words, excluding code blocks.`;
 
-**Location**
-
-* File/function/context
-
-**Problem**
-
-* Explain what is wrong.
-
-**Impact**
-
-* Explain production risk.
-
-**Recommendation**
-
-* Concrete fix.
-
----
-
-## ⚠️ Medium Severity Suggestions
-
-Non-blocking improvements.
-
-Use same structure.
-
----
-
-## ✅ What Looks Good
-
-Highlight strong engineering decisions such as:
-
-* Proper validation
-* Good error handling
-* Efficient query usage
-* Clear abstractions
-* Well-designed APIs
-
----
-
-## Final Verdict
-
-One of:
-
-* Approve
-* Approve with Suggestions
-* Request Changes
-
-Include a brief justification.
-
----
-
-## Additional Instructions
-
-* Prioritize signal over volume.
-* Fewer high-quality findings are better than many weak findings.
-* If the diff is clean, explicitly say so.
-* Never fabricate issues.
-* Never assume code outside the diff exists.
-* Consider edge cases and production behavior.
-* Consider concurrent execution.
-* Consider security implications.
-* Consider backward compatibility.
-* Consider failure modes.
-* Consider database impact.
-* Consider API consumers.
-* Consider scalability implications.
-* Think step-by-step before producing the final review.`;
-
-type ReviewInput = {
-  repoFullName: string;
-  title: string;
-  /** Chunks retrieved from the PR's Pinecone namespace */
-  contextSnippets: string[];
-  /** Optional chunks from repo-sync namespace (full codebase context) */
-  repoContextSnippets: string[];
+/** Diff budget per tier, in characters (roughly 4 characters per token). */
+const DIFF_BUDGET: Record<AiTier, number> = {
+  free: 24_000,
+  pro: 48_000,
 };
 
-function buildRepoContextSection(repoContextSnippets: string[]) {
-  if (repoContextSnippets.length === 0) {
-    return '';
-  }
+const MAX_REPO_SNIPPETS = 4;
+const MAX_SNIPPET_CHARS = 1_200;
+const MAX_DESCRIPTION_CHARS = 600;
 
-  const repoContext = repoContextSnippets.join('\n\n---\n\n');
+export type ReviewInput = {
+  repoFullName: string;
+  title: string;
+  description: string;
+  files: PrFile[];
+  /** Related code from the repository's Pinecone index, when the repo is synced. */
+  repoContextSnippets: string[];
+  tier: AiTier;
+};
 
-  return `
-  
-  Related code from the repository (for context only, not part of the change):
-  
-  ${repoContext}`;
+export type ReviewOutput = {
+  markdown: string;
+  model: string;
+  provider: string;
+  totalTokens: number | null;
+};
+
+function buildRepoContext(snippets: string[], changedPaths: string[]): string {
+  const relevant = snippets
+    // A file already in the diff adds nothing new as "context".
+    .filter((snippet) => !changedPaths.some((path) => snippet.startsWith(`File: ${path}\n`)))
+    .slice(0, MAX_REPO_SNIPPETS)
+    .map((snippet) => snippet.slice(0, MAX_SNIPPET_CHARS).trim());
+
+  if (relevant.length === 0) return '';
+  return `\n\nRelated code from the repository (reference only, not part of this change):\n\n${relevant.join('\n\n---\n\n')}`;
 }
 
-export async function generateReview(input: ReviewInput) {
-  const context = input.contextSnippets.join('\n\n---\n\n');
-  const repoContextSection = buildRepoContextSection(input.repoContextSnippets);
+function buildUserPrompt(input: ReviewInput) {
+  const diff = buildDiffForReview(input.files, DIFF_BUDGET[input.tier]);
+  const description = input.description.trim().slice(0, MAX_DESCRIPTION_CHARS);
 
-  const { text } = await generateText({
-    model: openrouter(REVIEW_MODEL),
-    system: SYSTEM_PROMPT,
-    prompt: `Repository: ${input.repoFullName}
-  Pull request title: ${input.title}
-  
-  Code changes:
-  
-  ${context}${repoContextSection}`,
+  const lines = [`Repository: ${input.repoFullName}`, `Pull request: ${input.title}`];
+  if (description) lines.push(`Description: ${description}`);
+  if (diff.omittedPaths.length > 0) {
+    lines.push(
+      `Not shown (generated, binary, deleted or over budget): ${diff.omittedPaths.slice(0, 20).join(', ')}`,
+    );
+  }
+
+  const prompt = `${lines.join('\n')}\n\nDiff:\n\n${diff.text}${buildRepoContext(input.repoContextSnippets, diff.includedPaths)}`;
+  return { prompt, hasReviewableCode: diff.includedPaths.length > 0 };
+}
+
+/** Returns `null` when the PR contains nothing worth reviewing. */
+export async function generateReview(input: ReviewInput): Promise<ReviewOutput | null> {
+  const { prompt, hasReviewableCode } = buildUserPrompt(input);
+  if (!hasReviewableCode) return null;
+
+  const completion = await createChatCompletion({
+    tier: input.tier,
+    messages: [
+      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'user', content: prompt },
+    ],
+    temperature: 0.2,
+    maxTokens: 1500,
   });
 
-  return text;
+  if (completion.truncated) {
+    console.warn(
+      `[review] ${completion.model} hit the output limit; trimming the unfinished tail.`,
+    );
+  }
+
+  const text = completion.truncated ? trimIncompleteTail(completion.text) : completion.text;
+  const markdown = sanitizeReview(text);
+  if (!markdown) {
+    throw new Error('The model returned an empty review after sanitization.');
+  }
+
+  return {
+    markdown,
+    model: completion.model,
+    provider: completion.provider,
+    totalTokens: completion.usage?.totalTokens ?? null,
+  };
 }
