@@ -48,7 +48,7 @@ function getGithubStat(installation: OverviewData['installation']) {
 }
 
 function getRepositoriesStat(repos: OverviewRepoSummary | null) {
-  if (!repos) return { value: '—', description: 'Connect GitHub App first', accent: undefined };
+  if (!repos) return { value: '-', description: 'Connect GitHub App first', accent: undefined };
   return {
     value: String(repos.totalCount),
     description: getRepoDescription(repos),
