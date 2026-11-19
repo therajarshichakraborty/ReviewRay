@@ -1,76 +1,51 @@
-/**
- * Server loader for the pull requests list page.
- *
- * Fetches all PRs for an installation and groups them by repository
- * so the UI can render one card per repo with nested PR rows.
- */
-
 import type {
   PullRequestItem,
-  PullRequestStatus,
   RepoPullRequests,
 } from '@/features/pull-requests/types/pull-request';
+import { toPullRequestStatus } from '@/features/pull-requests/types/pull-request';
 import { prisma } from '@/lib/db.config';
 
-/** Shape of a row returned from Prisma before client serialization. */
-type PullRequestRecord = {
-  id: string;
-  repoFullName: string;
-  prNumber: number;
-  title: string;
-  authorLogin: string | null;
-  baseBranch: string;
-  status: string;
-  reviewComment: string | null;
-  reviewedAt: Date | null;
-  createdAt: Date;
-};
+const MAX_PULL_REQUESTS = 200;
 
-/**
- * Converts a database record into a JSON-serializable `PullRequestItem`.
- *
- * @param record - Raw Prisma pull request row.
- * @returns Item with ISO date strings for client components.
- */
-function toPullRequestItem(record: PullRequestRecord): PullRequestItem {
-  return {
-    id: record.id,
-    prNumber: record.prNumber,
-    title: record.title,
-    authorLogin: record.authorLogin,
-    baseBranch: record.baseBranch,
-    status: record.status as PullRequestStatus,
-    reviewComment: record.reviewComment,
-    reviewedAt: record.reviewedAt?.toISOString() ?? null,
-    createdAt: record.createdAt.toISOString(),
-  };
-}
-
-/**
- * Loads all pull requests for an installation, grouped by repository.
- *
- * @param installationId - GitHub App installation ID for the current user.
- * @returns An array of repo groups, each with its pull requests (newest first within each group).
- */
+/** All pull requests for an installation, grouped by repository, newest activity first. */
 export async function getPullRequestsByRepo(installationId: number): Promise<RepoPullRequests[]> {
   const records = await prisma.pullRequest.findMany({
     where: { installationId },
     orderBy: { updatedAt: 'desc' },
+    take: MAX_PULL_REQUESTS,
+    select: {
+      id: true,
+      repoFullName: true,
+      prNumber: true,
+      title: true,
+      authorLogin: true,
+      baseBranch: true,
+      status: true,
+      reviewComment: true,
+      reviewedAt: true,
+      createdAt: true,
+    },
   });
 
-  const groups: RepoPullRequests[] = [];
+  const groups = new Map<string, PullRequestItem[]>();
 
-  // Single pass: append each PR to an existing group or start a new one
   for (const record of records) {
-    let group = groups.find((g) => g.repoFullName === record.repoFullName);
+    const item: PullRequestItem = {
+      id: record.id,
+      prNumber: record.prNumber,
+      title: record.title,
+      authorLogin: record.authorLogin,
+      baseBranch: record.baseBranch,
+      status: toPullRequestStatus(record.status),
+      reviewComment: record.reviewComment,
+      reviewedAt: record.reviewedAt?.toISOString() ?? null,
+      createdAt: record.createdAt.toISOString(),
+    };
 
-    if (!group) {
-      group = { repoFullName: record.repoFullName, pullRequests: [] };
-      groups.push(group);
-    }
-
-    group.pullRequests.push(toPullRequestItem(record));
+    const group = groups.get(record.repoFullName);
+    if (group) group.push(item);
+    else groups.set(record.repoFullName, [item]);
   }
 
-  return groups;
+  return [...groups].map(([repoFullName, pullRequests]) => ({ repoFullName, pullRequests }));
 }
