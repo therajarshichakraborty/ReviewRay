@@ -9,29 +9,11 @@ export const DASHBOARD_ROUTES = {
 export type DashboardRoute = (typeof DASHBOARD_ROUTES)[keyof typeof DASHBOARD_ROUTES];
 
 export const DASHBOARD_NAV_ITEMS = [
-  {
-    title: 'Overview',
-    href: DASHBOARD_ROUTES.overview,
-    icon: 'layout-dashboard' as const,
-  },
-  {
-    title: 'Repositories',
-    href: DASHBOARD_ROUTES.repos,
-    icon: 'folder' as const,
-  },
-  {
-    title: 'PullRequests',
-    href: DASHBOARD_ROUTES.pullRequest,
-    icon: 'git-pull-request' as const,
-  },
-  {
-    title: 'GitHub App',
-    href: DASHBOARD_ROUTES.github,
-    icon: 'github' as const,
-  },
-  {
-    title: 'Settings',
-    href: DASHBOARD_ROUTES.settings,
-    icon: 'settings' as const,
-  },
+  { title: 'Overview', href: DASHBOARD_ROUTES.overview, icon: 'overview' },
+  { title: 'Pull requests', href: DASHBOARD_ROUTES.pullRequest, icon: 'pull-requests' },
+  { title: 'Repositories', href: DASHBOARD_ROUTES.repos, icon: 'repositories' },
+  { title: 'GitHub App', href: DASHBOARD_ROUTES.github, icon: 'github' },
+  { title: 'Settings', href: DASHBOARD_ROUTES.settings, icon: 'settings' },
 ] as const;
+
+export type DashboardNavIcon = (typeof DASHBOARD_NAV_ITEMS)[number]['icon'];
