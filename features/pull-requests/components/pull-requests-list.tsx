@@ -62,7 +62,7 @@ function AiReviewAccordion({ pullRequest }: { pullRequest: PullRequestItem }) {
   if (pullRequest.status === 'rate_limited') {
     return (
       <p className="text-[11px] text-amber-700 dark:text-amber-400 font-light italic border border-amber-300/40 bg-amber-50/50 dark:bg-amber-950/10 px-3 py-1.5 rounded-lg w-fit">
-        Monthly review limit reached — upgrade to Pro for unlimited reviews.
+        Monthly review limit reached - upgrade to Pro for unlimited reviews.
       </p>
     );
   }
