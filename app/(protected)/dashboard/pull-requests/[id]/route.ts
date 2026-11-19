@@ -1,16 +1,9 @@
-import { redirect, notFound } from 'next/navigation';
-import { prisma } from '@/lib/db.config';
+import { redirect } from 'next/navigation';
 
-export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+import { DASHBOARD_ROUTES } from '@/features/dashboard/lib/routes';
+
+/** Legacy URL. The detail page performs the ownership check. */
+export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-
-  const pullRequest = await prisma.pullRequest.findUnique({
-    where: { id },
-  });
-
-  if (!pullRequest) {
-    notFound();
-  }
-
-  redirect(`https://github.com/${pullRequest.repoFullName}/commit/${pullRequest.headSha}`);
+  redirect(`${DASHBOARD_ROUTES.pullRequest}/${encodeURIComponent(id)}`);
 }
