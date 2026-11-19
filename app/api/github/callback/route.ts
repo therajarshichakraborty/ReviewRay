@@ -1,30 +1,33 @@
-import { DASHBOARD_ROUTES } from '@/features/dashboard/lib/routes';
-import { saveInstallation } from '@/features/github/server/installation';
-import { getServerSession } from '@/features/auth/actions';
 import { redirect } from 'next/navigation';
 
-function buildSignInCallbackUrl(installationId: string | null): string {
-  if (installationId) {
-    return `/api/github/callback?installation_id=${installationId}`;
-  }
-
-  return DASHBOARD_ROUTES.github;
-}
+import { getServerSession } from '@/features/auth/server/session';
+import { SIGN_IN_PATH } from '@/features/auth/utils';
+import { DASHBOARD_ROUTES } from '@/features/dashboard/lib/routes';
+import { saveInstallation } from '@/features/github/server/installation';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-
   const installationId = searchParams.get('installation_id');
   const session = await getServerSession();
 
   if (!session) {
-    const callbackUrl = buildSignInCallbackUrl(installationId);
-    redirect(`/sign-in?callbackUrl=${encodeURIComponent(callbackUrl)}`);
+    const callbackUrl = installationId
+      ? `/api/github/callback?installation_id=${encodeURIComponent(installationId)}`
+      : DASHBOARD_ROUTES.github;
+    redirect(`${SIGN_IN_PATH}?callbackUrl=${encodeURIComponent(callbackUrl)}`);
   }
 
-  if (installationId) {
+  if (!installationId) {
+    redirect(DASHBOARD_ROUTES.github);
+  }
+
+  let status = 'connected';
+  try {
     await saveInstallation(session.user.id, Number(installationId));
+  } catch (error) {
+    console.warn('[github] installation link rejected:', error);
+    status = 'error';
   }
 
-  redirect(DASHBOARD_ROUTES.github);
+  redirect(`${DASHBOARD_ROUTES.github}?status=${status}`);
 }
