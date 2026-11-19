@@ -1,10 +1,10 @@
 'use client';
+
 /**
  * Renders AI-generated review text as formatted Markdown.
  *
  * Uses Streamdown for streaming-friendly Markdown with syntax highlighting
- * via the `@streamdown/code` plugin. Marked as `"use client"` because
- * Streamdown runs in the browser.
+ * via the `@streamdown/code` plugin.
  */
 
 import { Streamdown } from 'streamdown';
@@ -19,8 +19,8 @@ import 'streamdown/styles.css';
  */
 export function AiReviewMarkdown({ review }: { review: string }) {
   return (
-    <Streamdown plugins={{ code }} className="text-sm leading-relaxed">
-      {review}
-    </Streamdown>
+    <div className="ai-review-content text-sm leading-relaxed text-foreground">
+      <Streamdown plugins={{ code }}>{review}</Streamdown>
+    </div>
   );
 }
