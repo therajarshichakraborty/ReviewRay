@@ -1,34 +1,33 @@
+export type PrFileStatus =
+  | 'added'
+  | 'removed'
+  | 'modified'
+  | 'renamed'
+  | 'copied'
+  | 'changed'
+  | 'unchanged';
+
+/** One changed file in a pull request, as returned by the GitHub API. */
 export type PrFile = {
   filePath: string;
+  status: PrFileStatus;
+  additions: number;
+  deletions: number;
+  /** Unified diff hunk. Missing for binary or very large files. */
+  patch: string | null;
+};
 
-  patch: string;
+/** PR metadata plus changed files, fetched once per review run. */
+export type PrSnapshot = {
+  description: string;
+  files: PrFile[];
 };
 
 export type CodeChunk = {
-  /** Unique id used as the Pinecone record id, e.g. `pr-42--src/foo.ts--part-0` */
+  /** Unique id used as the Pinecone record id, e.g. `repo--src/foo.ts--part-0` */
   id: string;
   /** Source file path this chunk came from */
   filePath: string;
   /** Raw text stored in Pinecone and searched at review time */
   text: string;
-};
-
-/**
- * Subset of the GitHub `pull_request` webhook payload we persist and review.
- *
- * @see features/github/server/webhook-handler.ts — parses and validates webhooks
- */
-export type PullRequestWebhookPayload = {
-  /** Webhook action, e.g. `opened`, `synchronize`, `reopened` */
-  action: string;
-  /** GitHub App installation that received the event */
-  installation: { id: number };
-  repository: { full_name: string };
-  pull_request: {
-    number: number;
-    title: string;
-    user: { login: string } | null;
-    head: { sha: string };
-    base: { ref: string };
-  };
 };
