@@ -1,4 +1,5 @@
 import { createHmac, timingSafeEqual } from 'crypto';
+import { razorpayEnv } from '@/features/billing/lib/razorpay';
 import { prisma } from '@/lib/db.config';
 
 type RazorpaySubscriptionPayload = {
@@ -27,7 +28,7 @@ const HANDLED_EVENTS = new Set([
 export async function POST(request: Request) {
   const body = await request.text();
   const signature = request.headers.get('x-razorpay-signature');
-  const secret = process.env.NEXT_PUBLIC_RAZORPAY_WEBHOOK_SECRET;
+  const secret = razorpayEnv.webhookSecret();
 
   if (!secret || !signature) {
     return Response.json({ error: 'Invalid signature' }, { status: 401 });
