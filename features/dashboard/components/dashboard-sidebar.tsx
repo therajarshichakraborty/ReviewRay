@@ -1,5 +1,5 @@
 import Link from 'next/link';
-
+import { Sparkles } from 'lucide-react';
 import { DASHBOARD_ROUTES } from '@/features/dashboard/lib/routes';
 import { DashboardNav } from '@/features/dashboard/components/dashboard-nav';
 import { SidebarUserButton } from '@/features/dashboard/components/sidebar-user-button';
@@ -34,10 +34,10 @@ export function DashboardSidebar({ user, plan = 'Pro' }: DashboardSidebarProps) 
               className="hover:bg-transparent active:bg-transparent"
             >
               <Link href={DASHBOARD_ROUTES.overview} className="flex items-center gap-2.5 px-1.5">
-                <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-foreground text-background shadow-md">
-                  <span className="font-mono text-xs font-black select-none">R</span>
+                <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm shadow-blue-500/25">
+                  <Sparkles className="size-4" />
                 </div>
-                <span className="font-sans text-sm font-semibold tracking-tight text-foreground group-data-[collapsible=icon]:hidden">
+                <span className="font-sans text-sm font-bold tracking-tight text-foreground group-data-[collapsible=icon]:hidden">
                   ReviewRay
                 </span>
               </Link>
