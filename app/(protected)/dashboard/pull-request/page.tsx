@@ -49,7 +49,7 @@ function PullRequestsNotConnected() {
 }
 
 /**
- * Pull requests index — all PRs grouped by repo for the user's installation.
+ * Pull requests index - all PRs grouped by repo for the user's installation.
  *
  * @returns Header plus list or connect prompt.
  */
