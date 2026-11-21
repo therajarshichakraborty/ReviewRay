@@ -73,7 +73,7 @@ export function CtaBannerSection({ isLoggedIn }: { isLoggedIn: boolean }) {
             <Link href="/pricing">View pricing</Link>
           </Button>
         </Reveal>
-        <MonoNote className="mt-6 block">5 free reviews every month · no card required</MonoNote>
+        <MonoNote className="mt-6 block">1 free review every month · no card required</MonoNote>
       </div>
     </Section>
   );

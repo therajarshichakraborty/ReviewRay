@@ -1,4 +1,8 @@
-import { canInstallationReview, FREE_MONTHLY_LIMIT } from '@/features/billing/server/usage';
+import {
+  canInstallationReview,
+  PRO_MONTHLY_LIMIT,
+  type ReviewAllowance,
+} from '@/features/billing/server/usage';
 import { inngest } from '@/features/inngest/client';
 import { savePullRequest } from '@/features/reviews/server/save-pull-requests';
 import { prisma } from '@/lib/db.config';
@@ -24,7 +28,21 @@ function appUrl(path: string) {
   return `${base.replace(/\/$/, '')}${path}`;
 }
 
-async function postLimitReachedNotice(event: PullRequestWebhookPayload) {
+function limitNoticeBody({ tier, limit }: ReviewAllowance) {
+  const plan = tier === 'pro' ? 'Pro' : 'Free';
+  const reviews = limit === 1 ? '1 AI review' : `${limit} AI reviews`;
+  const next =
+    tier === 'pro'
+      ? 'The limit resets at the start of next month.'
+      : `[Upgrade to Pro](${appUrl('/pricing')}) for ${PRO_MONTHLY_LIMIT} reviews a month, or wait for the limit to reset at the start of next month.`;
+
+  return `ReviewRay skipped this pull request: the ${plan} plan includes ${reviews} per month and they have all been used.\n\n${next}`;
+}
+
+async function postLimitReachedNotice(
+  event: PullRequestWebhookPayload,
+  allowance: ReviewAllowance,
+) {
   const octokit = await getGithubApp().getInstallationOctokit(event.installation.id);
   const [owner, repo] = event.repository.full_name.split('/');
 
@@ -32,7 +50,7 @@ async function postLimitReachedNotice(event: PullRequestWebhookPayload) {
     owner,
     repo,
     issue_number: event.pull_request.number,
-    body: `ReviewRay skipped this pull request: the free plan includes ${FREE_MONTHLY_LIMIT} AI reviews per month and they have all been used.\n\n[Upgrade to Pro](${appUrl('/pricing')}) for unlimited reviews, or wait for the limit to reset at the start of next month.`,
+    body: limitNoticeBody(allowance),
   });
 }
 
@@ -51,16 +69,16 @@ async function handlePullRequestEvent(event: PullRequestWebhookPayload) {
   }
 
   const pullRequest = await savePullRequest(event);
-  const allowed = await canInstallationReview(event.installation.id, pullRequest.id);
+  const allowance = await canInstallationReview(event.installation.id, pullRequest.id);
 
-  if (!allowed) {
+  if (!allowance.allowed) {
     await prisma.pullRequest.update({
       where: { id: pullRequest.id },
       data: { status: 'rate_limited' },
     });
 
     if (NOTIFY_ACTIONS.has(event.action)) {
-      await postLimitReachedNotice(event).catch((error) =>
+      await postLimitReachedNotice(event, allowance).catch((error) =>
         console.warn('[webhook] could not post limit notice:', error),
       );
     }

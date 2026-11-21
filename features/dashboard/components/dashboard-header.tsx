@@ -25,6 +25,7 @@ export function DashboardHeader({ title, parents = [], actions }: DashboardHeade
             {crumb.href ? (
               <Link
                 href={crumb.href}
+                transitionTypes={['nav-back']}
                 className="link-underline truncate pb-px text-muted-foreground transition-colors hover:text-foreground"
               >
                 {crumb.label}

@@ -19,5 +19,14 @@ export const auth = betterAuth({
     },
   },
 
+  session: {
+    // Signed session snapshot in a cookie: session checks in the proxy, layouts
+    // and pages verify a signature instead of querying the database each time.
+    cookieCache: {
+      enabled: true,
+      maxAge: 5 * 60,
+    },
+  },
+
   plugins: [nextCookies()],
 });

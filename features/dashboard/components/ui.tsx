@@ -4,6 +4,7 @@
  */
 
 import { AnimatedNumber } from '@/components/motion/animated-number';
+import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
 /** Row separators inside a panel, drawn in the page color so they read as gaps. */
@@ -66,7 +67,7 @@ export function StatCard({
   return (
     <div
       className="group animate-fade-up rounded-2xl bg-surface p-5 transition-colors duration-300 hover:bg-accent/60"
-      style={{ animationDelay: `${index * 70}ms` }}
+      style={{ animationDelay: `${index * 35}ms` }}
     >
       <div className="flex items-start justify-between gap-3">
         <p className="text-sm text-muted-foreground">{label}</p>
@@ -152,6 +153,20 @@ export function Meter({
         className={cn('animate-grow-x h-full origin-left rounded-full bg-primary', barClassName)}
         style={{ width: `${percent}%` }}
       />
+    </div>
+  );
+}
+
+/** Placeholder with the exact footprint of a `StatCard`, so nothing shifts. */
+export function StatCardSkeleton() {
+  return (
+    <div className="rounded-2xl bg-surface p-5" aria-hidden>
+      <div className="flex items-start justify-between gap-3">
+        <Skeleton className="mt-0.5 h-4 w-28 bg-background" />
+        <Skeleton className="size-8 rounded-lg bg-background" />
+      </div>
+      <Skeleton className="mt-3 h-9 w-16 bg-background" />
+      <Skeleton className="mt-2 h-4 w-36 bg-background" />
     </div>
   );
 }

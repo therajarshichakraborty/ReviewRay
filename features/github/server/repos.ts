@@ -1,3 +1,5 @@
+import { unstable_cache } from 'next/cache';
+
 import { getGithubApp } from '@/features/github/utils/github-app';
 
 export type GithubRepo = {
@@ -60,9 +62,9 @@ function mapRepo(repo: {
 
 const REPOS_PER_PAGE = 100;
 
-export async function getInstallationReposPage(
+async function fetchInstallationReposPage(
   installationId: number,
-  page = 1,
+  page: number,
 ): Promise<InstallationReposPage> {
   const app = getGithubApp();
   // `getInstallationOctokit` exchanges the App JWT for an installation access token.
@@ -81,4 +83,22 @@ export async function getInstallationReposPage(
     page,
     hasMore: page * REPOS_PER_PAGE < totalCount,
   };
+}
+
+/**
+ * Repository lists change rarely, while every dashboard visit needs them. A
+ * short server cache spares two GitHub round trips (token exchange + listing)
+ * on most page loads. Sync status is merged separately and stays live.
+ */
+const cachedInstallationReposPage = unstable_cache(
+  fetchInstallationReposPage,
+  ['github-installation-repos-page'],
+  { revalidate: 60, tags: ['github-installation-repos'] },
+);
+
+export async function getInstallationReposPage(
+  installationId: number,
+  page = 1,
+): Promise<InstallationReposPage> {
+  return cachedInstallationReposPage(installationId, page);
 }

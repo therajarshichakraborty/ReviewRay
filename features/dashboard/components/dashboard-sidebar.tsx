@@ -27,26 +27,16 @@ type DashboardSidebarProps = {
 };
 
 function UsageCard({ plan, usage }: { plan: SubscriptionPlan; usage: UsageSummary }) {
-  if (usage.limit === null) {
-    return (
-      <div className="animate-fade-in rounded-xl bg-background p-3.5 group-data-[collapsible=icon]:hidden">
-        <p className="flex items-center gap-1.5 text-sm font-medium">
-          <Sparkles className="size-3.5 text-primary" />
-          {PLAN_DETAILS[plan].label} plan
-        </p>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Unlimited reviews · {usage.used} this month
-        </p>
-      </div>
-    );
-  }
-
   const exhausted = usage.used >= usage.limit;
+  const isPro = plan === 'pro';
 
   return (
     <div className="animate-fade-in rounded-xl bg-background p-3.5 group-data-[collapsible=icon]:hidden">
       <div className="flex items-center justify-between text-xs">
-        <span className="font-medium">Free plan</span>
+        <span className="flex items-center gap-1.5 font-medium">
+          {isPro ? <Sparkles className="size-3.5 text-primary" /> : null}
+          {PLAN_DETAILS[plan].label} plan
+        </span>
         <span className="font-mono text-muted-foreground tabular-nums">
           {usage.used}/{usage.limit}
         </span>
@@ -58,13 +48,19 @@ function UsageCard({ plan, usage }: { plan: SubscriptionPlan; usage: UsageSummar
         className="mt-2.5 bg-muted"
         barClassName={exhausted ? 'bg-amber-500' : undefined}
       />
-      <Link
-        href="/pricing"
-        className="group mt-3 inline-flex items-center gap-1 text-xs font-medium text-primary"
-      >
-        {exhausted ? 'Limit reached. Upgrade' : 'Upgrade for unlimited'}
-        <ArrowUpRight className="size-3 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-      </Link>
+      {isPro ? (
+        <p className="mt-3 text-xs text-muted-foreground">
+          {exhausted ? 'Limit reached. Resets on the 1st' : 'Reviews used this month'}
+        </p>
+      ) : (
+        <Link
+          href="/pricing"
+          className="group mt-3 inline-flex items-center gap-1 text-xs font-medium text-primary"
+        >
+          {exhausted ? 'Limit reached. Upgrade' : 'Upgrade for 10 reviews'}
+          <ArrowUpRight className="size-3 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+        </Link>
+      )}
     </div>
   );
 }
@@ -79,7 +75,8 @@ export function DashboardSidebar({ user, plan, usage }: DashboardSidebarProps) {
               asChild
               size="lg"
               tooltip="ReviewRay"
-              className="hover:bg-transparent active:bg-transparent"
+              // Same padding as the nav buttons when collapsed, so the mark lines up with their icons.
+              className="hover:bg-transparent active:bg-transparent group-data-[collapsible=icon]:p-2!"
             >
               <Link href={DASHBOARD_ROUTES.overview}>
                 <LogoMark className="size-8 transition-transform duration-500 ease-[var(--ease-spring)] hover:rotate-[-8deg]" />

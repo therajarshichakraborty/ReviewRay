@@ -1,7 +1,12 @@
 import { startOfMonth } from 'date-fns';
+import { cache } from 'react';
 
 import type { AiTier } from '@/features/ai';
-import { FREE_MONTHLY_LIMIT } from '@/features/billing/constants';
+import {
+  FREE_MONTHLY_LIMIT,
+  getMonthlyReviewLimit,
+  PRO_MONTHLY_LIMIT,
+} from '@/features/billing/constants';
 import { getUserSubscription } from '@/features/billing/server/subscription';
 import {
   getUserIdByInstallationId,
@@ -9,11 +14,12 @@ import {
 } from '@/features/github/server/installation';
 import { prisma } from '@/lib/db.config';
 
-export { FREE_MONTHLY_LIMIT };
+export { FREE_MONTHLY_LIMIT, PRO_MONTHLY_LIMIT };
 
 export type UsageSummary = {
   used: number;
-  limit: number | null;
+  /** Reviews included this month: 1 on Free, 10 on Pro. */
+  limit: number;
 };
 
 /**
@@ -44,28 +50,40 @@ async function isProUser(userId: string | null): Promise<boolean> {
   return subscription.plan === 'pro' && subscription.status === 'active';
 }
 
-/** The AI tier an installation's reviews run on (decides OpenRouter vs OpenAI). */
+/** The plan an installation's reviews are billed against (decides the monthly limit). */
 export async function getInstallationTier(installationId: number): Promise<AiTier> {
   const userId = await getUserIdByInstallationId(installationId);
   return (await isProUser(userId)) ? 'pro' : 'free';
 }
 
-/** Whether a new review may start for this installation right now. */
+export type ReviewAllowance = {
+  allowed: boolean;
+  tier: AiTier;
+  limit: number;
+};
+
+/** Whether a new review may start for this installation right now, and why not. */
 export async function canInstallationReview(
   installationId: number,
   excludePullRequestId?: string,
-): Promise<boolean> {
-  if ((await getInstallationTier(installationId)) === 'pro') return true;
-  const used = await countReviewsThisMonth(installationId, excludePullRequestId);
-  return used < FREE_MONTHLY_LIMIT;
+): Promise<ReviewAllowance> {
+  const [tier, used] = await Promise.all([
+    getInstallationTier(installationId),
+    countReviewsThisMonth(installationId, excludePullRequestId),
+  ]);
+  const limit = getMonthlyReviewLimit(tier);
+  return { allowed: used < limit, tier, limit };
 }
 
-export async function getUsageSummary(userId: string): Promise<UsageSummary> {
+/** Memoized per request: the sidebar and the current page share one count. */
+export const getUsageSummary = cache(async function getUsageSummary(
+  userId: string,
+): Promise<UsageSummary> {
   const [installationId, pro] = await Promise.all([
     getUserInstallationId(userId),
     isProUser(userId),
   ]);
   const used = installationId ? await countReviewsThisMonth(installationId) : 0;
 
-  return { used, limit: pro ? null : FREE_MONTHLY_LIMIT };
-}
+  return { used, limit: getMonthlyReviewLimit(pro ? 'pro' : 'free') };
+});

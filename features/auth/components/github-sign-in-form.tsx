@@ -15,9 +15,13 @@ function SubmitButton() {
       type="submit"
       disabled={pending}
       aria-busy={pending}
-      className="h-11 w-full rounded-lg bg-foreground text-[15px] text-background shadow-sm hover:bg-foreground/90"
+      className="group h-11 w-full rounded-lg bg-foreground text-[15px] text-background shadow-sm transition-all duration-300 ease-[var(--ease-out-expo)] hover:-translate-y-px hover:bg-foreground/90 hover:shadow-md active:translate-y-0 active:scale-[0.985]"
     >
-      {pending ? <Loader2 className="size-4 animate-spin" /> : <GitHubIcon className="size-4" />}
+      {pending ? (
+        <Loader2 className="size-4 animate-spin" />
+      ) : (
+        <GitHubIcon className="size-4 transition-transform duration-500 ease-[var(--ease-spring)] group-hover:-rotate-12 group-hover:scale-110" />
+      )}
       {pending ? 'Redirecting to GitHub' : 'Continue with GitHub'}
     </Button>
   );

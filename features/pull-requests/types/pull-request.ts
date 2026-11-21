@@ -28,7 +28,6 @@ export type PullRequestItem = {
   authorLogin: string | null;
   baseBranch: string;
   status: PullRequestStatus;
-  reviewComment: string | null;
   reviewedAt: string | null;
   createdAt: string;
 };

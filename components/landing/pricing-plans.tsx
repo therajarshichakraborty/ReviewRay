@@ -5,7 +5,7 @@ import { Reveal } from '@/components/motion/reveal';
 import { Button } from '@/components/ui/button';
 import { SIGN_IN_PATH } from '@/features/auth/utils';
 import { UpgradeButton } from '@/features/billing/components/upgrade-button';
-import { FREE_MONTHLY_LIMIT } from '@/features/billing/constants';
+import { FREE_MONTHLY_LIMIT, PRO_MONTHLY_LIMIT } from '@/features/billing/constants';
 import { DASHBOARD_ROUTES } from '@/features/dashboard/lib/routes';
 import type { SubscriptionPlan } from '@/features/dashboard/lib/types';
 import { PLAN_DETAILS, type PlanDetails } from '@/features/settings/lib/plan-details';
@@ -20,7 +20,7 @@ type PricingPlansProps = {
 const NOTES = [
   {
     q: 'What counts as a review?',
-    a: `Each pull request ReviewRay reviews counts once per month, no matter how many commits you push to it. Free includes ${FREE_MONTHLY_LIMIT}.`,
+    a: `Each pull request ReviewRay reviews counts once per month, no matter how many commits you push to it. Free includes ${FREE_MONTHLY_LIMIT} and Pro includes ${PRO_MONTHLY_LIMIT}.`,
   },
   {
     q: 'What happens at the limit?',

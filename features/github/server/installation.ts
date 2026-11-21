@@ -1,5 +1,7 @@
 import type { GithubInstallationStatus } from '@/features/dashboard/lib/types';
 import { getGithubApp } from '@/features/github/utils/github-app';
+import { cache } from 'react';
+
 import { prisma } from '@/lib/db.config';
 
 type InstallationAccount = { id?: number; login?: string; slug?: string } | null | undefined;
@@ -8,8 +10,19 @@ function getAccountLogin(account: InstallationAccount): string | null {
   return account?.login ?? account?.slug ?? null;
 }
 
+/**
+ * The user's installation row. Memoized per request, so the layout, page and
+ * overview helpers share a single query.
+ */
+const getInstallationRecord = cache(async (userId: string) =>
+  prisma.githubInstallation.findUnique({
+    where: { userId },
+    select: { installationId: true, accountLogin: true, createdAt: true },
+  }),
+);
+
 export async function getInstallationStatus(userId: string): Promise<GithubInstallationStatus> {
-  const installation = await prisma.githubInstallation.findUnique({ where: { userId } });
+  const installation = await getInstallationRecord(userId);
 
   if (!installation) {
     return { connected: false, accountLogin: null, installedAt: null };
@@ -114,10 +127,6 @@ export async function getUserIdByInstallationId(installationId: number) {
 }
 
 export async function getUserInstallationId(userId: string) {
-  const installation = await prisma.githubInstallation.findUnique({
-    where: { userId },
-    select: { installationId: true },
-  });
-
+  const installation = await getInstallationRecord(userId);
   return installation?.installationId ?? null;
 }

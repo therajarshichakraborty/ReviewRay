@@ -197,7 +197,7 @@ export function RepoList() {
         </div>
       </div>
 
-      <div className="animate-fade-up overflow-hidden rounded-2xl bg-surface [animation-delay:80ms]">
+      <div className="animate-fade-up overflow-hidden rounded-2xl bg-surface [animation-delay:40ms]">
         {body}
       </div>
 

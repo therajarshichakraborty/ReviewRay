@@ -22,16 +22,20 @@ type DiffLineProps = {
   n?: number;
   kind?: 'add' | 'del' | 'ctx';
   children: React.ReactNode;
+  className?: string;
+  style?: React.CSSProperties;
 };
 
-export function DiffLine({ n, kind = 'ctx', children }: DiffLineProps) {
+export function DiffLine({ n, kind = 'ctx', children, className, style }: DiffLineProps) {
   return (
     <div
       className={cn(
         'flex gap-3 px-3 whitespace-pre',
         kind === 'add' && 'bg-emerald-500/10',
         kind === 'del' && 'bg-red-500/10',
+        className,
       )}
+      style={style}
     >
       <span className="w-6 shrink-0 text-right text-muted-foreground/50 select-none">
         {n ?? ''}

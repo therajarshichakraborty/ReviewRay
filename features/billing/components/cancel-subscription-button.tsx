@@ -52,8 +52,8 @@ export function CancelSubscriptionButton({ disabled = false }: { disabled?: bool
         <AlertDialogHeader>
           <AlertDialogTitle>Cancel your Pro subscription?</AlertDialogTitle>
           <AlertDialogDescription>
-            You keep unlimited reviews until the current billing period ends. After that your
-            account moves to the Free plan with 5 reviews per month.
+            You keep 10 reviews a month until the current billing period ends. After that your
+            account moves to the Free plan with 1 review per month.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

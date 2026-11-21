@@ -40,7 +40,7 @@ function ReviewPlaceholder({ status }: { status: PullRequestStatus }) {
         <EmptyState
           icon={Clock}
           title="Monthly review limit reached"
-          description="This pull request arrived after the free plan's monthly reviews were used. Upgrade to Pro for unlimited reviews, or push again after the limit resets."
+          description="This pull request arrived after this month's reviews were used. Free includes 1 review a month and Pro includes 10. Push again after the limit resets on the 1st."
           action={
             <Button asChild className="rounded-lg">
               <Link href="/pricing">See Pro</Link>
@@ -140,7 +140,7 @@ export default async function PullRequestDetailPage({
         </div>
 
         {pullRequest.reviewComment && status === 'reviewed' ? (
-          <article className="animate-fade-up overflow-hidden rounded-2xl bg-surface [animation-delay:120ms]">
+          <article className="animate-fade-up overflow-hidden rounded-2xl bg-surface [animation-delay:50ms]">
             <header className="flex items-center gap-2.5 px-5 pt-5 sm:px-7">
               <LogoMark className="size-6 rounded-md" />
               <span className="text-sm font-medium">ReviewRay</span>

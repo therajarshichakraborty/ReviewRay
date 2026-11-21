@@ -11,7 +11,7 @@ import { searchCodeContext } from './vector';
  * Review pipeline for one pull request:
  *
  * 1. Mark the PR as processing.
- * 2. Resolve the owner's plan (free runs on OpenRouter, pro on OpenAI).
+ * 2. Resolve the owner's plan (sets the diff budget; both plans run on OpenRouter).
  * 3. Fetch the PR description and changed files from GitHub.
  * 4. Retrieve related code from the synced codebase index, if any.
  * 5. Generate a budgeted, sanitized review.

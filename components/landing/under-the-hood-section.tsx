@@ -47,9 +47,9 @@ const ITEMS = [
   },
   {
     icon: Workflow,
-    title: 'Model routing by plan',
-    body: 'Free reviews run on open models with fallbacks; Pro reviews run on OpenAI.',
-    meta: 'openrouter + openai',
+    title: 'Model fallbacks',
+    body: 'Every review runs on OpenRouter, and a busy model hands off to the next one automatically.',
+    meta: 'openrouter',
   },
   {
     icon: Timer,

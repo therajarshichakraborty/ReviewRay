@@ -86,7 +86,7 @@ export function UpgradeButton({
         key: RAZORPAY_KEY_ID,
         subscription_id: subscriptionId,
         name: 'ReviewRay',
-        description: 'Pro plan, unlimited AI reviews',
+        description: 'Pro plan, 10 AI reviews per month',
         prefill,
         theme: { color: '#2563eb' },
         handler: () => {

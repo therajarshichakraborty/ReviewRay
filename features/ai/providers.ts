@@ -1,18 +1,16 @@
 /**
  * LLM provider registry.
  *
- * ReviewRay talks to two OpenAI-compatible Chat Completions endpoints:
+ * Both plans currently run on OpenRouter. Plans differ only in their monthly
+ * review allowance (see `features/billing/constants.ts`) and diff budget.
  *
- * - OpenRouter: serves the Free plan, using free community models.
- * - OpenAI:     serves the Pro plan, using the official OpenAI API.
- *
- * Everything is driven by environment variables, so switching models or
- * enabling OpenAI later never requires a code change. See `.env.example`.
+ * The OpenAI provider is kept below, commented out, so Pro can move back to
+ * OpenAI later by restoring it and the `OPENAI_*` variables in `.env.example`.
  */
 
 export type ProviderId = 'openai' | 'openrouter';
 
-/** Billing tier the review is generated for. Decides which provider is preferred. */
+/** Billing tier the review is generated for. */
 export type AiTier = 'free' | 'pro';
 
 export type ProviderConfig = {
@@ -25,7 +23,8 @@ export type ProviderConfig = {
   headers: Record<string, string>;
 };
 
-const DEFAULT_OPENAI_MODEL = 'gpt-4.1-mini';
+// OpenAI is disabled for now. Kept for when Pro moves back to OpenAI.
+// const DEFAULT_OPENAI_MODEL = 'gpt-4.1-mini';
 
 /** Strong free models first, then OpenRouter's free router as a last resort. */
 const DEFAULT_OPENROUTER_MODELS = [
@@ -50,19 +49,20 @@ function unique(values: string[]): string[] {
   return [...new Set(values)];
 }
 
-function getOpenAiConfig(): ProviderConfig | null {
-  const apiKey = readEnv('OPENAI_API_KEY');
-  if (!apiKey) return null;
-
-  return {
-    id: 'openai',
-    label: 'OpenAI',
-    endpoint: `${readEnv('OPENAI_BASE_URL') ?? 'https://api.openai.com/v1'}/chat/completions`,
-    apiKey,
-    models: [readEnv('OPENAI_MODEL') ?? DEFAULT_OPENAI_MODEL],
-    headers: {},
-  };
-}
+// OpenAI is disabled for now. Kept for when Pro moves back to OpenAI.
+// function getOpenAiConfig(): ProviderConfig | null {
+//   const apiKey = readEnv('OPENAI_API_KEY');
+//   if (!apiKey) return null;
+//
+//   return {
+//     id: 'openai',
+//     label: 'OpenAI',
+//     endpoint: `${readEnv('OPENAI_BASE_URL') ?? 'https://api.openai.com/v1'}/chat/completions`,
+//     apiKey,
+//     models: [readEnv('OPENAI_MODEL') ?? DEFAULT_OPENAI_MODEL],
+//     headers: {},
+//   };
+// }
 
 function getOpenRouterConfig(): ProviderConfig | null {
   const apiKey = readEnv('OPENROUTER_API_KEY');
@@ -90,25 +90,21 @@ function getOpenRouterConfig(): ProviderConfig | null {
 /**
  * Returns the providers to try, in order, for a given tier.
  *
- * - Pro:  OpenAI first. Falls back to OpenRouter if OpenAI is not configured
- *         yet or fails, so Pro users are never left without a review.
- * - Free: OpenRouter only. OpenAI is used for free users solely when OpenRouter
- *         is not configured at all, so paid credits are never spent by accident.
+ * Free and Pro both use OpenRouter, with its model fallback chain.
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function resolveProviders(tier: AiTier): ProviderConfig[] {
-  const openai = getOpenAiConfig();
   const openrouter = getOpenRouterConfig();
 
-  const chain = tier === 'pro' ? [openai, openrouter] : [openrouter ?? openai];
-  const providers = chain.filter((provider): provider is ProviderConfig => provider !== null);
+  // Previous routing, kept for when OpenAI is turned back on:
+  // const openai = getOpenAiConfig();
+  // const chain = tier === 'pro' ? [openai, openrouter] : [openrouter ?? openai];
 
-  if (providers.length === 0) {
-    throw new Error(
-      'No AI provider configured. Set OPENROUTER_API_KEY (free plan) and/or OPENAI_API_KEY (pro plan).',
-    );
+  if (!openrouter) {
+    throw new Error('No AI provider configured. Set OPENROUTER_API_KEY.');
   }
 
-  return providers;
+  return [openrouter];
 }
 
 /**

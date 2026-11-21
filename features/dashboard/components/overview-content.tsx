@@ -10,28 +10,46 @@ import {
   Sparkles,
 } from 'lucide-react';
 import Link from 'next/link';
+import { Suspense } from 'react';
 
 import { GitHubIcon } from '@/components/landing/icons';
 import { Button } from '@/components/ui/button';
 import { DASHBOARD_ROUTES } from '@/features/dashboard/lib/routes';
 import { statusBadge, statusDotClass } from '@/features/dashboard/lib/status-styles';
+import { getOverviewRepoSummary } from '@/features/overview/server/get-overview';
 import type { OverviewActivityItem, OverviewData } from '@/features/overview/types/overview';
 import { getPrStatusTone, PR_STATUS_LABELS } from '@/features/pull-requests/utils/status';
 import { cn } from '@/lib/utils';
-import { EmptyState, PANEL_ROW_HOVER, PANEL_ROWS, Panel, StatCard } from './ui';
+import { EmptyState, PANEL_ROW_HOVER, PANEL_ROWS, Panel, StatCard, StatCardSkeleton } from './ui';
 
-function StatsGrid({ overview }: { overview: OverviewData }) {
-  const repos = overview.repos;
-  const resetDate = format(startOfMonth(addMonths(new Date(), 1)), 'MMM d');
-  const limited = overview.reviewsLimit !== null;
-  const exhausted = limited && overview.reviewsUsed >= (overview.reviewsLimit ?? 0);
+/** Repository count from GitHub. Streams in so a slow GitHub never blocks the page. */
+async function RepoStatCard({ installationId }: { installationId: number | null }) {
+  const repos = installationId ? await getOverviewRepoSummary(installationId) : null;
 
-  let repoCaption = 'Connect the GitHub App';
+  let caption = 'Connect the GitHub App';
   if (repos) {
-    repoCaption = repos.hasMorePages
+    caption = repos.hasMorePages
       ? 'Connected through the app'
       : `${repos.publicCount} public · ${repos.privateCount} private`;
+  } else if (installationId) {
+    caption = 'GitHub is not responding';
   }
+
+  return (
+    <StatCard
+      index={2}
+      label="Repositories"
+      value={repos ? repos.totalCount : '-'}
+      caption={caption}
+      icon={FolderGit2}
+    />
+  );
+}
+
+function StatsGrid({ overview }: { overview: OverviewData }) {
+  const resetDate = format(startOfMonth(addMonths(new Date(), 1)), 'MMM d');
+  const exhausted = overview.reviewsUsed >= overview.reviewsLimit;
+  const planLabel = overview.plan === 'pro' ? 'Pro plan' : 'Free plan';
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -39,17 +57,9 @@ function StatsGrid({ overview }: { overview: OverviewData }) {
         index={0}
         label="Reviews this month"
         value={overview.reviewsUsed}
-        suffix={
-          limited ? (
-            <span className="text-xl text-muted-foreground"> / {overview.reviewsLimit}</span>
-          ) : null
-        }
+        suffix={<span className="text-xl text-muted-foreground"> / {overview.reviewsLimit}</span>}
         caption={
-          !limited
-            ? 'Unlimited on Pro'
-            : exhausted
-              ? `Limit reached · resets ${resetDate}`
-              : `Free plan · resets ${resetDate}`
+          exhausted ? `Limit reached · resets ${resetDate}` : `${planLabel} · resets ${resetDate}`
         }
         icon={Sparkles}
         tone={exhausted ? 'warning' : 'default'}
@@ -61,13 +71,9 @@ function StatsGrid({ overview }: { overview: OverviewData }) {
         caption={`${overview.breakdown.reviewed} reviewed all time`}
         icon={GitPullRequest}
       />
-      <StatCard
-        index={2}
-        label="Repositories"
-        value={repos ? repos.totalCount : '-'}
-        caption={repoCaption}
-        icon={FolderGit2}
-      />
+      <Suspense fallback={<StatCardSkeleton />}>
+        <RepoStatCard installationId={overview.installationId} />
+      </Suspense>
       <StatCard
         index={3}
         label="Codebase context"
@@ -107,7 +113,7 @@ function OutcomesPanel({ overview }: { overview: OverviewData }) {
           <li
             key={row.label}
             className="animate-fade-up flex items-center gap-3 rounded-lg px-2 py-1.5 text-[15px] transition-colors hover:bg-background/70"
-            style={{ animationDelay: `${150 + index * 60}ms` }}
+            style={{ animationDelay: `${60 + index * 30}ms` }}
           >
             <span className={cn('size-2.5 rounded-full', row.color)} />
             <span className="flex-1">{row.label}</span>
@@ -164,7 +170,7 @@ function SetupChecklist({ overview }: { overview: OverviewData }) {
               'animate-fade-up flex items-center gap-4 rounded-xl px-3 py-3.5',
               PANEL_ROW_HOVER,
             )}
-            style={{ animationDelay: `${index * 80}ms` }}
+            style={{ animationDelay: `${index * 40}ms` }}
           >
             <span
               className={cn(
@@ -203,9 +209,10 @@ function ActivityRow({ item, index }: { item: OverviewActivityItem; index: numbe
   const tone = getPrStatusTone(item.status);
 
   return (
-    <li className="animate-fade-up" style={{ animationDelay: `${index * 60}ms` }}>
+    <li className="animate-fade-up" style={{ animationDelay: `${index * 30}ms` }}>
       <Link
         href={`${DASHBOARD_ROUTES.pullRequest}/${item.id}`}
+        transitionTypes={['nav-forward']}
         className={cn('group flex items-center gap-4 rounded-xl px-3 py-3.5', PANEL_ROW_HOVER)}
       >
         <div className="min-w-0 flex-1">
@@ -307,7 +314,7 @@ export function OverviewContent({ overview }: { overview: OverviewData }) {
     <>
       {!overview.installation.connected ? <ConnectBanner /> : null}
       <StatsGrid overview={overview} />
-      <div className="animate-fade-up grid gap-4 [animation-delay:200ms] lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+      <div className="animate-fade-up grid gap-4 [animation-delay:80ms] lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
         {needsSetup ? (
           <SetupChecklist overview={overview} />
         ) : (

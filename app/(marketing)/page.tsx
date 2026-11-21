@@ -72,7 +72,7 @@ function Hero({ isLoggedIn }: { isLoggedIn: boolean }) {
               See a sample review
             </Link>
           </Button>
-          <MonoNote className="ml-2 hidden sm:inline">5 free reviews / month · no card</MonoNote>
+          <MonoNote className="ml-2 hidden sm:inline">1 free review / month · no card</MonoNote>
         </div>
 
         <div className="animate-fade-up mt-16 [animation-delay:320ms] lg:mt-20">

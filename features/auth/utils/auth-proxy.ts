@@ -13,6 +13,14 @@ function getPostAuthRedirectPath(request: NextRequest): string {
   return getSafeCallbackPath(callbackUrl);
 }
 
+/** Copies refreshed session cookies (cookie cache renewals) onto the response. */
+function forwardSetCookies(from: Headers, to: NextResponse) {
+  for (const cookie of from.getSetCookie()) {
+    to.headers.append('set-cookie', cookie);
+  }
+  return to;
+}
+
 export async function handleAuthProxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -20,22 +28,26 @@ export async function handleAuthProxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const session = await auth.api.getSession({
+  // With the cookie cache enabled this is a signature check, not a database
+  // query. When the cache has expired, the refreshed cookie is sent back so the
+  // following navigations are cheap again.
+  const { headers, response: session } = await auth.api.getSession({
     headers: request.headers,
+    returnHeaders: true,
   });
 
   if (pathname === SIGN_IN_PATH) {
     if (session) {
       const redirectPath = getPostAuthRedirectPath(request);
-      return NextResponse.redirect(new URL(redirectPath, request.url));
+      return forwardSetCookies(headers, NextResponse.redirect(new URL(redirectPath, request.url)));
     }
 
-    return NextResponse.next();
+    return forwardSetCookies(headers, NextResponse.next());
   }
 
   if (!session) {
-    return redirectToSignIn(request, pathname);
+    return forwardSetCookies(headers, redirectToSignIn(request, pathname));
   }
 
-  return NextResponse.next();
+  return forwardSetCookies(headers, NextResponse.next());
 }

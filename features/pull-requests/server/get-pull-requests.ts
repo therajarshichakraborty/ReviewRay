@@ -21,7 +21,6 @@ export async function getPullRequestsByRepo(installationId: number): Promise<Rep
       authorLogin: true,
       baseBranch: true,
       status: true,
-      reviewComment: true,
       reviewedAt: true,
       createdAt: true,
     },
@@ -37,7 +36,6 @@ export async function getPullRequestsByRepo(installationId: number): Promise<Rep
       authorLogin: record.authorLogin,
       baseBranch: record.baseBranch,
       status: toPullRequestStatus(record.status),
-      reviewComment: record.reviewComment,
       reviewedAt: record.reviewedAt?.toISOString() ?? null,
       createdAt: record.createdAt.toISOString(),
     };

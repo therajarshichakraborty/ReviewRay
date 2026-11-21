@@ -10,13 +10,13 @@ import { getUserSubscription } from '@/features/billing/server/subscription';
 export const metadata: Metadata = {
   title: 'Pricing',
   description:
-    'Start free with 5 AI pull request reviews per month. Upgrade to Pro for unlimited reviews on OpenAI models.',
+    'Start free with 1 AI pull request review per month. Upgrade to Pro for 10 reviews a month with a larger diff budget.',
 };
 
 const FAQ = [
   {
     q: 'Which models review my code?',
-    a: 'Free reviews run on capable open models through OpenRouter. Pro reviews run on OpenAI models with a larger diff budget, which helps on bigger pull requests.',
+    a: 'Every review runs on capable models through OpenRouter, with automatic fallbacks when a model is busy. Pro reviews get a larger diff budget, which helps on bigger pull requests.',
   },
   {
     q: 'Do you store my source code?',
@@ -48,7 +48,7 @@ export default async function PricingPage() {
                 Start free. Upgrade when reviews <Serif>become a habit.</Serif>
               </>
             }
-            description="One simple plan for unlimited reviews. No seats, no per-repository fees, cancel whenever you like."
+            description="One simple plan with 10 reviews a month. No seats, no per-repository fees, cancel whenever you like."
           />
         </SectionInner>
         <PricingPlans

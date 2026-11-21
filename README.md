@@ -1,88 +1,111 @@
+<div align="center">
+
+<img src="public/logo.svg" alt="ReviewRay" width="56" height="56" />
+
 # ReviewRay
 
-ReviewRay is a codebase-aware, automated AI code review engine designed to integrate with GitHub workflows. The application intercepts pull requests via webhooks, retrieves context from a vector database representing the codebase structure, generates reviews utilizing Large Language Models, and posts automated feedback directly onto the active code changes.
+**Codebase-aware AI code review for every pull request.**
 
-## System Previews
+ReviewRay installs as a GitHub App, reads each pull request with the context of your repository,
+and posts a precise, severity-ranked review with ready-to-paste fixes in under a minute.
 
-### Landing Page
+</div>
 
-![Landing Page](public/landing.png)
+<br />
 
-### Developer Dashboard
+<p align="center">
+  <img src="public/screenshot/overview.png" alt="ReviewRay dashboard overview" width="100%" />
+</p>
 
-![Developer Dashboard](public/dashboard.png)
+<p align="center"><sub>The overview: monthly usage, review outcomes and the latest pull requests across your repositories.</sub></p>
 
-### Account Settings and Billing
+<br />
 
-![Account Settings](public/settings.png)
+<p align="center">
+  <img src="public/screenshot/review.png" alt="A ReviewRay pull request review" width="100%" />
+</p>
 
----
+<p align="center"><sub>A review: a summary and verdict, then ranked issues with fixes highlighted in GitHub's own theme.</sub></p>
 
-## Core Features
+<br />
 
-- **Codebase-aware reviews**: Synced repositories are indexed in Pinecone, so each review can reference related code outside the diff.
-- **Plan-based model routing**: Free reviews run on free OpenRouter models with automatic fallbacks; Pro reviews run on OpenAI. Switching is configuration only.
-- **Token-budgeted prompts**: Lockfiles, generated and binary files are stripped, patches are normalized, and source files are prioritized within a per-plan character budget.
-- **Consistent, clean output**: A fixed review structure (summary, verdict, severity-ranked issues with fixes, suggestions, strengths) plus a sanitizer that guarantees no emojis or em dashes, whichever model answers.
-- **Durable background jobs**: Inngest steps retry independently, rapid pushes are debounced into one review, and terminal failures are surfaced in the dashboard.
-- **One living comment per PR**: New pushes update ReviewRay's existing comment instead of adding new ones.
-- **SaaS billing**: Razorpay subscriptions with a 5-review monthly free tier, enforced per installation and counting reviews still in flight.
+## Highlights
 
----
+- **Context, not just the diff.** Synced repositories are indexed in Pinecone, so every review can reference related code outside the changed lines.
+- **One living comment per pull request.** New pushes refresh ReviewRay's existing comment instead of piling up new ones.
+- **Resilient model chain.** Every review runs on OpenRouter, and a busy or failing model hands off to the next one automatically.
+- **Token-budgeted prompts.** Lockfiles, generated and binary files are dropped, patches are normalized, and source files are prioritized within a per-plan budget.
+- **A consistent voice.** Every review follows the same structure: summary, verdict, severity-ranked issues with fixes, suggestions and strengths. A sanitizer keeps the output clean whichever model answers.
+- **Durable background jobs.** Inngest steps retry independently, rapid pushes are debounced into a single review, and terminal failures surface in the dashboard.
+- **Simple billing.** One free review a month, ten on Pro through Razorpay, enforced per installation.
+- **A fast dashboard.** Instant loading states, native view transitions between pages, and per-request caching on the server.
 
-## Architecture and Data Flow
-
-ReviewRay is built around a Retrieval-Augmented Generation (RAG) pipeline designed for software codebases. The data flow proceeds as follows:
+## How it works
 
 ```
-[GitHub PR event] ──> [Webhook: verify signature, check plan limit] ──> [Inngest queue]
-                                                                              │
-                                                                              ▼
-[Resolve plan] ──> [Fetch PR diff] ──> [Search Pinecone for related code (synced repos)]
-                                                                              │
-                                                                              ▼
-[Budget diff + context] ──> [Free: OpenRouter | Pro: OpenAI] ──> [Sanitize output]
-                                                                              │
-                                                                              ▼
-                                               [Create or update the PR comment on GitHub]
+Pull request opened or updated on GitHub
+        |
+        v
+Webhook        verify the signature, check the plan's monthly limit
+        |
+        v
+Inngest job    resolve the plan, fetch the diff, budget the patches
+        |
+        v
+Context        query Pinecone for related code in synced repositories
+        |
+        v
+Generate       OpenRouter with model fallbacks, then sanitize the output
+        |
+        v
+Publish        create or update ReviewRay's comment, store it for the dashboard
 ```
 
-1. **Ingestion**: When a repository is synced, its files are chunked and upserted into a per-repository Pinecone namespace with integrated embeddings.
-2. **Webhook**: The GitHub App delivers `pull_request` events. The signature is verified and the installation's monthly usage is checked before any work is queued.
-3. **Diff**: The full PR diff and description are fetched. Noise files are dropped and the remaining patches are fit to the plan's budget.
-4. **Context**: For synced repositories, Pinecone returns related code using the PR title and changed paths as the query.
-5. **Generation**: The provider chain for the plan is called through an OpenAI-compatible client with timeouts, fallbacks and truncation handling.
-6. **Publishing**: The sanitized review is written to ReviewRay's single comment on the PR and stored for the dashboard.
+1. **Ingestion.** When a repository is synced, its files are chunked and upserted into a per-repository Pinecone namespace with integrated embeddings.
+2. **Webhook.** The GitHub App delivers `pull_request` events. The signature is verified and monthly usage is checked before any work is queued.
+3. **Diff.** The full diff and description are fetched. Noise is removed and the remaining patches are fit to the plan's budget.
+4. **Context.** For synced repositories, Pinecone returns related code using the pull request title and changed paths as the query.
+5. **Generation.** OpenRouter is called through a small OpenAI-compatible client with timeouts, model fallbacks and truncation handling.
+6. **Publishing.** The sanitized review is written to the pull request and saved for the dashboard.
 
-### AI configuration
+## Tech stack
 
-| Variable                     | Purpose                                                             |
-| ---------------------------- | ------------------------------------------------------------------- |
-| `OPENROUTER_API_KEY`         | Enables free-plan reviews on OpenRouter                             |
-| `OPENROUTER_MODEL`           | Primary free model (default `google/gemma-4-31b-it:free`)           |
-| `OPENROUTER_FALLBACK_MODELS` | Comma-separated fallbacks, tried when the primary is busy           |
-| `OPENAI_API_KEY`             | Enables OpenAI for Pro reviews. Until set, Pro falls back to OpenRouter |
-| `OPENAI_MODEL`               | OpenAI model for Pro (default `gpt-4.1-mini`)                       |
+| Layer          | Technology                                                                 |
+| -------------- | -------------------------------------------------------------------------- |
+| Framework      | Next.js 16 (App Router, Server Components, view transitions), React 19     |
+| Language       | TypeScript in strict mode                                                  |
+| Styling        | Tailwind CSS v4, shadcn/ui on Radix UI, Lucide icons, Geist and Instrument Serif |
+| Data fetching  | TanStack Query                                                             |
+| Database       | PostgreSQL (Neon) with Prisma ORM and the `pg` driver adapter              |
+| Vector search  | Pinecone with integrated embeddings                                        |
+| Background jobs| Inngest                                                                    |
+| Authentication | Better Auth with GitHub OAuth                                              |
+| GitHub         | GitHub App with Octokit and signed webhooks                                |
+| AI provider    | OpenRouter for both plans, via an OpenAI-compatible client                 |
+| Review rendering | Streamdown with Shiki (GitHub Light and GitHub Dark themes)              |
+| Payments       | Razorpay subscriptions                                                     |
+| Tooling        | Bun, ESLint, Prettier                                                      |
 
----
+## AI configuration
 
-## Technology Stack
+Both plans run on OpenRouter. They differ in monthly allowance and diff budget.
 
-- **Core Framework**: Next.js (App Router) utilizing React 19
-- **Language**: TypeScript (Strict Mode)
-- **Database Layer**: PostgreSQL managed via Prisma ORM
-- **Vector Database**: Pinecone Client
-- **Queue Management**: Inngest asynchronous job scheduling
-- **Authentication**: Better Auth with GitHub OAuth integration
-- **Billing and Subscriptions**: Razorpay Payment Gateway integration
-- **AI Providers**: OpenRouter (free models) and OpenAI, via a dependency-free OpenAI-compatible client
-- **UI Styling**: Tailwind CSS v4, Radix UI primitives, Lucide React, Geist and Instrument Serif
+| Plan | Reviews per month | Price      |
+| ---- | ----------------- | ---------- |
+| Free | 1                 | Free       |
+| Pro  | 10                | ₹199/month |
 
----
+| Variable                     | Purpose                                                     |
+| ---------------------------- | ----------------------------------------------------------- |
+| `OPENROUTER_API_KEY`         | Enables reviews on OpenRouter                               |
+| `OPENROUTER_MODEL`           | Primary model, `google/gemma-4-31b-it:free` by default      |
+| `OPENROUTER_FALLBACK_MODELS` | Comma-separated fallbacks, tried when the primary is busy   |
 
-## Environment Setup
+The OpenAI provider is kept in `features/ai/providers.ts` and `.env.example`, commented out, for a future return to OpenAI on Pro.
 
-Copy `.env.example` to `.env` and fill in the values. Every variable is documented there.
+## Getting started
+
+**1. Configure the environment.** Every variable is documented in `.env.example`.
 
 ```bash
 cp .env.example .env
@@ -90,37 +113,22 @@ cp .env.example .env
 
 Subscribe the GitHub App to the **Pull request** and **Installation** webhook events.
 
----
+**2. Install dependencies and prepare the database.**
 
-## Installation and Execution
+```bash
+bun install
+bunx prisma generate
+bunx prisma db push
+```
 
-1. Clone the repository and install all dependencies:
+**3. Run the app.** Start the Inngest dev server and Next.js in two terminals.
 
-   ```bash
-   bun install
-   ```
+```bash
+bunx inngest-cli dev
+```
 
-2. Generate the Prisma client interface:
+```bash
+bun run dev
+```
 
-   ```bash
-   bunx prisma generate
-   ```
-
-3. Synchronize database schemas:
-
-   ```bash
-   bunx prisma db push
-   ```
-
-4. Start the local Inngest development server:
-
-   ```bash
-   bunx inngest-cli dev
-   ```
-
-5. Launch the Next.js development server:
-   ```bash
-   bun run dev
-   ```
-
-Open `http://localhost:3000` to interact with the application.
+Open [http://localhost:3000](http://localhost:3000), sign in with GitHub and install the app on a repository.

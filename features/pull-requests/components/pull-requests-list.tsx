@@ -16,9 +16,10 @@ function PullRequestRow({ pullRequest, index }: { pullRequest: PullRequestItem; 
   const tone = getPrStatusTone(pullRequest.status);
 
   return (
-    <li className="animate-fade-up" style={{ animationDelay: `${Math.min(index, 8) * 50}ms` }}>
+    <li className="animate-fade-up" style={{ animationDelay: `${Math.min(index, 6) * 25}ms` }}>
       <Link
         href={`${DASHBOARD_ROUTES.pullRequest}/${pullRequest.id}`}
+        transitionTypes={['nav-forward']}
         className={cn('group flex items-center gap-4 rounded-xl px-3 py-3.5', PANEL_ROW_HOVER)}
       >
         <span
@@ -59,7 +60,7 @@ function RepoGroup({ repo, index }: { repo: RepoPullRequests; index: number }) {
   return (
     <section
       className="animate-fade-up overflow-hidden rounded-2xl bg-surface"
-      style={{ animationDelay: `${index * 90}ms` }}
+      style={{ animationDelay: `${Math.min(index, 4) * 45}ms` }}
     >
       <header className="flex items-center gap-3 px-5 pt-4 pb-2">
         <FolderGit2 className="size-4 text-muted-foreground" />

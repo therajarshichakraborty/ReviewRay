@@ -1,6 +1,8 @@
 /**
- * Aggregates everything the dashboard Overview page needs in one call.
- * Independent queries run in parallel.
+ * Aggregates the database-backed data the dashboard Overview page needs in one
+ * call. Independent queries run in parallel. The GitHub repository summary is
+ * fetched separately (see `getOverviewRepoSummary`) so it can stream in
+ * without holding back the rest of the page.
  */
 
 import { getUsageSummary } from '@/features/billing/server/usage';
@@ -15,7 +17,7 @@ import { prisma } from '@/lib/db.config';
 import { EMPTY_BREAKDOWN, getRecentReviewActivity, getStatusBreakdown } from './activity';
 import { getInstallationRepoSummary } from './repo-summary';
 
-async function safeRepoSummary(installationId: number): Promise<OverviewRepoSummary | null> {
+export async function getOverviewRepoSummary(installationId: number): Promise<OverviewRepoSummary | null> {
   try {
     return await getInstallationRepoSummary(installationId);
   } catch (error) {
@@ -38,24 +40,23 @@ export async function getOverview(userId: string): Promise<OverviewData> {
     reviewsUsed: usage.used,
     reviewsLimit: usage.limit,
     plan: subscription.plan,
+    installationId,
   };
 
   if (!installationId) {
     return {
       ...base,
-      repos: null,
       syncedRepoCount: 0,
       breakdown: EMPTY_BREAKDOWN,
       recentActivity: [],
     };
   }
 
-  const [repos, breakdown, recentActivity, syncedRepoCount] = await Promise.all([
-    safeRepoSummary(installationId),
+  const [breakdown, recentActivity, syncedRepoCount] = await Promise.all([
     getStatusBreakdown(installationId),
     getRecentReviewActivity(installationId),
     prisma.repoSync.count({ where: { installationId, status: 'synced' } }),
   ]);
 
-  return { ...base, repos, syncedRepoCount, breakdown, recentActivity };
+  return { ...base, syncedRepoCount, breakdown, recentActivity };
 }

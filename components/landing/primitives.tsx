@@ -190,7 +190,7 @@ export function SelectionBox({
   );
 }
 
-/** Mono micro-copy, e.g. "free for 5 reviews · no card". */
+/** Mono micro-copy, e.g. "1 free review / month · no card". */
 export function MonoNote({
   children,
   className,

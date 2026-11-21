@@ -140,7 +140,7 @@ function BillingTab({
               <li
                 key={feature}
                 className="animate-fade-up flex items-start gap-2.5 text-sm"
-                style={{ animationDelay: `${index * 60}ms` }}
+                style={{ animationDelay: `${index * 30}ms` }}
               >
                 <Check className="mt-0.5 size-3.5 shrink-0 text-primary" strokeWidth={3} />
                 {feature}
@@ -161,23 +161,19 @@ function BillingTab({
         <div className="flex items-baseline justify-between">
           <p className="text-3xl font-semibold tracking-[-0.03em] tabular-nums">
             {usage.used}
-            {usage.limit !== null ? (
-              <span className="text-lg text-muted-foreground"> / {usage.limit}</span>
-            ) : null}
+            <span className="text-lg text-muted-foreground"> / {usage.limit}</span>
           </p>
           <p className="text-sm text-muted-foreground">
-            {usage.limit === null ? 'Unlimited' : `${Math.max(0, usage.limit - usage.used)} left`}
+            {Math.max(0, usage.limit - usage.used)} left
           </p>
         </div>
-        {usage.limit !== null ? (
-          <Meter
-            value={usage.used}
-            max={usage.limit}
-            label="Reviews used this month"
-            className="mt-4 h-2"
-            barClassName={usage.used >= usage.limit ? 'bg-amber-500' : undefined}
-          />
-        ) : null}
+        <Meter
+          value={usage.used}
+          max={usage.limit}
+          label="Reviews used this month"
+          className="mt-4 h-2"
+          barClassName={usage.used >= usage.limit ? 'bg-amber-500' : undefined}
+        />
       </Panel>
     </div>
   );

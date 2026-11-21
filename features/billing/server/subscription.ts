@@ -1,8 +1,12 @@
 import type { UserSubscription } from '@/features/dashboard/lib/types';
 import { getRazorpay, razorpayEnv } from '@/features/billing/lib/razorpay';
 import { prisma } from '@/lib/db.config';
+import { cache } from 'react';
 
-export async function getUserSubscription(userId: string): Promise<UserSubscription> {
+/** Memoized per request: the dashboard layout and pages share one lookup. */
+export const getUserSubscription = cache(async function getUserSubscription(
+  userId: string,
+): Promise<UserSubscription> {
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: {
@@ -42,7 +46,7 @@ export async function getUserSubscription(userId: string): Promise<UserSubscript
   }
 
   return { plan: 'free', status: 'canceled', renewsAt };
-}
+});
 
 export async function createProSubscription(userId: string) {
   const subscription = await getUserSubscription(userId);

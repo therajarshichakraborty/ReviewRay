@@ -29,10 +29,11 @@ export type OverviewStatusBreakdown = {
 
 export type OverviewData = {
   installation: GithubInstallationStatus;
-  repos: OverviewRepoSummary | null;
+  /** GitHub App installation id; the repository summary streams in from it. */
+  installationId: number | null;
   syncedRepoCount: number;
   reviewsUsed: number;
-  reviewsLimit: number | null;
+  reviewsLimit: number;
   plan: SubscriptionPlan;
   breakdown: OverviewStatusBreakdown;
   recentActivity: OverviewActivityItem[];
